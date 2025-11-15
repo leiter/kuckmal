@@ -63,6 +63,7 @@
     <string name="error_invalid_video_url">Invalid video URL</string>
     <string name="error_no_video_player">No app available to play this video format</string>
     <string name="error_download_manager_unavailable">Download manager not available</string>
+    <string name="error_playback_failed">Failed to start video playback</string>
     <string name="error_format">Error: %1$s</string>
 
     <!-- Dialog Titles -->

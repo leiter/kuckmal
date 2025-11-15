@@ -1,33 +1,35 @@
 package com.mediathekview.android.compose
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.mediathekview.android.compose.models.Channel
-import com.mediathekview.android.compose.models.MediaItem
-import com.mediathekview.android.compose.models.SampleData
-import com.mediathekview.android.compose.screens.BrowseView
-import com.mediathekview.android.compose.screens.DetailView
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.mediathekview.android.compose.navigation.MediathekViewNavHost
+import com.mediathekview.android.compose.navigation.Screen
 import com.mediathekview.android.compose.ui.theme.MediathekViewTheme
 import com.mediathekview.android.data.MediaViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 /**
  * Main Compose Activity - Entry point for Jetpack Compose UI
- * Uses Koin for dependency injection
+ * Now uses Compose Navigation with animated transitions
  */
 class ComposeActivity : ComponentActivity() {
+
+    companion object {
+        private const val TAG = "ComposeActivity"
+    }
 
     // Inject MediaViewModel using Koin
     private val viewModel: MediaViewModel by viewModel()
@@ -35,6 +37,13 @@ class ComposeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Ensure ViewModel is initialized with proper navigation state
+        // If we're starting fresh, navigate to all themes
+        if (savedInstanceState == null) {
+            viewModel.navigateToThemes(null)
+        }
+
         setContent {
             MediathekViewTheme {
                 ComposeMainScreen(viewModel)
@@ -43,52 +52,53 @@ class ComposeActivity : ComponentActivity() {
     }
 }
 
-enum class Screen {
-    BROWSE, DETAIL
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ComposeMainScreen(viewModel: MediaViewModel) {
-    var currentScreen by remember { mutableStateOf(Screen.BROWSE) }
-    var selectedChannel by remember { mutableStateOf<Channel?>(SampleData.sampleChannels[9]) }
+    val navController = rememberNavController()
     val context = LocalContext.current
 
-    // Observe ViewModel state (for future use)
-    val loadingState by viewModel.loadingState.collectAsState()
+    // Observe ViewModel state for synchronization with traditional UI
+    val viewState by viewModel.viewState.collectAsStateWithLifecycle()
+    val loadingState by viewModel.loadingState.collectAsStateWithLifecycle()
 
-    // Handle back button
-    BackHandler(enabled = currentScreen == Screen.DETAIL) {
-        currentScreen = Screen.BROWSE
+    // Observe start activity intents for video playback
+    LaunchedEffect(viewModel) {
+        Log.d("ComposeActivity", "Setting up intent collector...")
+        viewModel.startActivityIntent.collect { intent ->
+            Log.d("ComposeActivity", "Received playback intent, starting activity...")
+            context.startActivity(intent)
+            Log.d("ComposeActivity", "Activity started successfully")
+        }
+    }
+
+    // Observe navigation state
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    // Log navigation changes
+    LaunchedEffect(currentRoute) {
+        Log.d("ComposeActivity", "Current route: $currentRoute")
+    }
+
+    // Sync with ViewModel state when needed (future integration)
+    LaunchedEffect(viewState) {
+        val currentViewState = viewState // Capture the value to enable smart cast
+        when (currentViewState) {
+            is MediaViewModel.ViewState.Themes -> {
+                // Could sync navigation state here if needed
+                Log.d("ComposeActivity", "ViewState: Themes - channel=${currentViewState.channel}, theme=${currentViewState.theme}")
+            }
+            is MediaViewModel.ViewState.Detail -> {
+                Log.d("ComposeActivity", "ViewState: Detail - title=${currentViewState.title}")
+            }
+        }
     }
 
     Scaffold(
         topBar = {
-//            TopAppBar(
-//                title = {
-//                    Text(
-//                        when (currentScreen) {
-//                            Screen.BROWSE -> "MediathekView - Browse"
-//                            Screen.DETAIL -> "MediathekView - Detail"
-//                        }
-//                    )
-//                },
-//                navigationIcon = {
-//                    if (currentScreen == Screen.DETAIL) {
-//                        IconButton(onClick = { currentScreen = Screen.BROWSE }) {
-//                            Icon(
-//                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-//                                contentDescription = "Back"
-//                            )
-//                        }
-//                    }
-//                },
-//                colors = TopAppBarDefaults.topAppBarColors(
-//                    containerColor = MaterialTheme.colorScheme.primary,
-//                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-//                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
-//                )
-//            )
+            // Top bar can be customized based on current route
+            // For now, keeping it minimal to match the original design
         }
     ) { paddingValues ->
         Surface(
@@ -97,57 +107,46 @@ fun ComposeMainScreen(viewModel: MediaViewModel) {
                 .padding(paddingValues),
             color = MaterialTheme.colorScheme.background
         ) {
-            when (currentScreen) {
-                Screen.BROWSE -> {
-                    BrowseView(
-                        channels = SampleData.sampleChannels,
-                        titles = SampleData.sampleTitles,
-                        selectedChannel = selectedChannel,
-                        onChannelSelected = { channel ->
-                            selectedChannel = channel
-                            Toast.makeText(
-                                context,
-                                "Selected: ${channel.displayName}",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        },
-                        onTitleSelected = { title ->
-                            Toast.makeText(
-                                context,
-                                "Opening: $title",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            currentScreen = Screen.DETAIL
-                        },
-                        onMenuClick = {
-                            Toast.makeText(
-                                context,
-                                "Menu clicked",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    )
+            MediathekViewNavHost(
+                navController = navController,
+                viewModel = viewModel,
+                startDestination = determineStartDestination(viewState)
+            )
+        }
+    }
+
+    // Handle loading state
+    if (loadingState == MediaViewModel.LoadingState.LOADING) {
+        // Show loading indicator overlay if needed
+        // This could be a dialog or overlay composable
+    }
+}
+
+/**
+ * Determine the start destination based on current ViewModel state
+ * This helps maintain state during configuration changes
+ */
+private fun determineStartDestination(viewState: MediaViewModel.ViewState): String {
+    return when (viewState) {
+        is MediaViewModel.ViewState.Themes -> {
+            when {
+                viewState.theme != null -> {
+                    // Currently viewing titles within a theme
+                    Screen.ThemeTitles.createRoute(viewState.channel, viewState.theme)
                 }
-                Screen.DETAIL -> {
-                    DetailView(
-                        mediaItem = SampleData.sampleMediaItem,
-                        onPlayClick = { isHighQuality ->
-                            Toast.makeText(
-                                context,
-                                "Play clicked - Quality: ${if (isHighQuality) "High" else "Low"}",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        },
-                        onDownloadClick = { isHighQuality ->
-                            Toast.makeText(
-                                context,
-                                "Download clicked - Quality: ${if (isHighQuality) "High" else "Low"}",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    )
+                viewState.channel != null -> {
+                    // Currently viewing themes for a channel
+                    Screen.ChannelThemes.createRoute(viewState.channel)
+                }
+                else -> {
+                    // Viewing all themes
+                    Screen.AllThemes.route
                 }
             }
+        }
+        is MediaViewModel.ViewState.Detail -> {
+            // Currently viewing detail
+            Screen.MediaDetail.createRoute(viewState.title)
         }
     }
 }
