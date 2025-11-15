@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- App -->
+    <string name="app_name">MediathekView</string>
+    <string name="action_settings">Settings</string>
+
+    <!-- Browse View -->
+    <string name="channels">Channels</string>
+    <string name="all_themes">All Themes</string>
+    <string name="themes">Themes</string>
+    <string name="menu">Menu</string>
+    <string name="search">Search</string>
+    <string name="search_hint">Search titles…</string>
+    <string name="close_search">Close search</string>
+
+    <!-- Welcome Dialog -->
+    <string name="welcome_title">Welcome to MediathekView</string>
+    <string name="welcome_message">To get started, we need to download the media library list.\n\nThis is a one-time setup process.</string>
+
+    <!-- Progress Dialog -->
+    <string name="loading">Loading…</string>
+    <string name="whats_happening">What\'s happening?</string>
+
+    <!-- Detail View Labels -->
+    <string name="channel_label">Channel:</string>
+    <string name="theme_label">Theme</string>
+    <string name="title_label">Title</string>
+    <string name="date_label">Date</string>
+    <string name="time_label">Time</string>
+    <string name="duration_label">Duration</string>
+    <string name="size_label">Size</string>
+    <string name="description_label">Description</string>
+    <string name="quality_label">Quality</string>
+
+    <!-- Quality Options -->
+    <string name="quality_high">High</string>
+    <string name="quality_low">Low</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_channel_icon">Channel icon</string>
+    <string name="cd_play">Play</string>
+    <string name="cd_download">Download</string>
+
+    <!-- Description expand/collapse -->
+    <string name="show_more">Show more</string>
+    <string name="show_less">Show less</string>
+
+    <!-- Menu Items -->
+    <string name="menu_time_period">Time Period</string>
+    <string name="menu_show_download">Show Download</string>
+    <string name="menu_check_update">Check for Updates</string>
+    <string name="menu_reinstall_filmlist">Reinstall Film List (Clear Data)</string>
+    <string name="menu_start_compose">Start Compose</string>
+
+    <!-- Dynamic Titles -->
+    <string name="channel_themes">%1$s Themes</string>
+    <string name="titles_for_theme">Titles: %1$s</string>
+
+    <!-- Error Messages -->
+    <string name="error_no_media_selected">No media selected</string>
+    <string name="error_no_video_url">No video URL available</string>
+    <string name="error_invalid_video_url">Invalid video URL</string>
+    <string name="error_no_video_player">No app available to play this video format</string>
+    <string name="error_download_manager_unavailable">Download manager not available</string>
+    <string name="error_format">Error: %1$s</string>
+
+    <!-- Dialog Titles -->
+    <string name="dialog_title_please_wait">Please Wait</string>
+    <string name="dialog_title_no_internet">No Internet Connection</string>
+    <string name="dialog_title_downloading">Downloading Media List</string>
+    <string name="dialog_title_decompressing">Decompressing Media List</string>
+    <string name="dialog_title_download_failed">Download Failed</string>
+    <string name="dialog_title_internet_required">Internet Connection Required</string>
+    <string name="dialog_title_filter_date">Filter by Date</string>
+    <string name="dialog_title_update_available">Update Available</string>
+    <string name="dialog_title_checking_update">Checking for Updates</string>
+
+    <!-- Dialog Messages -->
+    <string name="dialog_msg_loading">Loading media list…</string>
+    <string name="dialog_msg_downloading">Downloading media list…</string>
+    <string name="dialog_msg_initializing">Initializing download…</string>
+    <string name="dialog_msg_downloading_progress" formatted="false">Downloading: %.1f / %.1f MB (%s)\n%d%%</string>
+    <string name="dialog_msg_decompressing">Extracting compressed file…\nThis may take a few moments.</string>
+    <string name="dialog_msg_no_internet">Unable to download media list. Please check your internet connection and try again.</string>
+    <string name="dialog_msg_can_download_later">You can download the media list from the menu when connected.</string>
+    <string name="dialog_msg_can_retry">You can retry downloading from the menu.</string>
+    <string name="dialog_msg_download_later">You can download the media list from the menu later.</string>
+    <string name="dialog_msg_cannot_load">Error: Cannot load media list</string>
+    <string name="dialog_msg_low_memory">Not enough memory to decompress the file. Please close other apps and try again.</string>
+    <string name="dialog_msg_error_retry">%1$s\n\nWould you like to try again?</string>
+    <string name="dialog_msg_loaded_entries">Loaded %1$d entries…</string>
+    <string name="dialog_msg_internet_required">Media list needs to be downloaded for first-time use.\n\nPlease connect to the internet and restart the app.</string>
+    <string name="dialog_msg_update_available">A new media list is available. Would you like to download it now?</string>
+    <string name="dialog_msg_update_later">You can update the media list from the menu later.</string>
+    <string name="dialog_msg_checking_update">Checking server for new film list…</string>
+    <string name="toast_no_update_available">Film list is up to date</string>
+    <string name="toast_update_check_failed">Update check failed: %1$s</string>
+    <string name="toast_download_retrying" formatted="false">Download failed. Retrying… (%1$d/%2$d)</string>
+    <string name="toast_failed_decompress">Failed to decompress: %1$s</string>
+    <string name="toast_filter">Filter: %1$s</string>
+    <string name="estimated_time">Estimated time: %1$s</string>
+
+    <!-- Network Errors -->
+    <string name="error_no_connection">No internet connection. Please check your network.</string>
+    <string name="error_timeout">Connection timed out. Please check your internet connection.</string>
+    <string name="error_download_failed">Download failed: %1$s</string>
+    <string name="error_download_network">Network error</string>
+    <string name="error_unknown">Unknown error</string>
+    <string name="error_invalid_file_size">Invalid file size from server</string>
+    <string name="error_download_incomplete">Download incomplete: file size mismatch</string>
+    <string name="error_decompression_failed">Decompression failed: %1$s</string>
+    <string name="error_file_corrupted">File may be corrupted</string>
+    <string name="error_decompression">Decompression error: %1$s</string>
+
+    <!-- Button Labels -->
+    <string name="btn_start_download">Start Download</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_retry">Retry</string>
+    <string name="btn_update">Update</string>
+    <string name="btn_later">Later</string>
+
+    <!-- Time Period Filter Options -->
+    <string name="time_period_all">All Time</string>
+    <string name="time_period_1_day">Last 24 Hours</string>
+    <string name="time_period_3_days">Last 3 Days</string>
+    <string name="time_period_7_days">Last 7 Days</string>
+    <string name="time_period_30_days">Last 30 Days</string>
+    <string name="time_period_unknown">Unknown</string>
+
+    <!-- Duration Formatting -->
+    <string name="duration_hours_short">h</string>
+    <string name="duration_minutes_short">min</string>
+    <string name="duration_seconds_short">sec</string>
+
+    <!-- Time Formatting -->
+    <string name="time_am">AM</string>
+    <string name="time_pm">PM</string>
+    <string name="time_suffix"></string>
+
+</resources>

@@ -1,0 +1,24 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/menu_set_zeitraum"
+        android:title="@string/menu_time_period" />
+
+    <item android:id="@+id/menu_check_update"
+        android:title="@string/menu_check_update" />
+
+    <item android:id="@+id/menu_get_filmlist"
+        android:title="@string/menu_reinstall_filmlist" />
+
+    <item android:id="@+id/menu_start_compose"
+        android:title="@string/menu_start_compose" />
+
+    <!-- Commented out - not yet implemented -->
+    <!--
+     <item android:id="@+id/menu_show_download"
+        android:title="@string/menu_show_download" />
+    <item android:id="@+id/menu_get_serverlist"
+        android:title="Download Serverlist" />
+    -->
+
+</menu>
+
