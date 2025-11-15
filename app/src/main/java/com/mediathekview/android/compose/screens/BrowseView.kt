@@ -31,8 +31,11 @@ fun BrowseView(
     titles: List<String> = SampleData.sampleTitles,
     selectedChannel: Channel? = SampleData.sampleChannels[9], // phoenix
     currentTheme: String = "1000 Inseln im Sankt-Lorenz-Strom",
+    isShowingTitles: Boolean = false, // true when showing titles within a theme, false when showing themes
+    hasMoreItems: Boolean = true, // whether there are more items to load
     onChannelSelected: (Channel) -> Unit = {},
     onTitleSelected: (String) -> Unit = {},
+    onLoadMore: () -> Unit = {}, // callback to load more items
     onMenuClick: () -> Unit = {}
 ) {
     Row(
@@ -73,7 +76,8 @@ fun BrowseView(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Titel: $currentTheme",
+                        // Show "Titel: theme name" when showing titles, otherwise just the label
+                        text = if (isShowingTitles) "Titel: $currentTheme" else currentTheme,
                         style = MaterialTheme.typography.titleMedium,
                         color = Color(0xFF81B4D2), // Cyan/blue matching theme
                         modifier = Modifier.weight(1f),
@@ -128,7 +132,43 @@ fun BrowseView(
                         onClick = { onTitleSelected(title) }
                     )
                 }
+
+                // Show "++ more ++" item if there are more items to load
+                if (hasMoreItems && titles.isNotEmpty()) {
+                    item {
+                        MoreItem(onClick = onLoadMore)
+                    }
+                }
             }
+        }
+    }
+}
+
+@Composable
+fun MoreItem(
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFF2A3A4A) // Slightly different background
+        ),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "++ more ++",
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color(0xFF81B4D2), // Cyan color to stand out
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }

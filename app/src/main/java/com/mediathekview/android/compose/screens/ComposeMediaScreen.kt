@@ -8,6 +8,7 @@ import com.mediathekview.android.compose.data.ComposeDataMapper.extractUniqueThe
 import com.mediathekview.android.compose.data.ComposeDataMapper.extractUniqueTitles
 import com.mediathekview.android.compose.data.ComposeDataMapper.toMediaItem
 import com.mediathekview.android.compose.models.Channel
+import com.mediathekview.android.compose.models.ComposeViewModel
 import com.mediathekview.android.compose.models.MediaItem
 import com.mediathekview.android.data.MediaViewModel
 import com.mediathekview.android.database.MediaEntry
@@ -20,7 +21,7 @@ import kotlinx.coroutines.flow.map
  */
 @Composable
 fun rememberComposeMediaState(
-    viewModel: MediaViewModel
+    viewModel: ComposeViewModel
 ): ComposeMediaState {
     return remember(viewModel) {
         ComposeMediaState(viewModel)
@@ -28,7 +29,7 @@ fun rememberComposeMediaState(
 }
 
 class ComposeMediaState(
-    private val viewModel: MediaViewModel
+    private val viewModel: ComposeViewModel
 ) {
     // Get all available channels
     val channels: List<Channel> = ComposeDataMapper.getAllChannels()
@@ -48,46 +49,55 @@ class ComposeMediaState(
 
     /**
      * Get themes for display based on current navigation state
+     * Uses repository's dedicated Flow methods for proper reactive updates
      * @param channelName Filter by channel name (null for all channels)
+     * @param currentPart Current pagination page (0-indexed)
      * @return Flow of theme names
      */
     @Composable
-    fun getThemes(channelName: String?): State<List<String>> {
-        val contentList by getAllMediaEntries()
+    fun getThemes(channelName: String?, currentPart: Int = 0): State<List<String>> {
+        // Calculate limit based on pagination (1200 items per page)
+        val limit = (currentPart + 1) * 1200
 
-        return remember(contentList, channelName) {
-            derivedStateOf {
-                if (channelName != null) {
-                    // Filter by channel first, then extract themes
-                    contentList
-                        .filter { it.channel == channelName }
-                        .extractUniqueThemes()
-                } else {
-                    // All themes across all channels
-                    contentList.extractUniqueThemes()
-                }
+        // Use the repository's dedicated themes Flow for proper reactivity
+        val themesFlow = remember(channelName, limit) {
+            if (channelName != null) {
+                viewModel.repository.getThemesForChannelFlow(channelName, limit = limit)
+            } else {
+                viewModel.repository.getAllThemesFlow(limit = limit)
             }
+        }
+
+        val themes by themesFlow.collectAsStateWithLifecycle(emptyList())
+
+        android.util.Log.d("ComposeMediaState", "getThemes(channel=$channelName, part=$currentPart, limit=$limit): ${themes.size} themes")
+
+        return remember(themes) {
+            derivedStateOf { themes }
         }
     }
 
     /**
      * Get titles for a specific theme
+     * Uses repository's Flow for proper reactive updates
      * @param channelName Optional channel filter
      * @param theme Theme to get titles for
      * @return Flow of title names
      */
     @Composable
     fun getTitles(channelName: String?, theme: String): State<List<String>> {
-        val contentList by getAllMediaEntries()
+        // Use repository's entries flow and extract titles
+        val entriesFlow = remember(channelName, theme) {
+            viewModel.repository.getEntriesFlow(channelName ?: "", theme)
+        }
 
-        return remember(contentList, channelName, theme) {
+        val entries by entriesFlow.collectAsStateWithLifecycle(emptyList())
+
+        return remember(entries) {
             derivedStateOf {
-                val filtered = if (channelName != null) {
-                    contentList.filter { it.channel == channelName && it.theme == theme }
-                } else {
-                    contentList.filter { it.theme == theme }
-                }
-                filtered.extractUniqueTitles()
+                val titles = entries.extractUniqueTitles()
+                android.util.Log.d("ComposeMediaState", "getTitles(channel=$channelName, theme=$theme): ${titles.size} titles")
+                titles
             }
         }
     }
@@ -269,7 +279,7 @@ class ComposeMediaState(
             derivedStateOf {
                 // Check both that loading is complete AND we have some data
                 // or that we're explicitly in LOADED state (even if empty)
-                loadingState == MediaViewModel.LoadingState.LOADED || contentList.isNotEmpty()
+                loadingState == ComposeViewModel.LoadingState.LOADED || contentList.isNotEmpty()
             }
         }
     }
@@ -278,7 +288,7 @@ class ComposeMediaState(
      * Get current loading state
      */
     @Composable
-    fun getLoadingState(): State<MediaViewModel.LoadingState> {
+    fun getLoadingState(): State<ComposeViewModel.LoadingState> {
         return viewModel.loadingState.collectAsStateWithLifecycle()
     }
 }

@@ -1,4 +1,4 @@
-package com.mediathekview.android.data
+package com.mediathekview.android.compose.models
 
 import android.app.Application
 import android.app.DownloadManager
@@ -18,6 +18,8 @@ import com.mediathekview.android.util.UpdateChecker
 import com.mediathekview.android.repository.DownloadRepository
 import com.mediathekview.android.repository.DownloadState
 import com.mediathekview.android.repository.MediaRepository
+import com.mediathekview.android.video.VideoPlayerManager
+import com.mediathekview.android.video.createVideoPlayerManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -31,16 +33,32 @@ import java.io.File
  * No synchronous cache, everything flows from Room database
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class MediaViewModel(
+class ComposeViewModel(
     application: Application,
     internal val repository: MediaRepository,
     private val downloadRepository: DownloadRepository,
     private val updateChecker: UpdateChecker
 ) : AndroidViewModel(application) {
 
+
+
     companion object {
         private const val TAG = "MediaViewModel"
         private const val MAX_UI_ITEMS = 1200
+    }
+
+    // Video player manager using expect/actual pattern
+    private val videoPlayerManager: VideoPlayerManager by lazy {
+        getApplication<Application>().createVideoPlayerManager()
+    }
+
+    init {
+        // Collect playback intents from VideoPlayerManager and forward them
+        viewModelScope.launch {
+            videoPlayerManager.playbackIntents.collect { intent ->
+                _startActivityIntent.emit(intent)
+            }
+        }
     }
 
     // ===========================================================================================
@@ -111,7 +129,7 @@ class MediaViewModel(
     // STATE: Intent Management (one-time events)
     // ===========================================================================================
 
-    private val _startActivityIntent = MutableSharedFlow<Intent>(replay = 0, extraBufferCapacity = 1)
+    private val _startActivityIntent = MutableSharedFlow<Intent>(replay = 1, extraBufferCapacity = 1)
     val startActivityIntent: SharedFlow<Intent> = _startActivityIntent.asSharedFlow()
 
     // ===========================================================================================
@@ -820,6 +838,30 @@ class MediaViewModel(
         }
     }
 
+    /**
+     * Set the current media entry directly (for Compose UI)
+     * This is used to ensure the entry is available immediately for playback
+     */
+    fun setCurrentMediaEntry(mediaEntry: com.mediathekview.android.database.MediaEntry) {
+        val currentState = _viewState.value
+
+        // Preserve navigation context from current state
+        val navigationChannel = currentState.channel
+        val navigationTheme = currentState.theme ?: ""
+        val searchFilter = if (currentState is ViewState.Themes) currentState.searchFilter else SearchFilter()
+        val selectedItem = if (currentState is ViewState.Themes) currentState.selectedItem else null
+
+        // Set the detail state with the provided entry
+        _viewState.value = ViewState.Detail(
+            mediaEntry = mediaEntry,
+            navigationChannel = navigationChannel,
+            navigationTheme = navigationTheme,
+            searchFilter = searchFilter,
+            selectedItem = selectedItem
+        )
+        Log.d(TAG, "Set current media entry directly: ${mediaEntry.title}")
+    }
+
 
     // ===========================================================================================
     // ACTIONS: Filters and Pagination
@@ -853,7 +895,7 @@ class MediaViewModel(
     // ===========================================================================================
 
     /**
-     * Handle play button click - stream the video in ExoPlayer
+     * Handle play button click - stream the video using expect/actual pattern
      * @param isHighQuality Whether to play high quality version
      */
     fun onPlayButtonClicked(isHighQuality: Boolean) {
@@ -868,131 +910,29 @@ class MediaViewModel(
             return
         }
 
-        // Log quality selection and URL details
-        val qualitySelected = if (isHighQuality) "HIGH" else "LOW"
-        Log.d(TAG, "=".repeat(80))
-        Log.d(TAG, "PLAY BUTTON CLICKED - Video Playback URL Selection")
-        Log.d(TAG, "=".repeat(80))
-        Log.d(TAG, "Quality selected: $qualitySelected")
-        Log.d(TAG, "Main URL: ${mediaEntry.url}")
-        Log.d(TAG, "Small URL (raw): ${mediaEntry.smallUrl}")
-        Log.d(TAG, "HD URL (raw): ${mediaEntry.hdUrl}")
-        Log.d(TAG, "-".repeat(80))
-
-        // TEMPORARY FIX: Force using main URL for BR.de videos due to quality URL availability issues
-        // TODO: Implement proper fallback mechanism or quality detection
-        val forceMainUrl = mediaEntry.url.contains("cdn-storage.br.de")
-
-        // Get the appropriate video URL based on quality selection
-        // URLs may be in pipe-delimited format that needs reconstruction using base URL
-        // NOTE: Some servers (like BR.de) may not have all quality versions available
-        val videoUrl = if (forceMainUrl) {
-            Log.w(TAG, "Forcing main URL for BR.de video (quality-specific URLs may not be available)")
-            Log.d(TAG, "Using main URL: ${mediaEntry.url}")
-            MediaUrlUtils.cleanMediaUrl(mediaEntry.url)
-        } else if (isHighQuality) {
-            // Try HD URL if available
-            if (mediaEntry.hdUrl.isNotEmpty()) {
-                val hdUrl = mediaEntry.hdUrl
-                Log.d(TAG, "Using HD quality: $hdUrl")
-                val reconstructed = MediaUrlUtils.reconstructUrl(hdUrl, mediaEntry.url)
-                Log.d(TAG, "HD URL reconstructed: $reconstructed")
-
-                // Check if reconstruction resulted in same URL as main (meaning HD not available)
-                if (reconstructed == MediaUrlUtils.cleanMediaUrl(mediaEntry.url)) {
-                    Log.w(TAG, "HD URL same as main URL, using main URL")
-                    MediaUrlUtils.cleanMediaUrl(mediaEntry.url)
-                } else {
-                    Log.w(TAG, "NOTE: Using HD quality URL. If playback fails, the HD version may not exist on server.")
-                    reconstructed
-                }
-            } else {
-                // No HD URL, fall back to main URL
-                Log.d(TAG, "No HD URL available, using main URL")
-                MediaUrlUtils.cleanMediaUrl(mediaEntry.url)
-            }
-        } else {
-            // Try small URL if available
-            if (mediaEntry.smallUrl.isNotEmpty()) {
-                val smallUrl = mediaEntry.smallUrl
-                Log.d(TAG, "Using LOW quality: $smallUrl")
-                val reconstructed = MediaUrlUtils.reconstructUrl(smallUrl, mediaEntry.url)
-                Log.d(TAG, "Small URL reconstructed: $reconstructed")
-
-                // Check if reconstruction resulted in same URL as main
-                if (reconstructed == MediaUrlUtils.cleanMediaUrl(mediaEntry.url)) {
-                    Log.w(TAG, "Small URL same as main URL, using main URL")
-                    MediaUrlUtils.cleanMediaUrl(mediaEntry.url)
-                } else {
-                    Log.w(TAG, "NOTE: Using LOW quality URL. If playback fails, the low quality version may not exist on server.")
-                    reconstructed
-                }
-            } else {
-                // No small URL, fall back to main URL
-                Log.d(TAG, "No small URL available, using main URL")
-                MediaUrlUtils.cleanMediaUrl(mediaEntry.url)
-            }
+        // Use VideoPlayerManager to handle playback
+        viewModelScope.launch {
+            videoPlayerManager.playVideo(mediaEntry, isHighQuality)
         }
-
-        if (videoUrl.isEmpty()) {
-            Log.w(TAG, "No video URL available for: ${mediaEntry.title}")
-            Toast.makeText(
-                getApplication(),
-                getApplication<Application>().getString(R.string.error_no_video_url),
-                Toast.LENGTH_SHORT
-            ).show()
-            return
-        }
-
-        Log.d(TAG, "Final video URL to play: $videoUrl")
-        Log.d(TAG, "=".repeat(80))
-        Log.i(TAG, "Playing video: ${mediaEntry.title} -> $videoUrl")
-
-        // Play video by emitting Intent
-        playVideo(videoUrl, mediaEntry.title)
     }
 
     /**
-     * Create and emit Intent to play video using in-app ExoPlayer
-     * Supports HTTP/HTTPS streaming
-     *
-     * @param mediaUrl The video URL to play
-     * @param videoTitle The title to display in the player
+     * Play video with a specific media entry (for Compose UI)
+     * @param mediaEntry The media entry to play
+     * @param isHighQuality Whether to play high quality version
      */
-    private fun playVideo(mediaUrl: String, videoTitle: String) {
-        // Clean and validate the URL
-        val cleanUrl = MediaUrlUtils.cleanMediaUrl(mediaUrl)
-        if (cleanUrl.isEmpty()) {
-            Log.e(TAG, "Invalid URL after cleaning: $mediaUrl")
-            Toast.makeText(
-                getApplication(),
-                getApplication<Application>().getString(R.string.error_invalid_video_url),
-                Toast.LENGTH_SHORT
-            ).show()
-            return
-        }
+    fun playVideoWithEntry(mediaEntry: com.mediathekview.android.database.MediaEntry, isHighQuality: Boolean) {
+        Log.d(TAG, "=== PLAY VIDEO WITH ENTRY ===")
+        Log.d(TAG, "Entry: ${mediaEntry.title} - ${mediaEntry.channel}")
+        Log.d(TAG, "Quality: ${if (isHighQuality) "HIGH" else "LOW"}")
 
-        Log.d(TAG, "Clean URL: $cleanUrl")
-        Log.d(TAG, "Protocol: ${if (cleanUrl.startsWith("https://")) "HTTPS (secure)" else "HTTP (cleartext)"}")
+        // Set the current entry in ViewState for consistency
+        setCurrentMediaEntry(mediaEntry)
 
-        // Create Intent for VideoPlayerActivity
-        // Note: We can't use VideoPlayerActivity::class.java here in ViewModel
-        // So we'll use the class name string and the Activity will resolve it
-        val intent = Intent().apply {
-            setClassName(
-                getApplication<Application>().packageName,
-                "com.mediathekview.android.ui.VideoPlayerActivity"
-            )
-            putExtra("video_url", cleanUrl)
-            putExtra("video_title", videoTitle)
-        }
-
-        // Emit intent to be collected by Activity
+        // Play the video directly with the provided entry
         viewModelScope.launch {
-            Log.i(TAG, "Emitting Intent for VideoPlayerActivity")
-            Log.d(TAG, "Video URL: $cleanUrl")
-            Log.d(TAG, "Video title: $videoTitle")
-            _startActivityIntent.emit(intent)
+            Log.d(TAG, "Launching video playback...")
+            videoPlayerManager.playVideo(mediaEntry, isHighQuality)
         }
     }
 
@@ -1077,7 +1017,7 @@ class MediaViewModel(
                 )
                 setAllowedNetworkTypes(
                     DownloadManager.Request.NETWORK_WIFI or
-                    DownloadManager.Request.NETWORK_MOBILE
+                        DownloadManager.Request.NETWORK_MOBILE
                 )
             }
 

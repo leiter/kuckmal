@@ -4,10 +4,11 @@ import android.net.Uri
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -28,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mediathekview.android.compose.data.ComposeDataMapper
 import com.mediathekview.android.compose.models.Channel
+import com.mediathekview.android.compose.models.ComposeViewModel
 import com.mediathekview.android.compose.models.MediaItem
 import com.mediathekview.android.compose.screens.BrowseView
 import com.mediathekview.android.compose.screens.DetailView
@@ -35,34 +37,18 @@ import com.mediathekview.android.compose.screens.rememberComposeMediaState
 import com.mediathekview.android.data.MediaViewModel
 
 /**
- * Navigation routes for the Compose screens
+ * Navigation routes - simplified to just two screens
  */
 sealed class Screen(val route: String) {
-    // Browse screens with navigation hierarchy
-    object AllThemes : Screen("all_themes")
-    data class ChannelThemes(val channelId: String) : Screen("channel_themes/{channelId}") {
-        companion object {
-            fun createRoute(channelId: String) = "channel_themes/$channelId"
-        }
-    }
-    data class ThemeTitles(val channelId: String?, val theme: String) : Screen("theme_titles?channel={channelId}&theme={theme}") {
-        companion object {
-            fun createRoute(channelId: String?, theme: String): String {
-                return if (channelId != null) {
-                    "theme_titles?channel=$channelId&theme=$theme"
-                } else {
-                    "theme_titles?theme=$theme"
-                }
-            }
-        }
-    }
+    // Overview screen (handles all browsing: themes, channels, titles)
+    object Overview : Screen("overview")
 
-    // Detail screen with optional channel and theme context
-    data class MediaDetail(
+    // Detail screen
+    data class Detail(
         val title: String,
         val channel: String? = null,
         val theme: String? = null
-    ) : Screen("media_detail/{title}?channel={channel}&theme={theme}") {
+    ) : Screen("detail/{title}?channel={channel}&theme={theme}") {
         companion object {
             fun createRoute(
                 title: String,
@@ -72,13 +58,24 @@ sealed class Screen(val route: String) {
                 val encodedTitle = Uri.encode(title)
                 val encodedChannel = channel?.let { Uri.encode(it) } ?: ""
                 val encodedTheme = theme?.let { Uri.encode(it) } ?: ""
-                return "media_detail/$encodedTitle?channel=$encodedChannel&theme=$encodedTheme"
+                return "detail/$encodedTitle?channel=$encodedChannel&theme=$encodedTheme"
             }
         }
     }
+}
 
-    // Search screen (future implementation)
-    object Search : Screen("search")
+/**
+ * Overview screen state - tracks what data is being displayed
+ */
+sealed class OverviewState {
+    // Showing all themes (no channel filter)
+    object AllThemes : OverviewState()
+
+    // Showing themes for a specific channel
+    data class ChannelThemes(val channelName: String) : OverviewState()
+
+    // Showing titles within a theme
+    data class ThemeTitles(val channelName: String?, val themeName: String) : OverviewState()
 }
 
 /**
@@ -87,7 +84,7 @@ sealed class Screen(val route: String) {
 object NavigationAnimations {
     const val ANIMATION_DURATION = 300
 
-    // Forward navigation (going deeper into hierarchy)
+    // Forward navigation (going to detail)
     val slideInFromRight = slideInHorizontally(
         initialOffsetX = { fullWidth -> fullWidth },
         animationSpec = tween(ANIMATION_DURATION)
@@ -98,7 +95,7 @@ object NavigationAnimations {
         animationSpec = tween(ANIMATION_DURATION)
     ) + fadeOut(animationSpec = tween(ANIMATION_DURATION))
 
-    // Backward navigation (going back in hierarchy)
+    // Backward navigation (returning from detail)
     val slideInFromLeft = slideInHorizontally(
         initialOffsetX = { fullWidth -> -fullWidth / 3 },
         animationSpec = tween(ANIMATION_DURATION)
@@ -109,38 +106,27 @@ object NavigationAnimations {
         animationSpec = tween(ANIMATION_DURATION)
     ) + fadeOut(animationSpec = tween(ANIMATION_DURATION))
 
-    // Fade transitions for same-level navigation
+    // Fade transitions
     val fadeIn = fadeIn(animationSpec = tween(ANIMATION_DURATION))
     val fadeOut = fadeOut(animationSpec = tween(ANIMATION_DURATION))
 }
 
 /**
- * Main navigation host for the Compose UI with real data
+ * Main navigation host - simplified to two destinations
  */
 @Composable
 fun MediathekViewNavHost(
     navController: NavHostController,
-    viewModel: MediaViewModel,
-    startDestination: String = Screen.AllThemes.route
+    viewModel: ComposeViewModel,
+    startDestination: String = Screen.Overview.route
 ) {
     // Create state holder for managing data flow
     val mediaState = rememberComposeMediaState(viewModel)
     val isDataLoaded by mediaState.isDataLoaded()
     val loadingState by mediaState.getLoadingState()
 
-    // Ensure navigation state is initialized on first composition
-    LaunchedEffect(Unit) {
-        // If ViewModel is in initial state, navigate to all themes
-        val currentViewState = viewModel.viewState.value
-        if (currentViewState is MediaViewModel.ViewState.Themes &&
-            currentViewState.channel == null &&
-            currentViewState.theme == null) {
-            viewModel.navigateToThemes(null)
-        }
-    }
-
     // Show loading indicator if data is not yet loaded
-    if (!isDataLoaded && loadingState != MediaViewModel.LoadingState.ERROR) {
+    if (!isDataLoaded && loadingState != ComposeViewModel.LoadingState.ERROR) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -151,7 +137,7 @@ fun MediathekViewNavHost(
     }
 
     // Show error state if loading failed
-    if (loadingState == MediaViewModel.LoadingState.ERROR) {
+    if (loadingState == ComposeViewModel.LoadingState.ERROR) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -165,149 +151,136 @@ fun MediathekViewNavHost(
         navController = navController,
         startDestination = startDestination
     ) {
-        // All Themes screen (initial screen)
+        // Overview screen (manages its own internal state)
         composable(
-            route = Screen.AllThemes.route,
+            route = Screen.Overview.route,
             enterTransition = { NavigationAnimations.fadeIn },
-            exitTransition = {
-                // When going to channel themes, use fade instead of slide
-                if (targetState.destination.route?.startsWith("channel_themes") == true) {
-                    NavigationAnimations.fadeOut
-                } else {
-                    NavigationAnimations.slideOutToLeft
-                }
-            },
+            exitTransition = { NavigationAnimations.slideOutToLeft },
             popEnterTransition = { NavigationAnimations.slideInFromLeft },
             popExitTransition = { NavigationAnimations.fadeOut }
         ) {
-            val themes by mediaState.getThemes(channelName = null)
+            // Overview screen manages its own state
+            var overviewState by remember { mutableStateOf<OverviewState>(OverviewState.AllThemes) }
+
+            // Pagination state - reset when state changes
+            var currentPart by remember { mutableStateOf(0) }
+
+            // Reset pagination when overview state changes
+            LaunchedEffect(overviewState) {
+                currentPart = 0
+            }
+
+            // Extract state parameters for reactive data fetching
+            val currentChannelName = when (val state = overviewState) {
+                is OverviewState.ChannelThemes -> state.channelName
+                is OverviewState.ThemeTitles -> state.channelName
+                else -> null
+            }
+            val currentThemeName = when (val state = overviewState) {
+                is OverviewState.ThemeTitles -> state.themeName
+                else -> null
+            }
+
+            // Fetch themes data with pagination (used for AllThemes and ChannelThemes states)
+            val themesData by mediaState.getThemes(channelName = currentChannelName, currentPart = currentPart)
+
+            // Fetch titles data (used for ThemeTitles state)
+            val titlesData by if (currentThemeName != null) {
+                mediaState.getTitles(channelName = currentChannelName, theme = currentThemeName)
+            } else {
+                // Return empty state when not showing titles
+                remember { mutableStateOf(emptyList<String>()) }
+            }
+
+            // Select the appropriate data based on current state
+            val displayData = when (overviewState) {
+                is OverviewState.AllThemes -> themesData
+                is OverviewState.ChannelThemes -> themesData
+                is OverviewState.ThemeTitles -> titlesData
+            }
+
+            // Determine if there are more items to load
+            // Show "more" if we have exactly the limit (1200 * (currentPart + 1)) items
+            val expectedLimit = (currentPart + 1) * 1200
+            val hasMoreItems = when (overviewState) {
+                is OverviewState.AllThemes -> themesData.size >= expectedLimit
+                is OverviewState.ChannelThemes -> themesData.size >= expectedLimit
+                is OverviewState.ThemeTitles -> false // Don't paginate titles
+            }
+
+            // Get current context info for display
+            val (selectedChannel, currentThemeLabel, showingTitles) = when (val state = overviewState) {
+                is OverviewState.AllThemes -> {
+                    Triple(null, "All Themes", false)
+                }
+                is OverviewState.ChannelThemes -> {
+                    val channel = ComposeDataMapper.findChannelByName(state.channelName)
+                    Triple(channel, "${channel?.displayName ?: state.channelName} Themes", false)
+                }
+                is OverviewState.ThemeTitles -> {
+                    val channel = state.channelName?.let { ComposeDataMapper.findChannelByName(it) }
+                    Triple(channel, state.themeName, true)
+                }
+            }
 
             BrowseView(
                 channels = mediaState.channels,
-                titles = themes, // These are actually themes in this context
-                selectedChannel = null,
-                currentTheme = "All Themes",
+                titles = displayData,
+                selectedChannel = selectedChannel,
+                currentTheme = currentThemeLabel,
+                isShowingTitles = showingTitles,
+                hasMoreItems = hasMoreItems,
                 onChannelSelected = { channel ->
-                    // Navigate to channel themes
-                    mediaState.navigateToThemes(channel.name)
-                    navController.navigate(Screen.ChannelThemes.createRoute(channel.name))
+                    // Change to that channel's themes (internal state change, no navigation)
+                    overviewState = OverviewState.ChannelThemes(channel.name)
                 },
-                onTitleSelected = { theme ->
-                    // From all themes, clicking a theme navigates to theme titles
-                    mediaState.navigateToTitles(null, theme)
-                    navController.navigate(Screen.ThemeTitles.createRoute(null, theme))
-                },
-                onMenuClick = {
-                    // Handle menu click
-                }
-            )
-        }
-
-        // Channel Themes screen
-        composable(
-            route = "channel_themes/{channelId}",
-            arguments = listOf(navArgument("channelId") { type = NavType.StringType }),
-            enterTransition = {
-                // Check if coming from AllThemes or another channel
-                when {
-                    initialState.destination.route == Screen.AllThemes.route -> {
-                        NavigationAnimations.fadeIn  // Fade when coming from AllThemes (channel selection)
-                    }
-                    initialState.destination.route?.startsWith("channel_themes") == true -> {
-                        NavigationAnimations.fadeIn  // Fade for channel-to-channel
-                    }
-                    else -> {
-                        NavigationAnimations.slideInFromRight  // Slide for other navigations
-                    }
-                }
-            },
-            exitTransition = {
-                // Only slide out when going to detail or titles, not channel switching
-                if (targetState.destination.route?.startsWith("channel_themes") == true) {
-                    NavigationAnimations.fadeOut  // Simple fade for channel-to-channel
-                } else {
-                    NavigationAnimations.slideOutToLeft  // Slide for other navigations
-                }
-            },
-            popEnterTransition = { NavigationAnimations.slideInFromLeft },
-            popExitTransition = { NavigationAnimations.slideOutToRight }
-        ) { backStackEntry ->
-            val channelName = backStackEntry.arguments?.getString("channelId") ?: ""
-            val channel = ComposeDataMapper.findChannelByName(channelName)
-            val themes by mediaState.getThemes(channelName = channelName)
-
-            BrowseView(
-                channels = mediaState.channels,
-                titles = themes, // These are themes for this channel
-                selectedChannel = channel,
-                currentTheme = "${channel?.displayName ?: ""} Themes",
-                onChannelSelected = { newChannel ->
-                    if (newChannel.name != channelName) {
-                        // Navigate to different channel themes, replacing current
-                        mediaState.navigateToThemes(newChannel.name)
-                        navController.navigate(Screen.ChannelThemes.createRoute(newChannel.name)) {
-                            popUpTo(Screen.AllThemes.route) { inclusive = false }
+                onTitleSelected = { item ->
+                    when (val state = overviewState) {
+                        is OverviewState.AllThemes -> {
+                            // Clicked on a theme -> show titles in that theme
+                            overviewState = OverviewState.ThemeTitles(null, item)
+                        }
+                        is OverviewState.ChannelThemes -> {
+                            // Clicked on a theme -> show titles in that theme for this channel
+                            overviewState = OverviewState.ThemeTitles(state.channelName, item)
+                        }
+                        is OverviewState.ThemeTitles -> {
+                            // Clicked on a title -> navigate to detail (actual navigation!)
+                            mediaState.navigateToDetail(item, state.channelName, state.themeName)
+                            navController.navigate(
+                                Screen.Detail.createRoute(item, state.channelName, state.themeName)
+                            )
                         }
                     }
                 },
-                onTitleSelected = { theme ->
-                    // Navigate to theme titles
-                    mediaState.navigateToTitles(channelName, theme)
-                    navController.navigate(Screen.ThemeTitles.createRoute(channelName, theme))
+                onLoadMore = {
+                    // Load more items by incrementing currentPart
+                    currentPart += 1
+                    android.util.Log.d("Navigation", "Loading more items, currentPart: $currentPart")
                 },
                 onMenuClick = {
-                    // Handle menu click
-                }
-            )
-        }
-
-        // Theme Titles screen
-        composable(
-            route = "theme_titles?channel={channelId}&theme={theme}",
-            arguments = listOf(
-                navArgument("channelId") {
-                    type = NavType.StringType
-                    nullable = true
-                    defaultValue = null
-                },
-                navArgument("theme") { type = NavType.StringType }
-            ),
-            enterTransition = { NavigationAnimations.slideInFromRight },
-            exitTransition = { NavigationAnimations.slideOutToLeft },
-            popEnterTransition = { NavigationAnimations.slideInFromLeft },
-            popExitTransition = { NavigationAnimations.slideOutToRight }
-        ) { backStackEntry ->
-            val channelName = backStackEntry.arguments?.getString("channelId")
-            val theme = backStackEntry.arguments?.getString("theme") ?: ""
-            val channel = ComposeDataMapper.findChannelByName(channelName)
-            val titles by mediaState.getTitles(channelName = channelName, theme = theme)
-
-            BrowseView(
-                channels = mediaState.channels,
-                titles = titles, // These are actual titles within the theme
-                selectedChannel = channel,
-                currentTheme = theme,
-                onChannelSelected = { newChannel ->
-                    // Navigate to channel themes
-                    mediaState.navigateToThemes(newChannel.name)
-                    navController.navigate(Screen.ChannelThemes.createRoute(newChannel.name)) {
-                        popUpTo(Screen.AllThemes.route) { inclusive = false }
+                    // Could handle back navigation within overview
+                    when (overviewState) {
+                        is OverviewState.AllThemes -> { /* Already at root */ }
+                        is OverviewState.ChannelThemes -> {
+                            overviewState = OverviewState.AllThemes
+                        }
+                        is OverviewState.ThemeTitles -> {
+                            val state = overviewState as OverviewState.ThemeTitles
+                            overviewState = if (state.channelName != null) {
+                                OverviewState.ChannelThemes(state.channelName)
+                            } else {
+                                OverviewState.AllThemes
+                            }
+                        }
                     }
-                },
-                onTitleSelected = { title ->
-                    // Navigate to media detail with context
-                    mediaState.navigateToDetail(title, channelName, theme)
-                    navController.navigate(Screen.MediaDetail.createRoute(title, channelName, theme))
-                },
-                onMenuClick = {
-                    // Handle menu click
                 }
             )
         }
 
-        // Media Detail screen
+        // Detail screen
         composable(
-            route = "media_detail/{title}?channel={channel}&theme={theme}",
+            route = "detail/{title}?channel={channel}&theme={theme}",
             arguments = listOf(
                 navArgument("title") { type = NavType.StringType },
                 navArgument("channel") {
@@ -330,7 +303,7 @@ fun MediathekViewNavHost(
             val channel = backStackEntry.arguments?.getString("channel")?.takeIf { it.isNotEmpty() }?.let { Uri.decode(it) }
             val theme = backStackEntry.arguments?.getString("theme")?.takeIf { it.isNotEmpty() }?.let { Uri.decode(it) }
 
-            // Get media item and raw entry with context for better matching
+            // Get media item and raw entry
             val mediaItem by mediaState.getMediaItem(title, channel, theme)
             val mediaEntry by mediaState.getMediaEntry(title, channel, theme)
 
@@ -338,7 +311,7 @@ fun MediathekViewNavHost(
             android.util.Log.d("Navigation", "Detail Screen - Title: '$title', Channel: '$channel', Theme: '$theme'")
             android.util.Log.d("Navigation", "MediaItem found: ${mediaItem != null}, MediaEntry found: ${mediaEntry != null}")
 
-            // Show loading or empty state if media item is not found
+            // Show loading or content
             val item = mediaItem
             if (item == null) {
                 Box(
@@ -381,24 +354,16 @@ fun MediathekViewNavHost(
 /**
  * Extension functions for navigation
  */
-fun NavHostController.navigateToAllThemes() {
-    navigate(Screen.AllThemes.route) {
-        popUpTo(Screen.AllThemes.route) { inclusive = true }
+fun NavHostController.navigateToOverview() {
+    navigate(Screen.Overview.route) {
+        popUpTo(Screen.Overview.route) { inclusive = true }
     }
 }
 
-fun NavHostController.navigateToChannelThemes(channelId: String) {
-    navigate(Screen.ChannelThemes.createRoute(channelId))
-}
-
-fun NavHostController.navigateToThemeTitles(channelId: String?, theme: String) {
-    navigate(Screen.ThemeTitles.createRoute(channelId, theme))
-}
-
-fun NavHostController.navigateToMediaDetail(
+fun NavHostController.navigateToDetail(
     title: String,
     channel: String? = null,
     theme: String? = null
 ) {
-    navigate(Screen.MediaDetail.createRoute(title, channel, theme))
+    navigate(Screen.Detail.createRoute(title, channel, theme))
 }
