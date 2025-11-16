@@ -1,6 +1,7 @@
 package com.mediathekview.android.compose.navigation
 
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -20,6 +21,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -148,7 +150,7 @@ fun MediathekViewNavHost(
 
     NavHost(
         navController = navController,
-        startDestination = startDestination
+        startDestination = Screen.Overview.route  // Always start with Overview to ensure proper back stack
     ) {
         // Overview screen (manages its own internal state)
         composable(
@@ -158,8 +160,57 @@ fun MediathekViewNavHost(
             popEnterTransition = { NavigationAnimations.slideInFromLeft },
             popExitTransition = { NavigationAnimations.fadeOut }
         ) {
-            // Overview screen manages its own state
-            var overviewState by remember { mutableStateOf<OverviewState>(OverviewState.AllThemes) }
+            // Overview screen manages its own state - use rememberSaveable for persistence
+            // Store state as strings since sealed classes aren't directly saveable
+            var stateType by rememberSaveable { mutableStateOf("AllThemes") }
+            var stateChannel by rememberSaveable { mutableStateOf<String?>(null) }
+            var stateTheme by rememberSaveable { mutableStateOf<String?>(null) }
+
+            // Convert to OverviewState
+            val overviewState = when (stateType) {
+                "ChannelThemes" -> OverviewState.ChannelThemes(stateChannel ?: "")
+                "ThemeTitles" -> OverviewState.ThemeTitles(stateChannel, stateTheme ?: "")
+                else -> OverviewState.AllThemes
+            }
+
+            // Helper function to update state
+            fun updateOverviewState(newState: OverviewState) {
+                when (newState) {
+                    is OverviewState.AllThemes -> {
+                        stateType = "AllThemes"
+                        stateChannel = null
+                        stateTheme = null
+                    }
+                    is OverviewState.ChannelThemes -> {
+                        stateType = "ChannelThemes"
+                        stateChannel = newState.channelName
+                        stateTheme = null
+                    }
+                    is OverviewState.ThemeTitles -> {
+                        stateType = "ThemeTitles"
+                        stateChannel = newState.channelName
+                        stateTheme = newState.themeName
+                    }
+                }
+            }
+
+            // Handle back button press within Overview
+            BackHandler(enabled = overviewState !is OverviewState.AllThemes) {
+                when (overviewState) {
+                    is OverviewState.ChannelThemes -> {
+                        updateOverviewState(OverviewState.AllThemes)
+                    }
+                    is OverviewState.ThemeTitles -> {
+                        val state = overviewState as OverviewState.ThemeTitles
+                        if (state.channelName != null) {
+                            updateOverviewState(OverviewState.ChannelThemes(state.channelName))
+                        } else {
+                            updateOverviewState(OverviewState.AllThemes)
+                        }
+                    }
+                    else -> { /* Already at root */ }
+                }
+            }
 
             // Pagination state - reset when state changes
             var currentPart by remember { mutableStateOf(0) }
@@ -237,17 +288,17 @@ fun MediathekViewNavHost(
                 hasMoreItems = hasMoreItems,
                 onChannelSelected = { channel ->
                     // Change to that channel's themes (internal state change, no navigation)
-                    overviewState = OverviewState.ChannelThemes(channel.name)
+                    updateOverviewState(OverviewState.ChannelThemes(channel.name))
                 },
                 onTitleSelected = { item ->
                     when (val state = overviewState) {
                         is OverviewState.AllThemes -> {
                             // Clicked on a theme -> show titles in that theme
-                            overviewState = OverviewState.ThemeTitles(null, item)
+                            updateOverviewState(OverviewState.ThemeTitles(null, item))
                         }
                         is OverviewState.ChannelThemes -> {
                             // Clicked on a theme -> show titles in that theme for this channel
-                            overviewState = OverviewState.ThemeTitles(state.channelName, item)
+                            updateOverviewState(OverviewState.ThemeTitles(state.channelName, item))
                         }
                         is OverviewState.ThemeTitles -> {
                             // Clicked on a title -> navigate to detail (actual navigation!)
@@ -270,14 +321,14 @@ fun MediathekViewNavHost(
                     when (overviewState) {
                         is OverviewState.AllThemes -> { /* Already at root */ }
                         is OverviewState.ChannelThemes -> {
-                            overviewState = OverviewState.AllThemes
+                            updateOverviewState(OverviewState.AllThemes)
                         }
                         is OverviewState.ThemeTitles -> {
                             val state = overviewState as OverviewState.ThemeTitles
-                            overviewState = if (state.channelName != null) {
-                                OverviewState.ChannelThemes(state.channelName)
+                            if (state.channelName != null) {
+                                updateOverviewState(OverviewState.ChannelThemes(state.channelName))
                             } else {
-                                OverviewState.AllThemes
+                                updateOverviewState(OverviewState.AllThemes)
                             }
                         }
                     }
@@ -309,6 +360,20 @@ fun MediathekViewNavHost(
             val title = Uri.decode(backStackEntry.arguments?.getString("title") ?: "")
             val channel = backStackEntry.arguments?.getString("channel")?.takeIf { it.isNotEmpty() }?.let { Uri.decode(it) }
             val theme = backStackEntry.arguments?.getString("theme")?.takeIf { it.isNotEmpty() }?.let { Uri.decode(it) }
+
+            // Handle back button press to navigate back to Overview (titles list)
+            BackHandler(enabled = true) {
+                android.util.Log.d("Navigation", "BackHandler in Detail - navigating back to Overview")
+                val popped = navController.popBackStack()
+                android.util.Log.d("Navigation", "popBackStack result: $popped, backQueue size: ${navController.currentBackStack.value.size}")
+                if (!popped) {
+                    // If pop failed, navigate explicitly to Overview
+                    android.util.Log.d("Navigation", "popBackStack failed, navigating explicitly to Overview")
+                    navController.navigate(Screen.Overview.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            }
 
             // Get media item and raw entry using ViewModel flows directly
             val mediaItemFlow = remember(title, channel, theme) {

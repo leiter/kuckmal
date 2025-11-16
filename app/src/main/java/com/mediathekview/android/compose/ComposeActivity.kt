@@ -55,6 +55,19 @@ class ComposeActivity : ComponentActivity() {
             }
         }
     }
+
+    // Let Compose handle back navigation via OnBackPressedDispatcher
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        // Check if OnBackPressedDispatcher has any enabled callbacks
+        if (onBackPressedDispatcher.hasEnabledCallbacks()) {
+            // Let Compose BackHandlers handle it
+            super.onBackPressed()
+        } else {
+            // No Compose handlers, finish activity
+            super.onBackPressed()
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -192,7 +192,7 @@ class UIManager(
 
         // Search toggle button click (in header)
         searchToggleButton.setOnClickListener {
-            if (stickySearchContainer.visibility == View.VISIBLE) {
+            if (stickySearchContainer.isVisible) {
                 deactivateSearch()
             } else {
                 activateSearch()
@@ -201,7 +201,7 @@ class UIManager(
 
         // Search button click (in sticky container) - same as toggle
         searchButton.setOnClickListener {
-            if (stickySearchContainer.visibility == View.VISIBLE) {
+            if (stickySearchContainer.isVisible) {
                 deactivateSearch()
             } else {
                 activateSearch()
