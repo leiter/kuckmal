@@ -38,7 +38,7 @@ class UIManager(
 
     // Detect if device is a TV for adaptive UI behavior
     private val isTvDevice: Boolean by lazy {
-        val uiModeManager = activity.getSystemService(android.content.Context.UI_MODE_SERVICE) as android.app.UiModeManager
+        val uiModeManager = activity.getSystemService(Context.UI_MODE_SERVICE) as android.app.UiModeManager
         val currentMode = uiModeManager.currentModeType
         (currentMode == android.content.res.Configuration.UI_MODE_TYPE_TELEVISION).also { isTV ->
             Log.d(TAG, "Device mode: ${if (isTV) "TV" else "Mobile/Tablet"}")
@@ -392,9 +392,9 @@ class UIManager(
                 searchInput.requestFocus()
 
                 // Show keyboard for text input
-                val imm = activity.getSystemService(android.content.Context.INPUT_METHOD_SERVICE)
-                    as android.view.inputmethod.InputMethodManager
-                imm.showSoftInput(searchInput, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
+                val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE)
+                    as InputMethodManager
+                imm.showSoftInput(searchInput, InputMethodManager.SHOW_IMPLICIT)
             }
             .start()
     }
@@ -410,8 +410,8 @@ class UIManager(
         cancelSearch()
 
         // Hide keyboard first
-        val imm = activity.getSystemService(android.content.Context.INPUT_METHOD_SERVICE)
-            as android.view.inputmethod.InputMethodManager
+        val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE)
+            as InputMethodManager
         imm.hideSoftInputFromWindow(searchInput.windowToken, 0)
 
         // Animate from expanded to collapsed (slide up animation)

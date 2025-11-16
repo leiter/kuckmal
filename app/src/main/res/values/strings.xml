@@ -2,7 +2,7 @@
 <resources>
 
     <!-- App -->
-    <string name="app_name">MediathekView</string>
+    <string name="app_name">ÖrFinder</string>
     <string name="action_settings">Settings</string>
 
     <!-- Browse View -->

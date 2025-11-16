@@ -216,9 +216,13 @@ fun MediathekViewNavHost(
             // Pagination state - reset when state changes
             var currentPart by remember { mutableIntStateOf(0) }
 
-            // Reset pagination when overview state changes
+            // Search state - persisted across navigation
+            var searchQuery by rememberSaveable { mutableStateOf("") }
+
+            // Reset pagination and search when overview state changes
             LaunchedEffect(overviewState) {
                 currentPart = 0
+                searchQuery = "" // Clear search when switching states
             }
 
             // Extract state parameters for reactive data fetching
@@ -250,19 +254,32 @@ fun MediathekViewNavHost(
             val titlesData by titlesFlow.collectAsStateWithLifecycle(emptyList())
 
             // Select the appropriate data based on current state
-            val displayData = when (overviewState) {
+            val rawData = when (overviewState) {
                 is OverviewState.AllThemes -> themesData
                 is OverviewState.ChannelThemes -> themesData
                 is OverviewState.ThemeTitles -> titlesData
             }
 
+            // Filter data based on search query (case-insensitive contains)
+            val displayData = if (searchQuery.isBlank()) {
+                rawData
+            } else {
+                val query = searchQuery.trim().lowercase()
+                rawData.filter { it.lowercase().contains(query) }
+            }
+
             // Determine if there are more items to load
             // Show "more" if we have exactly the limit (1200 * (currentPart + 1)) items
+            // Don't show more when search is active
             val expectedLimit = (currentPart + 1) * 1200
-            val hasMoreItems = when (overviewState) {
-                is OverviewState.AllThemes -> themesData.size >= expectedLimit
-                is OverviewState.ChannelThemes -> themesData.size >= expectedLimit
-                is OverviewState.ThemeTitles -> false // Don't paginate titles
+            val hasMoreItems = if (searchQuery.isNotBlank()) {
+                false // Don't show "more" during search
+            } else {
+                when (overviewState) {
+                    is OverviewState.AllThemes -> themesData.size >= expectedLimit
+                    is OverviewState.ChannelThemes -> themesData.size >= expectedLimit
+                    is OverviewState.ThemeTitles -> false // Don't paginate titles
+                }
             }
 
             // Get current context info for display
@@ -287,6 +304,11 @@ fun MediathekViewNavHost(
                 currentTheme = currentThemeLabel,
                 isShowingTitles = showingTitles,
                 hasMoreItems = hasMoreItems,
+                searchQuery = searchQuery,
+                onSearchQueryChanged = { query ->
+                    searchQuery = query
+                    android.util.Log.d("Navigation", "Search query updated: '$query'")
+                },
                 onChannelSelected = { channel ->
                     // Change to that channel's themes (internal state change, no navigation)
                     updateOverviewState(OverviewState.ChannelThemes(channel.name))
