@@ -2,13 +2,13 @@ package com.mediathekview.android.video
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.util.Log
 import com.mediathekview.android.util.MediaUrlUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.withContext
+import androidx.core.net.toUri
 
 /**
  * Android-specific implementation of VideoPlayer
@@ -16,7 +16,7 @@ import kotlinx.coroutines.withContext
  */
 class AndroidVideoPlayer(
     private val context: Context,
-    private val config: VideoPlayerConfig = VideoPlayerConfig()
+    private val config: VideoPlayerConfig = VideoPlayerConfig(),
 ) : VideoPlayer {
 
     companion object {
@@ -85,7 +85,7 @@ class AndroidVideoPlayer(
         if (url.isBlank()) return false
 
         return try {
-            val uri = Uri.parse(url)
+            val uri = url.toUri()
             val scheme = uri.scheme?.lowercase()
             val path = uri.path?.lowercase() ?: ""
 
@@ -150,7 +150,7 @@ class AndroidVideoPlayer(
      */
     private fun createSystemPlayerIntent(url: String, title: String): Intent {
         return Intent(Intent.ACTION_VIEW).apply {
-            setDataAndType(Uri.parse(url), "video/*")
+            setDataAndType(url.toUri(), "video/*")
             putExtra(Intent.EXTRA_TITLE, title)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -201,7 +201,7 @@ class AndroidVideoPlayer(
  * Factory for creating Android video player instances
  */
 class AndroidVideoPlayerFactory(
-    private val context: Context
+    private val context: Context,
 ) : VideoPlayerFactory {
 
     override fun create(config: VideoPlayerConfig): VideoPlayer {

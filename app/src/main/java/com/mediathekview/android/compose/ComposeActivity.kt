@@ -1,5 +1,6 @@
 package com.mediathekview.android.compose
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -8,6 +9,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -20,6 +23,7 @@ import com.mediathekview.android.compose.navigation.MediathekViewNavHost
 import com.mediathekview.android.compose.navigation.Screen
 import com.mediathekview.android.compose.ui.theme.MediathekViewTheme
 import com.mediathekview.android.data.MediaViewModel
+import com.mediathekview.android.ui.MediaActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 /**
@@ -96,10 +100,32 @@ fun ComposeMainScreen(viewModel: ComposeViewModel) {
         }
     }
 
+    // Overflow menu state
+    var showMenu by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
-            // Top bar can be customized based on current route
-            // For now, keeping it minimal to match the original design
+            TopAppBar(
+                title = { Text("MediathekView") },
+                actions = {
+                    IconButton(onClick = { showMenu = true }) {
+                        Icon(Icons.Default.MoreVert, contentDescription = "Menu")
+                    }
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Legacy UI") },
+                            onClick = {
+                                showMenu = false
+                                val intent = Intent(context, MediaActivity::class.java)
+                                context.startActivity(intent)
+                            }
+                        )
+                    }
+                }
+            )
         }
     ) { paddingValues ->
         Surface(
