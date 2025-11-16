@@ -33,7 +33,8 @@ class AndroidVideoPlayer(
     }
 
     // SharedFlow to emit intents for video playback
-    private val _playbackIntent = MutableSharedFlow<Intent>(replay = 0, extraBufferCapacity = 1)
+    // replay = 1 ensures intent is available even if collector isn't ready yet
+    private val _playbackIntent = MutableSharedFlow<Intent>(replay = 1, extraBufferCapacity = 0)
     val playbackIntent: SharedFlow<Intent> = _playbackIntent
 
     override suspend fun play(
@@ -139,6 +140,8 @@ class AndroidVideoPlayer(
             putExtra("video_title", title)
             putExtra("quality", getQualityExtra())
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)  // Clear existing instances to avoid duplicates
+            addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP) // Reuse existing instance if at top
         }
     }
 

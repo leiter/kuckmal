@@ -33,8 +33,8 @@ import com.mediathekview.android.compose.models.ComposeViewModel
 import com.mediathekview.android.compose.models.MediaItem
 import com.mediathekview.android.compose.screens.BrowseView
 import com.mediathekview.android.compose.screens.DetailView
-import com.mediathekview.android.compose.screens.rememberComposeMediaState
 import com.mediathekview.android.data.MediaViewModel
+import kotlinx.coroutines.flow.flowOf
 
 /**
  * Navigation routes - simplified to just two screens
@@ -120,10 +120,9 @@ fun MediathekViewNavHost(
     viewModel: ComposeViewModel,
     startDestination: String = Screen.Overview.route
 ) {
-    // Create state holder for managing data flow
-    val mediaState = rememberComposeMediaState(viewModel)
-    val isDataLoaded by mediaState.isDataLoaded()
-    val loadingState by mediaState.getLoadingState()
+    // Use ViewModel directly - no wrapper needed
+    val isDataLoaded by viewModel.isDataLoadedFlow.collectAsStateWithLifecycle()
+    val loadingState by viewModel.loadingState.collectAsStateWithLifecycle()
 
     // Show loading indicator if data is not yet loaded
     if (!isDataLoaded && loadingState != ComposeViewModel.LoadingState.ERROR) {
@@ -182,15 +181,21 @@ fun MediathekViewNavHost(
             }
 
             // Fetch themes data with pagination (used for AllThemes and ChannelThemes states)
-            val themesData by mediaState.getThemes(channelName = currentChannelName, currentPart = currentPart)
+            val themesLimit = (currentPart + 1) * 1200
+            val themesFlow = remember(currentChannelName, themesLimit) {
+                viewModel.getThemesFlow(currentChannelName, themesLimit)
+            }
+            val themesData by themesFlow.collectAsStateWithLifecycle(emptyList())
 
             // Fetch titles data (used for ThemeTitles state)
-            val titlesData by if (currentThemeName != null) {
-                mediaState.getTitles(channelName = currentChannelName, theme = currentThemeName)
-            } else {
-                // Return empty state when not showing titles
-                remember { mutableStateOf(emptyList<String>()) }
+            val titlesFlow = remember(currentChannelName, currentThemeName) {
+                if (currentThemeName != null) {
+                    viewModel.getTitlesFlow(currentChannelName, currentThemeName)
+                } else {
+                    flowOf(emptyList())
+                }
             }
+            val titlesData by titlesFlow.collectAsStateWithLifecycle(emptyList())
 
             // Select the appropriate data based on current state
             val displayData = when (overviewState) {
@@ -224,7 +229,7 @@ fun MediathekViewNavHost(
             }
 
             BrowseView(
-                channels = mediaState.channels,
+                channels = viewModel.channels,
                 titles = displayData,
                 selectedChannel = selectedChannel,
                 currentTheme = currentThemeLabel,
@@ -246,7 +251,9 @@ fun MediathekViewNavHost(
                         }
                         is OverviewState.ThemeTitles -> {
                             // Clicked on a title -> navigate to detail (actual navigation!)
-                            mediaState.navigateToDetail(item, state.channelName, state.themeName)
+                            // First set the navigation context in ViewModel, then navigate to detail
+                            viewModel.navigateToThemes(channel = state.channelName, theme = state.themeName)
+                            viewModel.navigateToDetail(item)
                             navController.navigate(
                                 Screen.Detail.createRoute(item, state.channelName, state.themeName)
                             )
@@ -303,17 +310,24 @@ fun MediathekViewNavHost(
             val channel = backStackEntry.arguments?.getString("channel")?.takeIf { it.isNotEmpty() }?.let { Uri.decode(it) }
             val theme = backStackEntry.arguments?.getString("theme")?.takeIf { it.isNotEmpty() }?.let { Uri.decode(it) }
 
-            // Get media item and raw entry
-            val mediaItem by mediaState.getMediaItem(title, channel, theme)
-            val mediaEntry by mediaState.getMediaEntry(title, channel, theme)
+            // Get media item and raw entry using ViewModel flows directly
+            val mediaItemFlow = remember(title, channel, theme) {
+                viewModel.getMediaItemFlow(title, channel, theme)
+            }
+            val mediaEntryFlow = remember(title, channel, theme) {
+                viewModel.getMediaEntryByTitleFlow(title, channel, theme)
+            }
+            val mediaItem by mediaItemFlow.collectAsStateWithLifecycle(null)
+            val mediaEntry by mediaEntryFlow.collectAsStateWithLifecycle(null)
 
             // Log for debugging
             android.util.Log.d("Navigation", "Detail Screen - Title: '$title', Channel: '$channel', Theme: '$theme'")
             android.util.Log.d("Navigation", "MediaItem found: ${mediaItem != null}, MediaEntry found: ${mediaEntry != null}")
 
-            // Show loading or content
+            // Show loading or content - wait for BOTH mediaItem AND mediaEntry to be available
             val item = mediaItem
-            if (item == null) {
+            val entry = mediaEntry
+            if (item == null || entry == null) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -340,10 +354,13 @@ fun MediathekViewNavHost(
                 DetailView(
                     mediaItem = item,
                     onPlayClick = { isHighQuality ->
-                        mediaState.onPlayClicked(mediaEntry, isHighQuality)
+                        // Use the entry that is guaranteed to be non-null
+                        viewModel.playVideoWithEntry(entry, isHighQuality)
                     },
                     onDownloadClick = { isHighQuality ->
-                        mediaState.onDownloadClicked(mediaEntry, isHighQuality)
+                        // Use the entry that is guaranteed to be non-null
+                        viewModel.setCurrentMediaEntry(entry)
+                        viewModel.onDownloadButtonClicked(isHighQuality)
                     }
                 )
             }

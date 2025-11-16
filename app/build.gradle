@@ -58,6 +58,11 @@ android {
         unitTests.returnDefaultValues = true
     }
 
+    // Don't compress database files in assets (required for large files)
+    aaptOptions {
+        noCompress "db"
+    }
+
     // Add KSP generated sources to source sets
     applicationVariants.configureEach { variant ->
         def variantName = variant.name

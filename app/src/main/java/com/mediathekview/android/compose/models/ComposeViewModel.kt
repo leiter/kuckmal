@@ -20,7 +20,13 @@ import com.mediathekview.android.repository.DownloadState
 import com.mediathekview.android.repository.MediaRepository
 import com.mediathekview.android.video.VideoPlayerManager
 import com.mediathekview.android.video.createVideoPlayerManager
+import com.mediathekview.android.compose.data.ComposeDataMapper
+import com.mediathekview.android.compose.data.ComposeDataMapper.extractUniqueThemes
+import com.mediathekview.android.compose.data.ComposeDataMapper.extractUniqueTitles
+import com.mediathekview.android.compose.data.ComposeDataMapper.toMediaItem
+import com.mediathekview.android.database.MediaEntry
 import kotlinx.coroutines.Dispatchers
+// Note: Channel and MediaItem are defined in this same package (compose.models)
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -80,6 +86,36 @@ class ComposeViewModel(
 
     private val _errorMessage = MutableStateFlow<String>("")
     val errorMessage: StateFlow<String> = _errorMessage.asStateFlow()
+
+    // ===========================================================================================
+    // STATE: Compose UI Data (direct access without wrapper)
+    // ===========================================================================================
+
+    /**
+     * All available channels - static data from ComposeDataMapper
+     */
+    val channels: List<Channel> = ComposeDataMapper.getAllChannels()
+
+    /**
+     * Internal state to track if database has content
+     * Checked on ViewModel init and updated when loading completes
+     */
+    private val _hasDataInDatabase = MutableStateFlow(false)
+
+    /**
+     * Computed StateFlow indicating if data is loaded and available
+     * True if: loading state is LOADED OR database already contains data
+     */
+    val isDataLoadedFlow: StateFlow<Boolean> = combine(
+        _loadingState,
+        _hasDataInDatabase
+    ) { state, hasData ->
+        state == LoadingState.LOADED || hasData
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = false
+    )
 
     // ===========================================================================================
     // STATE: Search Progress (observable)
@@ -297,11 +333,132 @@ class ComposeViewModel(
     val titles: StateFlow<List<com.mediathekview.android.database.MediaEntry>> = contentList
 
     // ===========================================================================================
+    // DATA QUERY METHODS (for direct Compose UI consumption)
+    // ===========================================================================================
+
+    /**
+     * Get themes as a Flow of strings (theme names)
+     * Uses repository's dedicated Flow methods for proper reactive updates
+     * @param channelName Filter by channel name (null for all channels)
+     * @param limit Maximum number of themes to return
+     * @return Flow of theme names
+     */
+    fun getThemesFlow(channelName: String?, limit: Int = MAX_UI_ITEMS): Flow<List<String>> {
+        return if (channelName != null) {
+            repository.getThemesForChannelFlow(channelName, limit = limit)
+        } else {
+            repository.getAllThemesFlow(limit = limit)
+        }
+    }
+
+    /**
+     * Get titles for a specific theme as a Flow of strings
+     * @param channelName Optional channel filter
+     * @param theme Theme to get titles for
+     * @return Flow of title names
+     */
+    fun getTitlesFlow(channelName: String?, theme: String): Flow<List<String>> {
+        return if (channelName != null) {
+            // Get titles for specific channel and theme
+            repository.getTitlesForChannelAndThemeFlow(channelName, theme, 0)
+        } else {
+            // Get titles for theme across all channels
+            repository.getTitlesForThemeFlow(theme, 0)
+        }
+    }
+
+    /**
+     * Get a specific media entry by title, channel, and theme
+     * @param title Title to search for
+     * @param channel Optional channel filter
+     * @param theme Optional theme filter
+     * @return Flow emitting the MediaEntry or null if not found
+     */
+    fun getMediaEntryByTitleFlow(
+        title: String,
+        channel: String? = null,
+        theme: String? = null
+    ): Flow<MediaEntry?> {
+        return if (theme != null && channel != null) {
+            repository.getMediaEntryFlow(channel, theme, title)
+        } else if (theme != null) {
+            repository.getMediaEntryByThemeAndTitleFlow(theme, title)
+        } else {
+            // No theme context, search all entries
+            repository.getEntriesFlow("", "").map { entries ->
+                entries.firstOrNull { it.title == title }
+                    ?: entries.firstOrNull { it.title.equals(title, ignoreCase = true) }
+            }
+        }
+    }
+
+    /**
+     * Get a MediaItem (UI model) for a specific title
+     * @param title Title to search for
+     * @param channel Optional channel filter
+     * @param theme Optional theme filter
+     * @return Flow emitting the MediaItem or null if not found
+     */
+    fun getMediaItemFlow(
+        title: String,
+        channel: String? = null,
+        theme: String? = null
+    ): Flow<MediaItem?> {
+        return getMediaEntryByTitleFlow(title, channel, theme).map { entry ->
+            entry?.toMediaItem()
+        }
+    }
+
+    /**
+     * Search for themes or titles
+     * @param query Search query
+     * @param searchInTitles If true, search in titles; otherwise search in themes
+     * @return Flow of matching items (theme or title names)
+     */
+    fun searchContentFlow(query: String, searchInTitles: Boolean): Flow<List<String>> {
+        if (query.isBlank()) {
+            return flowOf(emptyList())
+        }
+
+        val lowerQuery = query.lowercase()
+        return repository.getEntriesFlow("", "").map { entries ->
+            if (searchInTitles) {
+                entries.filter {
+                    it.title.lowercase().contains(lowerQuery) ||
+                    it.description.lowercase().contains(lowerQuery)
+                }.extractUniqueTitles()
+            } else {
+                entries.filter {
+                    it.theme.lowercase().contains(lowerQuery) ||
+                    it.title.lowercase().contains(lowerQuery) ||
+                    it.description.lowercase().contains(lowerQuery)
+                }.extractUniqueThemes()
+            }
+        }
+    }
+
+    // ===========================================================================================
     // INITIALIZATION
     // ===========================================================================================
 
     init {
         Log.d(TAG, "MediaViewModel CREATED - instance: ${this.hashCode()}")
+
+        // Check if database already has data (for app restarts)
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val count = repository.getCount()
+                val hasData = count > 0
+                Log.d(TAG, "Database check on init: $count entries, hasData=$hasData")
+                _hasDataInDatabase.value = hasData
+                if (hasData) {
+                    // If database has data, set loading state to LOADED
+                    _loadingState.value = LoadingState.LOADED
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error checking database on init", e)
+            }
+        }
 
         // Observe download state and convert to dialog models
         // This must be in init block AFTER all StateFlows are initialized

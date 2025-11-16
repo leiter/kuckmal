@@ -7,10 +7,14 @@ import android.widget.Toast
 import com.mediathekview.android.R
 import com.mediathekview.android.database.MediaEntry
 import com.mediathekview.android.util.MediaUrlUtils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 
 /**
  * Manager class that handles video playback using the expect/actual pattern
@@ -24,20 +28,32 @@ class VideoPlayerManager(
         private const val TAG = "VideoPlayerManager"
     }
 
+    // Coroutine scope for this manager
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
     // Flow for emitting intents to be handled by activities
     private val _playbackIntents = MutableSharedFlow<Intent>(replay = 0, extraBufferCapacity = 1)
     val playbackIntents: SharedFlow<Intent> = _playbackIntents.asSharedFlow()
 
-    // Video player instance
-    private val videoPlayer: VideoPlayer by lazy {
-        videoPlayerFactory.create(
-            VideoPlayerConfig(
-                enableSubtitles = true,
-                autoPlay = true,
-                rememberPosition = false,
-                userAgent = "MediathekView-Android/1.0"
-            )
+    // Video player instance - initialized eagerly to ensure collector is ready
+    private val videoPlayer: VideoPlayer = videoPlayerFactory.create(
+        VideoPlayerConfig(
+            enableSubtitles = true,
+            autoPlay = true,
+            rememberPosition = false,
+            userAgent = "MediathekView-Android/1.0"
         )
+    ).also { player ->
+        // Set up collection from AndroidVideoPlayer's flow at initialization time
+        if (player is AndroidVideoPlayer) {
+            scope.launch {
+                Log.d(TAG, "Setting up playback intent collector")
+                player.playbackIntent.collect { intent ->
+                    Log.d(TAG, "Forwarding playback intent")
+                    _playbackIntents.emit(intent)
+                }
+            }
+        }
     }
 
     /**
@@ -81,13 +97,7 @@ class VideoPlayerManager(
         result.fold(
             onSuccess = {
                 Log.i(TAG, "Successfully started playback for: ${mediaEntry.title}")
-
-                // If using AndroidVideoPlayer, collect and emit its intent
-                if (videoPlayer is AndroidVideoPlayer) {
-                    (videoPlayer as AndroidVideoPlayer).playbackIntent.collect { intent ->
-                        _playbackIntents.emit(intent)
-                    }
-                }
+                // Intent forwarding is handled by the collector set up in init
             },
             onFailure = { error ->
                 Log.e(TAG, "Failed to start playback", error)
