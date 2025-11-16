@@ -118,27 +118,27 @@ fun ComposeMainScreen(viewModel: ComposeViewModel) {
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("MediathekView") },
-                actions = {
-                    IconButton(onClick = { showMenu = true }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "Menu")
-                    }
-                    DropdownMenu(
-                        expanded = showMenu,
-                        onDismissRequest = { showMenu = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Legacy UI") },
-                            onClick = {
-                                showMenu = false
-                                val intent = Intent(context, MediaActivity::class.java)
-                                context.startActivity(intent)
-                            }
-                        )
-                    }
-                }
-            )
+//            TopAppBar(
+//                title = { Text("MediathekView") },
+//                actions = {
+//                    IconButton(onClick = { showMenu = true }) {
+//                        Icon(Icons.Default.MoreVert, contentDescription = "Menu")
+//                    }
+//                    DropdownMenu(
+//                        expanded = showMenu,
+//                        onDismissRequest = { showMenu = false }
+//                    ) {
+//                        DropdownMenuItem(
+//                            text = { Text("Legacy UI") },
+//                            onClick = {
+//                                showMenu = false
+//                                val intent = Intent(context, MediaActivity::class.java)
+//                                context.startActivity(intent)
+//                            }
+//                        )
+//                    }
+//                }
+//            )
         }
     ) { paddingValues ->
         Surface(

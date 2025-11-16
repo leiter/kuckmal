@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -201,7 +202,7 @@ fun MediathekViewNavHost(
                         updateOverviewState(OverviewState.AllThemes)
                     }
                     is OverviewState.ThemeTitles -> {
-                        val state = overviewState as OverviewState.ThemeTitles
+                        val state = overviewState
                         if (state.channelName != null) {
                             updateOverviewState(OverviewState.ChannelThemes(state.channelName))
                         } else {
@@ -213,7 +214,7 @@ fun MediathekViewNavHost(
             }
 
             // Pagination state - reset when state changes
-            var currentPart by remember { mutableStateOf(0) }
+            var currentPart by remember { mutableIntStateOf(0) }
 
             // Reset pagination when overview state changes
             LaunchedEffect(overviewState) {
@@ -324,7 +325,7 @@ fun MediathekViewNavHost(
                             updateOverviewState(OverviewState.AllThemes)
                         }
                         is OverviewState.ThemeTitles -> {
-                            val state = overviewState as OverviewState.ThemeTitles
+                            val state = overviewState
                             if (state.channelName != null) {
                                 updateOverviewState(OverviewState.ChannelThemes(state.channelName))
                             } else {
@@ -365,7 +366,7 @@ fun MediathekViewNavHost(
             BackHandler(enabled = true) {
                 android.util.Log.d("Navigation", "BackHandler in Detail - navigating back to Overview")
                 val popped = navController.popBackStack()
-                android.util.Log.d("Navigation", "popBackStack result: $popped, backQueue size: ${navController.currentBackStack.value.size}")
+                //android.util.Log.d("Navigation", "popBackStack result: $popped, backQueue size: ${navController.currentBackStack.value.size}")
                 if (!popped) {
                     // If pop failed, navigate explicitly to Overview
                     android.util.Log.d("Navigation", "popBackStack failed, navigating explicitly to Overview")
