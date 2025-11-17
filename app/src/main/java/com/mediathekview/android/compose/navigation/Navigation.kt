@@ -121,7 +121,6 @@ object NavigationAnimations {
 fun MediathekViewNavHost(
     navController: NavHostController,
     viewModel: ComposeViewModel,
-    startDestination: String = Screen.Overview.route
 ) {
     // Use ViewModel directly - no wrapper needed
     val isDataLoaded by viewModel.isDataLoadedFlow.collectAsStateWithLifecycle()
@@ -454,21 +453,4 @@ fun MediathekViewNavHost(
             }
         }
     }
-}
-
-/**
- * Extension functions for navigation
- */
-fun NavHostController.navigateToOverview() {
-    navigate(Screen.Overview.route) {
-        popUpTo(Screen.Overview.route) { inclusive = true }
-    }
-}
-
-fun NavHostController.navigateToDetail(
-    title: String,
-    channel: String? = null,
-    theme: String? = null
-) {
-    navigate(Screen.Detail.createRoute(title, channel, theme))
 }

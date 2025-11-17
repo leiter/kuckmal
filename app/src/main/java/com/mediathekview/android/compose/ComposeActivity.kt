@@ -152,7 +152,7 @@ fun ComposeMainScreen(viewModel: ComposeViewModel) {
             MediathekViewNavHost(
                 navController = navController,
                 viewModel = viewModel,
-                startDestination = determineStartDestination(viewState)
+                //startDestination = determineStartDestination(viewState)
             )
         }
     }

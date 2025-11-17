@@ -150,10 +150,14 @@ fun BrowseView(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(titles) { title ->
+                items(
+                    items = titles,
+                    key = { it.hashCode() }
+                    ) { title ->
                     TitleItem(
                         title = title,
-                        onClick = { onTitleSelected(title) }
+                        onClick = { onTitleSelected(title) },
+                        modifier = Modifier.animateItem()
                     )
                 }
 
@@ -285,10 +289,11 @@ fun ChannelItem(
 @Composable
 fun TitleItem(
     title: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier
 ) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
