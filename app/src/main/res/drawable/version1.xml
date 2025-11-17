@@ -1,0 +1,40 @@
+<vector xmlns:aapt="http://schemas.android.com/aapt" xmlns:android="http://schemas.android.com/apk/res/android" android:height="108dp" android:viewportHeight="200" android:viewportWidth="200" android:width="108dp">
+      
+    <path android:pathData="M55,20L145,20A35,35 0,0 1,180 55L180,145A35,35 0,0 1,145 180L55,180A35,35 0,0 1,20 145L20,55A35,35 0,0 1,55 20z">
+            
+        <aapt:attr name="android:fillColor">
+                  
+            <gradient android:endX="180" android:endY="180" android:startX="20" android:startY="20" android:type="linear">
+
+                <item android:offset="0" android:color="#FF006686"/>
+                <item android:offset="1" android:color="#FF004B61"/>
+                      
+            </gradient>
+                
+        </aapt:attr>
+          
+    </path>
+      
+    <path android:pathData="M58,55L142,55A8,8 0,0 1,150 63L150,117A8,8 0,0 1,142 125L58,125A8,8 0,0 1,50 117L50,63A8,8 0,0 1,58 55z">
+            
+        <aapt:attr name="android:fillColor">
+                  
+            <gradient android:endX="50" android:endY="125" android:startX="50" android:startY="55" android:type="linear">
+                <item android:offset="0" android:color="#FFC2E7FF"/>
+                <item android:offset="1" android:color="#FFA8D4F0"/>
+                      
+            </gradient>
+                
+        </aapt:attr>
+          
+    </path>
+      
+    <path android:fillAlpha="0.95" android:fillColor="#ffffff" android:pathData="M100,90m-18,0a18,18 0,1 1,36 0a18,18 0,1 1,-36 0" android:strokeAlpha="0.95"/>
+      
+    <path android:fillColor="#006686" android:pathData="M97,82l0,16l13,-8z"/>
+
+    <path android:fillAlpha="0.8" android:fillColor="#ffffff" android:pathData="M87,130L113,130A2,2 0,0 1,115 132L115,132A2,2 0,0 1,113 134L87,134A2,2 0,0 1,85 132L85,132A2,2 0,0 1,87 130z" android:strokeAlpha="0.8"/>
+      
+    <path android:fillAlpha="0.6" android:fillColor="#ffffff" android:pathData="M79,138L121,138A4,4 0,0 1,125 142L125,142A4,4 0,0 1,121 146L79,146A4,4 0,0 1,75 142L75,142A4,4 0,0 1,79 138z" android:strokeAlpha="0.6"/>
+    
+</vector>

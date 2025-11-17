@@ -1,6 +1,7 @@
 package com.mediathekview.android.ui
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
@@ -9,6 +10,7 @@ import androidx.core.view.WindowCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
 import com.mediathekview.android.R
+import com.mediathekview.android.compose.ComposeActivity
 import com.mediathekview.android.data.MediaViewModel
 import com.mediathekview.android.ui.dialog.DialogFactory.dismissSafely
 import com.mediathekview.android.ui.dialog.DialogModel
@@ -353,6 +355,15 @@ class MediaActivity : FragmentActivity() {
                 }
             }
         }
+    }
+
+    /**
+     * Start the Compose Activity for testing Jetpack Compose implementation
+     */
+    fun startComposeActivity() {
+        Log.i(TAG, "Starting Compose Activity")
+        val intent = Intent(this, ComposeActivity::class.java)
+        startActivity(intent)
     }
 
     /**

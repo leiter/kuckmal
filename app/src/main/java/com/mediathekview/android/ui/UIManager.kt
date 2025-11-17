@@ -1009,6 +1009,10 @@ class UIManager(
                     (activity as? MediaActivity)?.showTimePeriodDialog(viewModel)
                     true
                 }
+                R.id.menu_start_compose -> {
+                    (activity as? MediaActivity)?.startComposeActivity()
+                    true
+                }
                 else -> false
             }
         }
