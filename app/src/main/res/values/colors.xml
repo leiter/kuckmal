@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Material 3 Light Theme Colors (default) -->
+
+    <!-- Primary colors -->
+    <color name="md_theme_primary">#006686</color>
+    <color name="md_theme_onPrimary">#FFFFFF</color>
+    <color name="md_theme_primaryContainer">#C2E7FF</color>
+    <color name="md_theme_onPrimaryContainer">#001E2B</color>
+
+    <!-- Secondary colors -->
+    <color name="md_theme_secondary">#4C626B</color>
+    <color name="md_theme_onSecondary">#FFFFFF</color>
+    <color name="md_theme_secondaryContainer">#CFE6F2</color>
+    <color name="md_theme_onSecondaryContainer">#071E26</color>
+
+    <!-- Tertiary colors -->
+    <color name="md_theme_tertiary">#605A79</color>
+    <color name="md_theme_onTertiary">#FFFFFF</color>
+    <color name="md_theme_tertiaryContainer">#E6DEFF</color>
+    <color name="md_theme_onTertiaryContainer">#1C1832</color>
+
+    <!-- Error colors -->
+    <color name="md_theme_error">#BA1A1A</color>
+    <color name="md_theme_onError">#FFFFFF</color>
+    <color name="md_theme_errorContainer">#FFDAD6</color>
+    <color name="md_theme_onErrorContainer">#410002</color>
+
+    <!-- Background colors -->
+    <color name="md_theme_background">#FBFCFE</color>
+    <color name="md_theme_onBackground">#191C1E</color>
+
+    <!-- Surface colors -->
+    <color name="md_theme_surface">#FBFCFE</color>
+    <color name="md_theme_onSurface">#191C1E</color>
+    <color name="md_theme_surfaceVariant">#DCE3E9</color>
+    <color name="md_theme_onSurfaceVariant">#40484D</color>
+
+    <!-- Surface container colors -->
+    <color name="md_theme_surfaceContainerLowest">#FFFFFF</color>
+    <color name="md_theme_surfaceContainerLow">#F5F6F8</color>
+    <color name="md_theme_surfaceContainer">#EFF0F2</color>
+    <color name="md_theme_surfaceContainerHigh">#E9EAED</color>
+    <color name="md_theme_surfaceContainerHighest">#E3E5E7</color>
+
+    <!-- Outline -->
+    <color name="md_theme_outline">#70787D</color>
+    <color name="md_theme_outlineVariant">#C0C8CD</color>
+
+    <!-- Inverse colors -->
+    <color name="md_theme_inverseSurface">#2E3135</color>
+    <color name="md_theme_inverseOnSurface">#F0F0F4</color>
+    <color name="md_theme_inversePrimary">#6EC6FF</color>
+
+    <!-- Semantic colors for TV UI -->
+    <color name="channel_selected">#C2E7FF</color>
+    <color name="channel_selected_border">#006686</color>
+    <color name="channel_focused_border">#191C1E</color>
+    <color name="channel_focused_background">#E9EAED</color>
+    <color name="channel_list_background">@color/md_theme_surfaceContainer</color>
+
+    <!-- Action Button Colors - Light Theme -->
+    <color name="button_play_background">#006686</color>
+    <color name="button_play_icon">#FFFFFF</color>
+    <color name="button_download_background">#00695C</color>
+    <color name="button_download_icon">#FFFFFF</color>
+
+    <!-- Scrim for overlays -->
+    <color name="md_theme_scrim">#000000</color>
+
+    <!-- Launcher icon background color (matches ic_launcher_background.xml) -->
+    <color name="ic_launcher_background">#6EC6FF</color>
+</resources>

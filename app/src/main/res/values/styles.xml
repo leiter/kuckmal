@@ -1,0 +1,85 @@
+<resources>
+
+    <!-- Material 3 Theme - Automatically adapts to system dark/light mode -->
+    <style name="AppTheme" parent="android:Theme.Material.NoActionBar">
+        <!-- Primary colors -->
+        <item name="android:colorPrimary">@color/md_theme_primary</item>
+        <item name="android:colorPrimaryDark">@color/md_theme_primaryContainer</item>
+        <item name="android:colorAccent">@color/md_theme_secondary</item>
+
+        <!-- Background and surface -->
+        <item name="android:colorBackground">@color/md_theme_background</item>
+        <item name="android:windowBackground">@color/md_theme_background</item>
+
+        <!-- Splash screen (Android 12+) - match launcher icon background -->
+        <item name="android:windowSplashScreenBackground">@color/md_theme_background</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+
+        <!-- Text colors -->
+        <item name="android:textColorPrimary">@color/md_theme_onBackground</item>
+        <item name="android:textColorSecondary">@color/md_theme_onSurfaceVariant</item>
+
+        <!-- For TV lean back mode -->
+        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowFullscreen">false</item>
+
+        <!-- Prevent edge-to-edge (API 35 compatibility) -->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/black</item>
+
+        <!-- PopupMenu style for TV navigation -->
+        <item name="android:popupMenuStyle">@style/PopupMenuStyle</item>
+    </style>
+
+    <!-- Custom PopupMenu style with visible focus states for TV -->
+    <!-- Using base PopupMenu style instead of Material for better TV compatibility -->
+    <style name="PopupMenuStyle" parent="@android:style/Widget.PopupMenu">
+        <item name="android:popupBackground">@color/md_theme_surface</item>
+        <item name="android:dropDownSelector">@drawable/popup_menu_item_background</item>
+        <item name="android:textColor">@color/md_theme_onSurface</item>
+    </style>
+
+    <!-- Theme overlay specifically for PopupMenu to ensure selectors work -->
+    <style name="PopupMenuThemeOverlay" parent="AppTheme">
+        <item name="android:popupMenuStyle">@style/PopupMenuStyle</item>
+        <item name="android:listSelector">@drawable/popup_menu_item_background</item>
+        <item name="android:dropDownListViewStyle">@style/PopupListViewStyle</item>
+        <item name="android:textColorPrimary">@color/md_theme_onSurface</item>
+    </style>
+
+    <!-- Custom ListView style for popup with explicit selector -->
+    <style name="PopupListViewStyle" parent="@android:style/Widget.ListView">
+        <item name="android:listSelector">@drawable/popup_menu_item_background</item>
+        <item name="android:drawSelectorOnTop">false</item>
+        <item name="android:divider">@color/md_theme_outlineVariant</item>
+        <item name="android:dividerHeight">1dp</item>
+    </style>
+
+    <!-- Custom ListView style for dialog with TV focus selector -->
+    <style name="DialogListViewStyle" parent="@android:style/Widget.ListView">
+        <item name="android:listSelector">@drawable/dialog_list_item_background</item>
+        <item name="android:drawSelectorOnTop">false</item>
+        <item name="android:divider">@color/md_theme_outlineVariant</item>
+        <item name="android:dividerHeight">1dp</item>
+    </style>
+
+    <!-- AlertDialog theme matching Material 3 design with TV focus support -->
+    <style name="AppDialogTheme" parent="android:Theme.Material.Dialog.Alert">
+        <!-- Background -->
+        <item name="android:colorBackground">@color/md_theme_surface</item>
+        <item name="android:windowBackground">@color/md_theme_surface</item>
+
+        <!-- Text colors -->
+        <item name="android:textColorPrimary">@color/md_theme_onSurface</item>
+        <item name="android:textColorSecondary">@color/md_theme_onSurfaceVariant</item>
+
+        <!-- Button colors -->
+        <item name="android:colorAccent">@color/md_theme_primary</item>
+        <item name="android:textColorAlertDialogListItem">@color/md_theme_onSurface</item>
+
+        <!-- ListView style for TV focus indicators -->
+        <item name="android:listViewStyle">@style/DialogListViewStyle</item>
+        <item name="android:listSelector">@drawable/dialog_list_item_background</item>
+    </style>
+
+</resources>
