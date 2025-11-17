@@ -133,7 +133,7 @@ class MediaActivity : FragmentActivity() {
 
     /**
      * Called when activity comes to foreground
-     * Checks for updates once per day (configurable interval)
+     * Checks for updates every 2+ hours (configurable interval)
      */
     override fun onResume() {
         super.onResume()
@@ -142,7 +142,7 @@ class MediaActivity : FragmentActivity() {
         lifecycleScope.launch {
             val dataLoaded = viewModel.isDataLoaded()
             if (dataLoaded) {
-                // Check for updates when app comes to foreground (respects 24-hour interval)
+                // Check for updates when app comes to foreground (respects 2-hour interval)
                 checkForUpdatesOnForeground()
             }
         }
