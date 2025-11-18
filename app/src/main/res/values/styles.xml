@@ -11,9 +11,6 @@
         <item name="android:colorBackground">@color/md_theme_background</item>
         <item name="android:windowBackground">@color/md_theme_background</item>
 
-        <!-- Splash screen (Android 12+) - match launcher icon background -->
-        <item name="android:windowSplashScreenBackground">@color/md_theme_background</item>
-        <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
 
         <!-- Text colors -->
         <item name="android:textColorPrimary">@color/md_theme_onBackground</item>
