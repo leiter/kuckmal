@@ -19,19 +19,30 @@ data class Channel(
     val displayName: String
 )
 
-// Sample data for demo
+/**
+ * Sample data for demo/preview purposes.
+ * Channel names must match exactly with [com.mediathekview.android.model.Broadcaster.channelListArray]
+ * to display correct brand colors.
+ */
 object SampleData {
     val sampleChannels = listOf(
-        Channel("3sat", "3sat"),
+        Channel("3Sat", "3sat"),
         Channel("ARD", "ARD"),
-        Channel("arte", "arte"),
+        Channel("ARTE.DE", "ARTE"),
         Channel("BR", "BR"),
-        Channel("hr", "hr"),
-        Channel("KIKA", "KIKA"),
-        Channel("mdr", "mdr"),
+        Channel("HR", "HR"),
+        Channel("KiKA", "KiKA"),
+        Channel("MDR", "MDR"),
         Channel("NDR", "NDR"),
         Channel("ORF", "ORF"),
-        Channel("phoenix", "phoenix")
+        Channel("PHOENIX", "phoenix"),
+        Channel("RBB", "RBB"),
+        Channel("SR", "SR"),
+        Channel("SRF", "SRF"),
+        Channel("SWR", "SWR"),
+        Channel("WDR", "WDR"),
+        Channel("ZDF", "ZDF"),
+        Channel("ZDF-tivi", "ZDF-tivi")
     )
 
     val sampleTitles = listOf(
@@ -43,7 +54,7 @@ object SampleData {
     )
 
     val sampleMediaItem = MediaItem(
-        channel = "phoenix",
+        channel = "PHOENIX",
         theme = "1000 Inseln im Sankt-Lorenz-Strom",
         title = "Von Liebe und Leidenschaft",
         date = "25.07.2019",

@@ -218,10 +218,23 @@ fun MediathekViewNavHost(
             // Search state - persisted across navigation
             var searchQuery by rememberSaveable { mutableStateOf("") }
 
-            // Reset pagination and search when overview state changes
+            // Selection state - tracks separately for themes and titles
+            // This allows preserving selection when navigating back
+            var selectedTheme by rememberSaveable { mutableStateOf<String?>(null) }
+            var selectedTitle by rememberSaveable { mutableStateOf<String?>(null) }
+
+            // Determine which selection to show based on current state
+            val currentSelection = when (overviewState) {
+                is OverviewState.AllThemes -> selectedTheme
+                is OverviewState.ChannelThemes -> selectedTheme
+                is OverviewState.ThemeTitles -> selectedTitle
+            }
+
+            // Reset pagination and search when overview state changes (but NOT selection)
             LaunchedEffect(overviewState) {
                 currentPart = 0
                 searchQuery = "" // Clear search when switching states
+                // Don't clear selection - we want to preserve it for back navigation
             }
 
             // Extract state parameters for reactive data fetching
@@ -300,6 +313,7 @@ fun MediathekViewNavHost(
                 channels = viewModel.channels,
                 titles = displayData,
                 selectedChannel = selectedChannel,
+                selectedTitle = currentSelection, // Pass appropriate selection based on state
                 currentTheme = currentThemeLabel,
                 isShowingTitles = showingTitles,
                 hasMoreItems = hasMoreItems,
@@ -309,21 +323,32 @@ fun MediathekViewNavHost(
                     android.util.Log.d("Navigation", "Search query updated: '$query'")
                 },
                 onChannelSelected = { channel ->
+                    // Clear theme selection when changing channels
+                    selectedTheme = null
+                    selectedTitle = null
                     // Change to that channel's themes (internal state change, no navigation)
                     updateOverviewState(OverviewState.ChannelThemes(channel.name))
                 },
                 onTitleSelected = { item ->
                     when (val state = overviewState) {
                         is OverviewState.AllThemes -> {
-                            // Clicked on a theme -> show titles in that theme
+                            // Clicked on a theme -> update theme selection and show titles
+                            selectedTheme = item
+                            selectedTitle = null // Clear title selection for new theme
+                            android.util.Log.d("Navigation", "Selected theme: '$item'")
                             updateOverviewState(OverviewState.ThemeTitles(null, item))
                         }
                         is OverviewState.ChannelThemes -> {
-                            // Clicked on a theme -> show titles in that theme for this channel
+                            // Clicked on a theme -> update theme selection and show titles
+                            selectedTheme = item
+                            selectedTitle = null // Clear title selection for new theme
+                            android.util.Log.d("Navigation", "Selected theme: '$item'")
                             updateOverviewState(OverviewState.ThemeTitles(state.channelName, item))
                         }
                         is OverviewState.ThemeTitles -> {
-                            // Clicked on a title -> navigate to detail (actual navigation!)
+                            // Clicked on a title -> update title selection and navigate to detail
+                            selectedTitle = item
+                            android.util.Log.d("Navigation", "Selected title: '$item'")
                             // First set the navigation context in ViewModel, then navigate to detail
                             viewModel.navigateToThemes(channel = state.channelName, theme = state.themeName)
                             viewModel.navigateToDetail(item)

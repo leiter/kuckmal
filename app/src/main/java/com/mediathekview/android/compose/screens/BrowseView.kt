@@ -45,13 +45,15 @@ import androidx.compose.ui.unit.sp
 import com.mediathekview.android.compose.models.Channel
 import com.mediathekview.android.compose.models.SampleData
 import com.mediathekview.android.compose.ui.theme.MediathekViewTheme
+import com.mediathekview.android.model.Broadcaster
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BrowseView(
     channels: List<Channel> = SampleData.sampleChannels,
     titles: List<String> = SampleData.sampleTitles,
-    selectedChannel: Channel? = SampleData.sampleChannels[9], // phoenix
+    selectedChannel: Channel? = SampleData.sampleChannels.find { it.name == "PHOENIX" },
+    selectedTitle: String? = null, // currently selected title/theme in the right pane
     currentTheme: String = "1000 Inseln im Sankt-Lorenz-Strom",
     isShowingTitles: Boolean = false, // true when showing titles within a theme, false when showing themes
     hasMoreItems: Boolean = true, // whether there are more items to load
@@ -156,6 +158,7 @@ fun BrowseView(
                     ) { title ->
                     TitleItem(
                         title = title,
+                        isSelected = title == selectedTitle,
                         onClick = { onTitleSelected(title) },
                         modifier = Modifier.animateItem()
                     )
@@ -226,80 +229,146 @@ fun ChannelList(
     }
 }
 
+/**
+ * Channel item with two display modes controlled by [Broadcaster.useFallbackDisplay]:
+ * - Logo mode (useFallbackDisplay = false): Shows the channel logo icon
+ * - Fallback mode (useFallbackDisplay = true): Shows brand color background with abbreviation
+ *   (MediathekViewWeb style)
+ *
+ * Uses the official brand colors and icons from [Broadcaster] model.
+ */
 @Composable
 fun ChannelItem(
     channel: Channel,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    // Channel-specific colors to simulate logos
-    val channelColor = when (channel.name) {
-        "3sat" -> Color(0xFFE6004C) // Red
-        "ARD" -> Color(0xFF0066CC) // Blue
-        "arte" -> Color(0xFFFF6600) // Orange
-        "BR" -> Color(0xFF0099CC) // Cyan
-        "hr" -> Color(0xFF0066CC) // Blue
-        "KIKA" -> Color(0xFFFFCC00) // Yellow
-        "mdr" -> Color(0xFF0099CC) // Cyan
-        "NDR" -> Color(0xFF0066CC) // Blue
-        "ORF" -> Color(0xFFCC0000) // Red
-        "phoenix" -> Color(0xFF006699) // Teal
-        else -> MaterialTheme.colorScheme.primary
-    }
+    // Get broadcaster data
+    val broadcaster = Broadcaster.getByName(channel.name)
+    val useFallback = Broadcaster.useFallbackDisplay
+
+    // Convert Long ARGB to Compose Color using the Int constructor
+    val brandColorValue = (broadcaster?.brandColor ?: 0xFF808080L).toInt()
+    val brandColor = Color(brandColorValue)
+    val abbreviation = broadcaster?.abbreviation?.ifEmpty { channel.displayName } ?: channel.displayName
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(vertical = 6.dp, horizontal = 16.dp),
+            .padding(vertical = 6.dp, horizontal = 12.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Channel logo box
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(64.dp),
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = if (isSelected) {
-                    MaterialTheme.colorScheme.surfaceVariant
-                } else {
-                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
-                }
-            ),
-            border = if (isSelected) {
-                androidx.compose.foundation.BorderStroke(2.dp, channelColor.copy(alpha = 0.5f))
-            } else null
-        ) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = channel.displayName,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = channelColor
+        if (useFallback) {
+            // Fallback mode: Brand color background with abbreviation text
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(8.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = brandColor
+                ),
+                border = if (isSelected) {
+                    androidx.compose.foundation.BorderStroke(3.dp, Color.White)
+                } else null,
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = if (isSelected) 8.dp else 2.dp
                 )
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = abbreviation,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        fontSize = 16.sp
+                    )
+                }
+            }
+        } else {
+            // Logo mode: Show channel logo icon
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(8.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (isSelected) {
+                        MaterialTheme.colorScheme.surfaceVariant
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+                    }
+                ),
+                border = if (isSelected) {
+                    androidx.compose.foundation.BorderStroke(2.dp, brandColor.copy(alpha = 0.5f))
+                } else null,
+                elevation = CardDefaults.cardElevation(
+                    defaultElevation = if (isSelected) 4.dp else 1.dp
+                )
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    broadcaster?.iconRes?.let { iconRes ->
+                        androidx.compose.foundation.Image(
+                            painter = androidx.compose.ui.res.painterResource(id = iconRes),
+                            contentDescription = channel.displayName,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(8.dp),
+                            contentScale = androidx.compose.ui.layout.ContentScale.Fit
+                        )
+                    } ?: Text(
+                        text = channel.displayName,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = brandColor
+                    )
+                }
             }
         }
     }
 }
 
+/**
+ * Title/Theme item with selection state support.
+ * Shows visual feedback when selected (highlighted border and accent color indicator).
+ */
 @Composable
 fun TitleItem(
     title: String,
+    modifier: Modifier = Modifier,
+    isSelected: Boolean = false,
     onClick: () -> Unit,
-    modifier: Modifier
 ) {
+    // Selection colors
+    val selectedBorderColor = Color(0xFF81B4D2) // Cyan accent
+    val selectedIndicatorColor = Color(0xFF81B4D2)
+    val unselectedIndicatorColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+
     Card(
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
+            containerColor = if (isSelected) {
+                MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
+            } else {
+                MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
+            }
         ),
-        shape = RoundedCornerShape(8.dp)
+        shape = RoundedCornerShape(8.dp),
+        border = if (isSelected) {
+            androidx.compose.foundation.BorderStroke(2.dp, selectedBorderColor)
+        } else null,
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = if (isSelected) 4.dp else 0.dp
+        )
     ) {
         Row(
             modifier = Modifier
@@ -307,13 +376,13 @@ fun TitleItem(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Vertical bar indicator
+            // Vertical bar indicator - highlighted when selected
             Box(
                 modifier = Modifier
-                    .width(3.dp)
+                    .width(4.dp)
                     .height(36.dp)
                     .background(
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                        if (isSelected) selectedIndicatorColor else unselectedIndicatorColor,
                         shape = RoundedCornerShape(2.dp)
                     )
             )
@@ -323,7 +392,12 @@ fun TitleItem(
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = if (isSelected) {
+                    selectedBorderColor
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                },
+                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
                 fontSize = 16.sp
             )
         }
@@ -335,7 +409,31 @@ fun TitleItem(
 fun BrowseViewPreview() {
     MediathekViewTheme {
         BrowseView(
-            channels = SampleData.sampleChannels
+            channels = SampleData.sampleChannels,
+            selectedChannel = SampleData.sampleChannels.find { it.name == "ZDF" },
+            selectedTitle = SampleData.sampleTitles.getOrNull(1) // Select second item
         )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400)
+@Composable
+fun TitleItemPreview() {
+    MediathekViewTheme {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            TitleItem(
+                title = "Unselected Item",
+                isSelected = false,
+                onClick = {}
+            )
+            TitleItem(
+                title = "Selected Item",
+                isSelected = true,
+                onClick = {}
+            )
+        }
     }
 }

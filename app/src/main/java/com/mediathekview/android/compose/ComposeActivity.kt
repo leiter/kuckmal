@@ -26,6 +26,7 @@ import com.mediathekview.android.compose.models.ComposeViewModel
 import com.mediathekview.android.compose.navigation.MediathekViewNavHost
 import com.mediathekview.android.compose.navigation.Screen
 import com.mediathekview.android.compose.ui.theme.MediathekViewTheme
+import com.mediathekview.android.model.Broadcaster
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 /**
@@ -44,6 +45,10 @@ class ComposeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Use fallback display (brand color + abbreviation) for channel identification
+        // instead of logo icons (MediathekViewWeb style)
+        Broadcaster.useFallbackDisplay = true
 
         // Ensure ViewModel is initialized with proper navigation state
         // If we're starting fresh, navigate to all themes
