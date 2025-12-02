@@ -17,6 +17,7 @@
     <!-- Welcome Dialog -->
     <string name="welcome_title">Welcome to MediathekView</string>
     <string name="welcome_message">To get started, we need to download the media library list.\n\nThis is a one-time setup process.</string>
+    <string name="welcome_download_size">Download size: ~30 MB</string>
 
     <!-- Progress Dialog -->
     <string name="loading">Loading…</string>
@@ -115,6 +116,7 @@
     <string name="error_decompression">Decompression error: %1$s</string>
 
     <!-- Button Labels -->
+    <string name="btn_ok">OK</string>
     <string name="btn_start_download">Start Download</string>
     <string name="btn_cancel">Cancel</string>
     <string name="btn_retry">Retry</string>

@@ -621,6 +621,8 @@ class ComposeViewModel(
                             Log.i(TAG, "Successfully loaded ${result.totalEntries} entries to database")
                             _loadingState.value = LoadingState.LOADED
                             _loadingProgress.value = result.totalEntries
+                            // Dismiss the progress dialog
+                            dismissDialog()
 
                             // Delete the uncompressed file to save storage space
                             // Keep the .xz compressed file for potential re-parsing
@@ -642,6 +644,13 @@ class ComposeViewModel(
                             Log.e(TAG, "Error loading media list", result.exception)
                             _loadingState.value = LoadingState.ERROR
                             _errorMessage.value = result.exception.message ?: "Unknown error"
+                            // Show error dialog
+                            showDialog(
+                                DialogModel.Message(
+                                    title = getApplication<Application>().getString(R.string.dialog_title_download_failed),
+                                    message = result.exception.message ?: "Unknown error"
+                                )
+                            )
                         }
                     }
                 }
@@ -649,6 +658,13 @@ class ComposeViewModel(
                 Log.e(TAG, "Error collecting media list flow", e)
                 _loadingState.value = LoadingState.ERROR
                 _errorMessage.value = e.message ?: "Unknown error"
+                // Show error dialog
+                showDialog(
+                    DialogModel.Message(
+                        title = getApplication<Application>().getString(R.string.dialog_title_download_failed),
+                        message = e.message ?: "Unknown error"
+                    )
+                )
             }
         }
     }
@@ -818,6 +834,8 @@ class ComposeViewModel(
                             Log.i(TAG, "Successfully applied ${result.totalEntries} diff entries to database")
                             _loadingState.value = LoadingState.LOADED
                             _loadingProgress.value = result.totalEntries
+                            // Dismiss the progress dialog
+                            dismissDialog()
 
                             // Delete the uncompressed diff file to save storage space
                             try {
@@ -836,6 +854,13 @@ class ComposeViewModel(
                             Log.e(TAG, "Error applying diff", result.exception)
                             _loadingState.value = LoadingState.ERROR
                             _errorMessage.value = result.exception.message ?: "Unknown error"
+                            // Show error dialog
+                            showDialog(
+                                DialogModel.Message(
+                                    title = getApplication<Application>().getString(R.string.dialog_title_download_failed),
+                                    message = result.exception.message ?: "Unknown error"
+                                )
+                            )
                         }
                     }
                 }
@@ -843,6 +868,13 @@ class ComposeViewModel(
                 Log.e(TAG, "Error collecting diff application flow", e)
                 _loadingState.value = LoadingState.ERROR
                 _errorMessage.value = e.message ?: "Unknown error"
+                // Show error dialog
+                showDialog(
+                    DialogModel.Message(
+                        title = getApplication<Application>().getString(R.string.dialog_title_download_failed),
+                        message = e.message ?: "Unknown error"
+                    )
+                )
             }
         }
     }

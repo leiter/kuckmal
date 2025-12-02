@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,6 +26,7 @@ import androidx.navigation.compose.rememberNavController
 import com.mediathekview.android.compose.models.ComposeViewModel
 import com.mediathekview.android.compose.navigation.MediathekViewNavHost
 import com.mediathekview.android.compose.navigation.Screen
+import com.mediathekview.android.compose.ui.dialogs.AppDialogs
 import com.mediathekview.android.compose.ui.theme.MediathekViewTheme
 import com.mediathekview.android.model.Broadcaster
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -49,6 +51,11 @@ class ComposeActivity : ComponentActivity() {
         // Use fallback display (brand color + abbreviation) for channel identification
         // instead of logo icons (MediathekViewWeb style)
         Broadcaster.useFallbackDisplay = true
+
+        // Check and load media list on startup (fresh install flow)
+        val privatePath = filesDir.absolutePath + "/"
+        val hasData = viewModel.checkAndLoadMediaListToDatabase(privatePath)
+        Log.d(TAG, "Startup check: hasData=$hasData")
 
         // Ensure ViewModel is initialized with proper navigation state
         // If we're starting fresh, navigate to all themes
@@ -162,11 +169,8 @@ fun ComposeMainScreen(viewModel: ComposeViewModel) {
         }
     }
 
-    // Handle loading state
-    if (loadingState == ComposeViewModel.LoadingState.LOADING) {
-        // Show loading indicator overlay if needed
-        // This could be a dialog or overlay composable
-    }
+    // Show dialogs based on ViewModel state
+    AppDialogs(viewModel = viewModel)
 }
 
 /**
