@@ -220,12 +220,16 @@ fun MediathekViewNavHost(
             // Pagination state - reset when state changes
             var currentPart by remember { mutableIntStateOf(0) }
 
-            // Search state - persisted across navigation
+            // Search state - persisted across navigation using rememberSaveable
+            // Key insight: search should persist when drilling down (theme->titles->detail)
+            // but clear when changing browsing context (channel selection)
             var searchQuery by rememberSaveable { mutableStateOf("") }
             // Debounced search query for database queries
-            var debouncedSearchQuery by remember { mutableStateOf("") }
+            var debouncedSearchQuery by rememberSaveable { mutableStateOf("") }
             // Search loading state
             var isSearching by remember { mutableStateOf(false) }
+            // Track previous overview state to detect navigation direction
+            var previousOverviewState by remember { mutableStateOf<OverviewState?>(null) }
 
             // Selection state - tracks separately for themes and titles
             // This allows preserving selection when navigating back
@@ -259,13 +263,37 @@ fun MediathekViewNavHost(
                 }
             }
 
-            // Reset pagination and search when overview state changes (but NOT selection)
+            // Handle state transitions - only clear search on specific transitions
             LaunchedEffect(overviewState) {
+                val prev = previousOverviewState
+                previousOverviewState = overviewState
+
+                // Reset pagination on any state change
                 currentPart = 0
-                searchQuery = "" // Clear search when switching states
-                debouncedSearchQuery = ""
-                isSearching = false
-                // Don't clear selection - we want to preserve it for back navigation
+
+                // Determine if we should clear search based on navigation pattern
+                val shouldClearSearch = when {
+                    prev == null -> false // Initial load, don't clear
+                    // Navigating from AllThemes/ChannelThemes to ThemeTitles (drilling down) - preserve search
+                    prev is OverviewState.AllThemes && overviewState is OverviewState.ThemeTitles -> false
+                    prev is OverviewState.ChannelThemes && overviewState is OverviewState.ThemeTitles -> false
+                    // Coming back from ThemeTitles to AllThemes/ChannelThemes - preserve search
+                    prev is OverviewState.ThemeTitles && overviewState is OverviewState.AllThemes -> false
+                    prev is OverviewState.ThemeTitles && overviewState is OverviewState.ChannelThemes -> false
+                    // Changing channels - clear search (new context)
+                    prev is OverviewState.ChannelThemes && overviewState is OverviewState.ChannelThemes &&
+                        (prev as OverviewState.ChannelThemes).channelName != (overviewState as OverviewState.ChannelThemes).channelName -> true
+                    // Going from channel view to all themes - clear search (changing context)
+                    prev is OverviewState.ChannelThemes && overviewState is OverviewState.AllThemes -> true
+                    prev is OverviewState.AllThemes && overviewState is OverviewState.ChannelThemes -> true
+                    else -> false
+                }
+
+                if (shouldClearSearch) {
+                    searchQuery = ""
+                    debouncedSearchQuery = ""
+                    isSearching = false
+                }
             }
 
             // Extract state parameters for reactive data fetching
@@ -391,11 +419,20 @@ fun MediathekViewNavHost(
                             // Clicked on a title -> update title selection and navigate to detail
                             selectedTitle = item
                             android.util.Log.d("Navigation", "Selected title: '$item'")
+
+                            // When in search mode, search results span multiple themes
+                            // so we should not filter by the currently selected theme
+                            val isInSearchMode = debouncedSearchQuery.isNotBlank()
+                            val effectiveTheme = if (isInSearchMode) null else state.themeName
+                            val effectiveChannel = if (isInSearchMode) null else state.channelName
+
+                            android.util.Log.d("Navigation", "Navigating to detail - searchMode: $isInSearchMode, effectiveTheme: $effectiveTheme")
+
                             // First set the navigation context in ViewModel, then navigate to detail
-                            viewModel.navigateToThemes(channel = state.channelName, theme = state.themeName)
+                            viewModel.navigateToThemes(channel = effectiveChannel, theme = effectiveTheme)
                             viewModel.navigateToDetail(item)
                             navController.navigate(
-                                Screen.Detail.createRoute(item, state.channelName, state.themeName)
+                                Screen.Detail.createRoute(item, effectiveChannel, effectiveTheme)
                             )
                         }
                     }

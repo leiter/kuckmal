@@ -384,11 +384,8 @@ class ComposeViewModel(
         } else if (theme != null) {
             repository.getMediaEntryByThemeAndTitleFlow(theme, title)
         } else {
-            // No theme context, search all entries
-            repository.getEntriesFlow("", "").map { entries ->
-                entries.firstOrNull { it.title == title }
-                    ?: entries.firstOrNull { it.title.equals(title, ignoreCase = true) }
-            }
+            // No theme context - use efficient title-only query (for search results navigation)
+            repository.getMediaEntryByTitleFlow(title)
         }
     }
 
