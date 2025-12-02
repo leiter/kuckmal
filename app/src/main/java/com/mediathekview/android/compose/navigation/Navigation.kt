@@ -24,10 +24,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -37,6 +41,7 @@ import com.mediathekview.android.compose.data.ComposeDataMapper
 import com.mediathekview.android.compose.models.ComposeViewModel
 import com.mediathekview.android.compose.screens.BrowseView
 import com.mediathekview.android.compose.screens.DetailView
+import com.mediathekview.android.util.AppConfig
 import kotlinx.coroutines.flow.flowOf
 
 /**
@@ -217,6 +222,10 @@ fun MediathekViewNavHost(
 
             // Search state - persisted across navigation
             var searchQuery by rememberSaveable { mutableStateOf("") }
+            // Debounced search query for database queries
+            var debouncedSearchQuery by remember { mutableStateOf("") }
+            // Search loading state
+            var isSearching by remember { mutableStateOf(false) }
 
             // Selection state - tracks separately for themes and titles
             // This allows preserving selection when navigating back
@@ -230,10 +239,32 @@ fun MediathekViewNavHost(
                 is OverviewState.ThemeTitles -> selectedTitle
             }
 
+            // Debounce search query - wait 1200ms after user stops typing (matches legacy behavior)
+            // TV devices would use 300ms but we default to mobile timing
+            @OptIn(FlowPreview::class)
+            LaunchedEffect(Unit) {
+                snapshotFlow { searchQuery }
+                    .debounce(1200)
+                    .distinctUntilChanged()
+                    .collect { query ->
+                        debouncedSearchQuery = query
+                        isSearching = false
+                    }
+            }
+
+            // Show loading state when user is typing
+            LaunchedEffect(searchQuery) {
+                if (searchQuery.isNotBlank() && searchQuery != debouncedSearchQuery) {
+                    isSearching = true
+                }
+            }
+
             // Reset pagination and search when overview state changes (but NOT selection)
             LaunchedEffect(overviewState) {
                 currentPart = 0
                 searchQuery = "" // Clear search when switching states
+                debouncedSearchQuery = ""
+                isSearching = false
                 // Don't clear selection - we want to preserve it for back navigation
             }
 
@@ -272,19 +303,29 @@ fun MediathekViewNavHost(
                 is OverviewState.ThemeTitles -> titlesData
             }
 
-            // Filter data based on search query (case-insensitive contains)
-            val displayData = if (searchQuery.isBlank()) {
+            // Search results from database (when searching)
+            val isShowingTitles = overviewState is OverviewState.ThemeTitles
+            val searchResultsFlow = remember(debouncedSearchQuery, isShowingTitles) {
+                if (debouncedSearchQuery.isBlank()) {
+                    flowOf(emptyList())
+                } else {
+                    viewModel.searchContentFlow(debouncedSearchQuery, searchInTitles = isShowingTitles)
+                }
+            }
+            val searchResults by searchResultsFlow.collectAsStateWithLifecycle(emptyList())
+
+            // Use search results when searching, otherwise show raw data
+            val displayData = if (debouncedSearchQuery.isBlank()) {
                 rawData
             } else {
-                val query = searchQuery.trim().lowercase()
-                rawData.filter { it.lowercase().contains(query) }
+                searchResults
             }
 
             // Determine if there are more items to load
             // Show "more" if we have exactly the limit (1200 * (currentPart + 1)) items
             // Don't show more when search is active
             val expectedLimit = (currentPart + 1) * 1200
-            val hasMoreItems = if (searchQuery.isNotBlank()) {
+            val hasMoreItems = if (debouncedSearchQuery.isNotBlank()) {
                 false // Don't show "more" during search
             } else {
                 when (overviewState) {
@@ -318,6 +359,7 @@ fun MediathekViewNavHost(
                 isShowingTitles = showingTitles,
                 hasMoreItems = hasMoreItems,
                 searchQuery = searchQuery,
+                isSearching = isSearching,
                 onSearchQueryChanged = { query ->
                     searchQuery = query
                     android.util.Log.d("Navigation", "Search query updated: '$query'")
@@ -379,6 +421,15 @@ fun MediathekViewNavHost(
                             }
                         }
                     }
+                },
+                onTimePeriodClick = {
+                    viewModel.showTimePeriodDialog()
+                },
+                onCheckUpdateClick = {
+                    viewModel.checkForUpdatesManually()
+                },
+                onReinstallClick = {
+                    viewModel.showReinstallConfirmation()
                 }
             )
         }

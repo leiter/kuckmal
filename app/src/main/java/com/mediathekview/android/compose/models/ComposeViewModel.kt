@@ -410,7 +410,7 @@ class ComposeViewModel(
     }
 
     /**
-     * Search for themes or titles
+     * Search for themes or titles using efficient database search
      * @param query Search query
      * @param searchInTitles If true, search in titles; otherwise search in themes
      * @return Flow of matching items (theme or title names)
@@ -420,21 +420,15 @@ class ComposeViewModel(
             return flowOf(emptyList())
         }
 
-        val lowerQuery = query.lowercase()
-        return repository.getEntriesFlow("", "").map { entries ->
-            if (searchInTitles) {
-                entries.filter {
-                    it.title.lowercase().contains(lowerQuery) ||
-                    it.description.lowercase().contains(lowerQuery)
-                }.extractUniqueTitles()
+        return flow {
+            val results = repository.searchEntries(query, 5000)
+            val items = if (searchInTitles) {
+                results.extractUniqueTitles()
             } else {
-                entries.filter {
-                    it.theme.lowercase().contains(lowerQuery) ||
-                    it.title.lowercase().contains(lowerQuery) ||
-                    it.description.lowercase().contains(lowerQuery)
-                }.extractUniqueThemes()
+                results.extractUniqueThemes()
             }
-        }
+            emit(items)
+        }.flowOn(Dispatchers.IO)
     }
 
     // ===========================================================================================
@@ -1076,6 +1070,201 @@ class ComposeViewModel(
         if (_currentPart.value > 0) {
             _currentPart.value -= 1
             Log.d(TAG, "Back to part: ${_currentPart.value}")
+        }
+    }
+
+    // ===========================================================================================
+    // ACTIONS: Menu Options
+    // ===========================================================================================
+
+    /**
+     * Show time period selection dialog
+     */
+    fun showTimePeriodDialog() {
+        val context = getApplication<Application>()
+        val periods = arrayOf(
+            AppConfig.getTimePeriodName(context, AppConfig.TIME_PERIOD_ALL),
+            AppConfig.getTimePeriodName(context, AppConfig.TIME_PERIOD_1_DAY),
+            AppConfig.getTimePeriodName(context, AppConfig.TIME_PERIOD_3_DAYS),
+            AppConfig.getTimePeriodName(context, AppConfig.TIME_PERIOD_7_DAYS),
+            AppConfig.getTimePeriodName(context, AppConfig.TIME_PERIOD_30_DAYS)
+        )
+
+        showDialog(
+            DialogModel.SingleChoice(
+                title = context.getString(R.string.dialog_title_filter_date),
+                items = periods,
+                selectedIndex = _timePeriodId.value,
+                onItemSelected = { which ->
+                    val limitDate = AppConfig.getTimePeriodLimit(which)
+                    setDateFilter(limitDate, which)
+                    dismissDialog()
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.toast_filter, periods[which]),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            )
+        )
+    }
+
+    /**
+     * Manually check for updates from the menu
+     * Forces an update check regardless of interval
+     */
+    fun checkForUpdatesManually() {
+        val context = getApplication<Application>()
+
+        viewModelScope.launch {
+            try {
+                Log.d(TAG, "Manual update check initiated by user")
+
+                // Show progress dialog
+                showDialog(
+                    DialogModel.Progress(
+                        title = context.getString(R.string.dialog_title_checking_update),
+                        message = context.getString(R.string.dialog_msg_checking_update)
+                    )
+                )
+
+                val result = checkForUpdate(forceCheck = true)
+
+                // Dismiss progress dialog
+                dismissDialog()
+
+                when (result) {
+                    is UpdateChecker.UpdateCheckResult.UpdateAvailable -> {
+                        Log.i(TAG, "Update available - prompting user")
+                        showUpdateAvailableDialog()
+                    }
+                    is UpdateChecker.UpdateCheckResult.NoUpdateNeeded -> {
+                        Log.d(TAG, "Film list is up to date")
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.toast_no_update_available),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    is UpdateChecker.UpdateCheckResult.CheckFailed -> {
+                        Log.w(TAG, "Update check failed: ${result.error}")
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.toast_update_check_failed, result.error),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                    is UpdateChecker.UpdateCheckResult.CheckSkipped -> {
+                        // This shouldn't happen with forceCheck = true
+                        Log.d(TAG, "Update check skipped")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error checking for updates", e)
+                dismissDialog()
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.toast_update_check_failed, e.message),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    /**
+     * Show update available confirmation dialog
+     */
+    private fun showUpdateAvailableDialog() {
+        val context = getApplication<Application>()
+        showDialog(
+            DialogModel.Confirmation(
+                title = context.getString(R.string.dialog_title_update_available),
+                message = context.getString(R.string.dialog_msg_update_available),
+                positiveLabel = context.getString(R.string.btn_update),
+                negativeLabel = context.getString(R.string.btn_later),
+                onPositive = {
+                    dismissDialog()
+                    startSmartMediaListDownload()
+                },
+                onNegative = {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.dialog_msg_update_later),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    dismissDialog()
+                }
+            )
+        )
+    }
+
+    /**
+     * Show reinstall confirmation dialog
+     */
+    fun showReinstallConfirmation() {
+        val context = getApplication<Application>()
+        showDialog(
+            DialogModel.Confirmation(
+                title = context.getString(R.string.menu_reinstall_filmlist),
+                message = context.getString(R.string.dialog_msg_reinstall_confirm),
+                positiveLabel = context.getString(R.string.btn_ok),
+                negativeLabel = context.getString(R.string.btn_cancel),
+                onPositive = {
+                    dismissDialog()
+                    reinstallFilmList()
+                },
+                onNegative = {
+                    dismissDialog()
+                }
+            )
+        )
+    }
+
+    /**
+     * Clear database and re-download film list
+     */
+    private fun reinstallFilmList() {
+        val context = getApplication<Application>()
+        Log.i(TAG, "Reinstalling film list - clearing database and re-downloading")
+
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // Clear database
+                repository.deleteAll()
+                _loadingState.value = LoadingState.NOT_LOADED
+                _loadingProgress.value = 0
+                _hasDataInDatabase.value = false
+
+                // Delete cached files
+                val privatePath = context.filesDir.absolutePath + "/"
+                val xzFile = File(privatePath + AppConfig.FILENAME_XZ)
+                val uncompressedFile = File(privatePath + AppConfig.FILENAME)
+                val diffXzFile = File(privatePath + AppConfig.FILENAME_DIFF_XZ)
+                val diffFile = File(privatePath + AppConfig.FILENAME_DIFF)
+
+                listOf(xzFile, uncompressedFile, diffXzFile, diffFile).forEach { file ->
+                    if (file.exists()) {
+                        file.delete()
+                        Log.d(TAG, "Deleted: ${file.name}")
+                    }
+                }
+
+                Log.i(TAG, "Database and files cleared, starting fresh download")
+
+                // Start fresh download
+                withContext(Dispatchers.Main) {
+                    startSmartMediaListDownload()
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error reinstalling film list", e)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        context,
+                        "Error: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
         }
     }
 

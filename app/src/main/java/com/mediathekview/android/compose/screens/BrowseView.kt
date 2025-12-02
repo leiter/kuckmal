@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,6 +22,9 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,8 +44,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mediathekview.android.R
 import com.mediathekview.android.compose.models.Channel
 import com.mediathekview.android.compose.models.SampleData
 import com.mediathekview.android.compose.ui.theme.MediathekViewTheme
@@ -58,12 +64,19 @@ fun BrowseView(
     isShowingTitles: Boolean = false, // true when showing titles within a theme, false when showing themes
     hasMoreItems: Boolean = true, // whether there are more items to load
     searchQuery: String = "", // current search query
+    isSearching: Boolean = false, // whether search is in progress
     onSearchQueryChanged: (String) -> Unit = {}, // callback for search query changes
     onChannelSelected: (Channel) -> Unit = {},
     onTitleSelected: (String) -> Unit = {},
     onLoadMore: () -> Unit = {}, // callback to load more items
-    onMenuClick: () -> Unit = {}
+    onMenuClick: () -> Unit = {},
+    // Menu action callbacks
+    onTimePeriodClick: () -> Unit = {},
+    onCheckUpdateClick: () -> Unit = {},
+    onReinstallClick: () -> Unit = {}
 ) {
+    // Menu state
+    var showOverflowMenu by remember { mutableStateOf(false) }
     Row(
         modifier = Modifier
             .fillMaxSize()
@@ -110,23 +123,50 @@ fun BrowseView(
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
-                    IconButton(onClick = onMenuClick) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = "Menu",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                    Box {
+                        IconButton(onClick = { showOverflowMenu = true }) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "Menu",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = showOverflowMenu,
+                            onDismissRequest = { showOverflowMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.menu_time_period)) },
+                                onClick = {
+                                    showOverflowMenu = false
+                                    onTimePeriodClick()
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.menu_check_update)) },
+                                onClick = {
+                                    showOverflowMenu = false
+                                    onCheckUpdateClick()
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.menu_reinstall_filmlist)) },
+                                onClick = {
+                                    showOverflowMenu = false
+                                    onReinstallClick()
+                                }
+                            )
+                        }
                     }
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Search bar
-            var searchText by remember { mutableStateOf("") }
+            // Search bar - connected to parent state via searchQuery and onSearchQueryChanged
             OutlinedTextField(
-                value = searchText,
-                onValueChange = { searchText = it },
+                value = searchQuery,
+                onValueChange = onSearchQueryChanged,
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("Titel suchen...") },
                 leadingIcon = {
@@ -134,6 +174,14 @@ fun BrowseView(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search"
                     )
+                },
+                trailingIcon = {
+                    if (isSearching) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp
+                        )
+                    }
                 },
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.4f),

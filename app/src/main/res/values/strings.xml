@@ -95,6 +95,7 @@
     <string name="dialog_msg_internet_required">Media list needs to be downloaded for first-time use.\n\nPlease connect to the internet and restart the app.</string>
     <string name="dialog_msg_update_available">A new media list is available. Would you like to download it now?</string>
     <string name="dialog_msg_update_later">You can update the media list from the menu later.</string>
+    <string name="dialog_msg_reinstall_confirm">This will clear all data and download the media list again. Continue?</string>
     <string name="dialog_msg_checking_update">Checking server for new film list…</string>
     <string name="toast_no_update_available">Film list is up to date</string>
     <string name="toast_update_check_failed">Update check failed: %1$s</string>
