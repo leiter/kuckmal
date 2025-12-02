@@ -1,5 +1,10 @@
 package com.mediathekview.android.compose.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +23,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
@@ -34,11 +40,14 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -65,7 +74,9 @@ fun BrowseView(
     hasMoreItems: Boolean = true, // whether there are more items to load
     searchQuery: String = "", // current search query
     isSearching: Boolean = false, // whether search is in progress
+    isSearchVisible: Boolean = false, // whether search field is visible
     onSearchQueryChanged: (String) -> Unit = {}, // callback for search query changes
+    onSearchVisibilityChanged: (Boolean) -> Unit = {}, // callback for search visibility toggle
     onChannelSelected: (Channel) -> Unit = {},
     onTitleSelected: (String) -> Unit = {},
     onLoadMore: () -> Unit = {}, // callback to load more items
@@ -77,6 +88,16 @@ fun BrowseView(
 ) {
     // Menu state
     var showOverflowMenu by remember { mutableStateOf(false) }
+    // Focus requester for search input
+    val searchFocusRequester = remember { FocusRequester() }
+
+    // Auto-focus search input when it becomes visible
+    LaunchedEffect(isSearchVisible) {
+        if (isSearchVisible) {
+            searchFocusRequester.requestFocus()
+        }
+    }
+
     Row(
         modifier = Modifier
             .fillMaxSize()
@@ -92,25 +113,25 @@ fun BrowseView(
                 .fillMaxHeight()
         )
 
-        // Right side: Titles list with search
+        // Right side: Titles list with search - no end padding for menu alignment
         Column(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .padding(16.dp)
+                .padding(start = 12.dp, top = 8.dp, bottom = 8.dp, end = 0.dp)
         ) {
-            // Title header with menu
+            // Title header with menu - compact styling
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)
                 ),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(8.dp)
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -120,9 +141,19 @@ fun BrowseView(
                         style = MaterialTheme.typography.titleMedium,
                         color = Color(0xFF81B4D2), // Cyan/blue matching theme
                         modifier = Modifier.weight(1f),
-                        maxLines = 2,
+                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
+                    // Search toggle button - only visible when search is hidden
+                    if (!isSearchVisible) {
+                        IconButton(onClick = { onSearchVisibilityChanged(true) }) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Search",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
                     Box {
                         IconButton(onClick = { showOverflowMenu = true }) {
                             Icon(
@@ -161,39 +192,63 @@ fun BrowseView(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Search bar - connected to parent state via searchQuery and onSearchQueryChanged
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = onSearchQueryChanged,
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Titel suchen...") },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search"
+            // Search bar with slide animation - hidden by default
+            AnimatedVisibility(
+                visible = isSearchVisible,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                Column {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = onSearchQueryChanged,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 12.dp)
+                            .focusRequester(searchFocusRequester),
+                        placeholder = { Text("Titel suchen...") },
+                        leadingIcon = {
+                            if (isSearching) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp),
+                                    strokeWidth = 2.dp
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Search"
+                                )
+                            }
+                        },
+                        trailingIcon = {
+                            IconButton(onClick = {
+                                if (searchQuery.isNotEmpty()) {
+                                    onSearchQueryChanged("")
+                                } else {
+                                    onSearchVisibilityChanged(false)
+                                }
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Close search",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.4f),
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.4f),
+                            focusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                        ),
+                        shape = RoundedCornerShape(8.dp),
+                        singleLine = true
                     )
-                },
-                trailingIcon = {
-                    if (isSearching) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            strokeWidth = 2.dp
-                        )
-                    }
-                },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.4f),
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.4f),
-                    focusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-                ),
-                shape = RoundedCornerShape(8.dp),
-                singleLine = true
-            )
+                }
+            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Titles list
             LazyColumn(

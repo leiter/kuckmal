@@ -228,6 +228,8 @@ fun MediathekViewNavHost(
             var debouncedSearchQuery by rememberSaveable { mutableStateOf("") }
             // Search loading state
             var isSearching by remember { mutableStateOf(false) }
+            // Search visibility - hidden by default, toggled via button
+            var isSearchVisible by rememberSaveable { mutableStateOf(false) }
             // Track previous overview state to detect navigation direction
             var previousOverviewState by remember { mutableStateOf<OverviewState?>(null) }
 
@@ -293,6 +295,7 @@ fun MediathekViewNavHost(
                     searchQuery = ""
                     debouncedSearchQuery = ""
                     isSearching = false
+                    isSearchVisible = false
                 }
             }
 
@@ -388,9 +391,18 @@ fun MediathekViewNavHost(
                 hasMoreItems = hasMoreItems,
                 searchQuery = searchQuery,
                 isSearching = isSearching,
+                isSearchVisible = isSearchVisible,
                 onSearchQueryChanged = { query ->
                     searchQuery = query
                     android.util.Log.d("Navigation", "Search query updated: '$query'")
+                },
+                onSearchVisibilityChanged = { visible ->
+                    isSearchVisible = visible
+                    if (!visible) {
+                        searchQuery = ""
+                        debouncedSearchQuery = ""
+                        isSearching = false
+                    }
                 },
                 onChannelSelected = { channel ->
                     // Clear theme selection when changing channels
