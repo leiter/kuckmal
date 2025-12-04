@@ -24,9 +24,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.mediathekview.android.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -37,7 +40,12 @@ import com.mediathekview.android.compose.data.ComposeDataMapper
 import com.mediathekview.android.compose.models.ComposeViewModel
 import com.mediathekview.android.compose.screens.BrowseView
 import com.mediathekview.android.compose.screens.DetailView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.withContext
 
 /**
  * Navigation routes - simplified to just two screens
@@ -143,7 +151,7 @@ fun MediathekViewNavHost(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text("Error loading data. Please try again.")
+            Text(stringResource(R.string.error_loading_data))
         }
         return
     }
@@ -217,6 +225,72 @@ fun MediathekViewNavHost(
 
             // Search state - persisted across navigation
             var searchQuery by rememberSaveable { mutableStateOf("") }
+            var debouncedSearchQuery by remember { mutableStateOf("") }
+            var isSearching by remember { mutableStateOf(false) }
+            var searchResults by remember { mutableStateOf<List<String>>(emptyList()) }
+
+            // Debounce search query - wait 1200ms after user stops typing
+            @OptIn(FlowPreview::class)
+            LaunchedEffect(Unit) {
+                snapshotFlow { searchQuery }
+                    .debounce(1200)
+                    .distinctUntilChanged()
+                    .collect { query ->
+                        debouncedSearchQuery = query
+                    }
+            }
+
+            // Perform actual search when debounced query changes
+            LaunchedEffect(debouncedSearchQuery, overviewState) {
+                val query = debouncedSearchQuery.trim()
+                if (query.isBlank()) {
+                    searchResults = emptyList()
+                    isSearching = false
+                    return@LaunchedEffect
+                }
+
+                isSearching = true
+                android.util.Log.d("Navigation", "Performing search for: '$query'")
+
+                try {
+                    val results = withContext(Dispatchers.IO) {
+                        when (val state = overviewState) {
+                            is OverviewState.AllThemes -> {
+                                // Search all entries, extract unique themes
+                                val entries = viewModel.repository.searchEntries(query, 5000)
+                                entries.map { it.theme }.distinct()
+                            }
+                            is OverviewState.ChannelThemes -> {
+                                // Search entries in channel, extract unique themes
+                                val entries = viewModel.repository.searchEntriesByChannel(state.channelName, query, 5000)
+                                entries.map { it.theme }.distinct()
+                            }
+                            is OverviewState.ThemeTitles -> {
+                                // Search entries in theme, extract unique titles
+                                val entries = if (state.channelName != null) {
+                                    viewModel.repository.searchEntriesByChannelAndTheme(state.channelName, state.themeName, query, 5000)
+                                } else {
+                                    viewModel.repository.searchEntriesByTheme(state.themeName, query, 5000)
+                                }
+                                entries.map { it.title }.distinct()
+                            }
+                        }
+                    }
+                    searchResults = results
+                    android.util.Log.d("Navigation", "Search found ${results.size} results")
+                } catch (e: Exception) {
+                    android.util.Log.e("Navigation", "Search error", e)
+                    searchResults = emptyList()
+                }
+                isSearching = false
+            }
+
+            // Show loading state when user is typing
+            LaunchedEffect(searchQuery) {
+                if (searchQuery.isNotBlank() && searchQuery != debouncedSearchQuery) {
+                    isSearching = true
+                }
+            }
 
             // Selection state - tracks separately for themes and titles
             // This allows preserving selection when navigating back
@@ -272,19 +346,18 @@ fun MediathekViewNavHost(
                 is OverviewState.ThemeTitles -> titlesData
             }
 
-            // Filter data based on search query (case-insensitive contains)
-            val displayData = if (searchQuery.isBlank()) {
+            // Use search results when searching, otherwise show raw data
+            val displayData = if (debouncedSearchQuery.isBlank()) {
                 rawData
             } else {
-                val query = searchQuery.trim().lowercase()
-                rawData.filter { it.lowercase().contains(query) }
+                searchResults
             }
 
             // Determine if there are more items to load
             // Show "more" if we have exactly the limit (1200 * (currentPart + 1)) items
             // Don't show more when search is active
             val expectedLimit = (currentPart + 1) * 1200
-            val hasMoreItems = if (searchQuery.isNotBlank()) {
+            val hasMoreItems = if (debouncedSearchQuery.isNotBlank()) {
                 false // Don't show "more" during search
             } else {
                 when (overviewState) {
@@ -295,13 +368,15 @@ fun MediathekViewNavHost(
             }
 
             // Get current context info for display
+            val allThemesLabel = stringResource(R.string.all_themes)
+            val channelThemesLabel = stringResource(R.string.channel_themes, "")
             val (selectedChannel, currentThemeLabel, showingTitles) = when (val state = overviewState) {
                 is OverviewState.AllThemes -> {
-                    Triple(null, "All Themes", false)
+                    Triple(null, allThemesLabel, false)
                 }
                 is OverviewState.ChannelThemes -> {
                     val channel = ComposeDataMapper.findChannelByName(state.channelName)
-                    Triple(channel, "${channel?.displayName ?: state.channelName} Themes", false)
+                    Triple(channel, stringResource(R.string.channel_themes, channel?.displayName ?: state.channelName), false)
                 }
                 is OverviewState.ThemeTitles -> {
                     val channel = state.channelName?.let { ComposeDataMapper.findChannelByName(it) }
@@ -318,10 +393,14 @@ fun MediathekViewNavHost(
                 isShowingTitles = showingTitles,
                 hasMoreItems = hasMoreItems,
                 searchQuery = searchQuery,
+                isSearching = isSearching,
                 onSearchQueryChanged = { query ->
                     searchQuery = query
                     android.util.Log.d("Navigation", "Search query updated: '$query'")
                 },
+                onTimePeriodClick = { /* TODO: viewModel.showTimePeriodDialog() */ },
+                onCheckUpdateClick = { /* TODO: viewModel.checkForUpdatesManually() */ },
+                onReinstallClick = { /* TODO: viewModel.showReinstallConfirmation() */ },
                 onChannelSelected = { channel ->
                     // Clear theme selection when changing channels
                     selectedTheme = null
@@ -362,23 +441,6 @@ fun MediathekViewNavHost(
                     // Load more items by incrementing currentPart
                     currentPart += 1
                     android.util.Log.d("Navigation", "Loading more items, currentPart: $currentPart")
-                },
-                onMenuClick = {
-                    // Could handle back navigation within overview
-                    when (overviewState) {
-                        is OverviewState.AllThemes -> { /* Already at root */ }
-                        is OverviewState.ChannelThemes -> {
-                            updateOverviewState(OverviewState.AllThemes)
-                        }
-                        is OverviewState.ThemeTitles -> {
-                            val state = overviewState
-                            if (state.channelName != null) {
-                                updateOverviewState(OverviewState.ChannelThemes(state.channelName))
-                            } else {
-                                updateOverviewState(OverviewState.AllThemes)
-                            }
-                        }
-                    }
                 }
             )
         }
@@ -439,6 +501,11 @@ fun MediathekViewNavHost(
             // Show loading or content - wait for BOTH mediaItem AND mediaEntry to be available
             val item = mediaItem
             val entry = mediaEntry
+            // Get localized strings for loading state
+            val loadingText = stringResource(R.string.loading_title, title)
+            val contextAll = stringResource(R.string.context_all)
+            val contextInfo = stringResource(R.string.context_info, channel ?: contextAll, theme ?: contextAll)
+
             if (item == null || entry == null) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -451,12 +518,12 @@ fun MediathekViewNavHost(
                         CircularProgressIndicator()
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            "Loading: $title",
+                            loadingText,
                             style = MaterialTheme.typography.bodyMedium
                         )
                         if (channel != null || theme != null) {
                             Text(
-                                "Context: ${channel ?: "All"} / ${theme ?: "All"}",
+                                contextInfo,
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }

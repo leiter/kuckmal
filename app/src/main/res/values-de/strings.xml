@@ -45,16 +45,28 @@
     <!-- Description expand/collapse -->
     <string name="show_more">Mehr anzeigen</string>
     <string name="show_less">Weniger anzeigen</string>
+    <string name="expand">Erweitern</string>
+    <string name="collapse">Einklappen</string>
+
+    <!-- Load More -->
+    <string name="load_more">++ mehr ++</string>
 
     <!-- Menu Items -->
     <string name="menu_time_period">Zeitraum</string>
     <string name="menu_show_download">Downloads anzeigen</string>
     <string name="menu_check_update">Auf Updates prüfen</string>
     <string name="menu_reinstall_filmlist">Filmliste neu installieren</string>
+    <string name="menu_start_compose">Compose starten</string>
 
     <!-- Dynamic Titles -->
     <string name="channel_themes">%1$s Themen</string>
     <string name="titles_for_theme">Titel: %1$s</string>
+
+    <!-- Loading States -->
+    <string name="error_loading_data">Fehler beim Laden der Daten. Bitte versuchen Sie es erneut.</string>
+    <string name="loading_title">Lädt: %1$s</string>
+    <string name="context_info">Kontext: %1$s / %2$s</string>
+    <string name="context_all">Alle</string>
 
     <!-- Error Messages -->
     <string name="error_no_media_selected">Kein Medium ausgewählt</string>
@@ -62,6 +74,7 @@
     <string name="error_invalid_video_url">Ungültige Video-URL</string>
     <string name="error_no_video_player">Keine App zum Abspielen dieses Videoformats verfügbar</string>
     <string name="error_download_manager_unavailable">Download-Manager nicht verfügbar</string>
+    <string name="error_playback_failed">Wiedergabe konnte nicht gestartet werden</string>
     <string name="error_format">Fehler: %1$s</string>
 
     <!-- Dialog Titles -->

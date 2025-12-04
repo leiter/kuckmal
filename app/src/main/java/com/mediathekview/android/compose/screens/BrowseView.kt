@@ -16,9 +16,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.ui.res.stringResource
+import com.mediathekview.android.R
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -58,12 +64,18 @@ fun BrowseView(
     isShowingTitles: Boolean = false, // true when showing titles within a theme, false when showing themes
     hasMoreItems: Boolean = true, // whether there are more items to load
     searchQuery: String = "", // current search query
+    isSearching: Boolean = false, // whether search is in progress
     onSearchQueryChanged: (String) -> Unit = {}, // callback for search query changes
     onChannelSelected: (Channel) -> Unit = {},
     onTitleSelected: (String) -> Unit = {},
     onLoadMore: () -> Unit = {}, // callback to load more items
-    onMenuClick: () -> Unit = {}
+    // Menu action callbacks
+    onTimePeriodClick: () -> Unit = {},
+    onCheckUpdateClick: () -> Unit = {},
+    onReinstallClick: () -> Unit = {}
 ) {
+    // Menu state
+    var showOverflowMenu by remember { mutableStateOf(false) }
     Row(
         modifier = Modifier
             .fillMaxSize()
@@ -79,61 +91,96 @@ fun BrowseView(
                 .fillMaxHeight()
         )
 
-        // Right side: Titles list with search
+        // Right side: Titles list with search - no end padding for menu alignment
         Column(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .padding(16.dp)
+                .padding(start = 12.dp, top = 8.dp, bottom = 8.dp, end = 0.dp)
         ) {
-            // Title header with menu
+            // Title header with menu - compact styling
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(end = 4.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)
                 ),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(8.dp)
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        // Show "Titel: theme name" when showing titles, otherwise just the label
-                        text = if (isShowingTitles) "Titel: $currentTheme" else currentTheme,
+                        // Show "Titles: theme name" when showing titles, otherwise just the label
+                        text = if (isShowingTitles) stringResource(R.string.titles_for_theme, currentTheme) else currentTheme,
                         style = MaterialTheme.typography.titleMedium,
                         color = Color(0xFF81B4D2), // Cyan/blue matching theme
                         modifier = Modifier.weight(1f),
-                        maxLines = 2,
+                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    IconButton(onClick = onMenuClick) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = "Menu",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                    Box {
+                        IconButton(onClick = { showOverflowMenu = true }) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = stringResource(R.string.menu),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = showOverflowMenu,
+                            onDismissRequest = { showOverflowMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.menu_time_period)) },
+                                onClick = {
+                                    showOverflowMenu = false
+                                    onTimePeriodClick()
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.menu_check_update)) },
+                                onClick = {
+                                    showOverflowMenu = false
+                                    onCheckUpdateClick()
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.menu_reinstall_filmlist)) },
+                                onClick = {
+                                    showOverflowMenu = false
+                                    onReinstallClick()
+                                }
+                            )
+                        }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            // Search bar
-            var searchText by remember { mutableStateOf("") }
+            // Search bar - connected to parent state
             OutlinedTextField(
-                value = searchText,
-                onValueChange = { searchText = it },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Titel suchen...") },
+                value = searchQuery,
+                onValueChange = onSearchQueryChanged,
+                modifier = Modifier.fillMaxWidth().padding(end = 12.dp),
+                placeholder = { Text(stringResource(R.string.search_hint)) },
                 leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search"
-                    )
+                    // Show loading indicator when searching, otherwise search icon
+                    if (isSearching) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = stringResource(R.string.search)
+                        )
+                    }
                 },
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.4f),
@@ -145,7 +192,7 @@ fun BrowseView(
                 singleLine = true
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Titles list
             LazyColumn(
@@ -195,7 +242,7 @@ fun MoreItem(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "++ more ++",
+                text = stringResource(R.string.load_more),
                 style = MaterialTheme.typography.bodyLarge,
                 color = Color(0xFF81B4D2), // Cyan color to stand out
                 fontWeight = FontWeight.Bold

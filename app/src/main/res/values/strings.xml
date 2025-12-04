@@ -45,6 +45,11 @@
     <!-- Description expand/collapse -->
     <string name="show_more">Show more</string>
     <string name="show_less">Show less</string>
+    <string name="expand">Expand</string>
+    <string name="collapse">Collapse</string>
+
+    <!-- Load More -->
+    <string name="load_more">++ more ++</string>
 
     <!-- Menu Items -->
     <string name="menu_time_period">Time Period</string>
@@ -56,6 +61,12 @@
     <!-- Dynamic Titles -->
     <string name="channel_themes">%1$s Themes</string>
     <string name="titles_for_theme">Titles: %1$s</string>
+
+    <!-- Loading States -->
+    <string name="error_loading_data">Error loading data. Please try again.</string>
+    <string name="loading_title">Loading: %1$s</string>
+    <string name="context_info">Context: %1$s / %2$s</string>
+    <string name="context_all">All</string>
 
     <!-- Error Messages -->
     <string name="error_no_media_selected">No media selected</string>

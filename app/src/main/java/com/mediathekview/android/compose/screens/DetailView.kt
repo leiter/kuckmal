@@ -44,7 +44,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
+import com.mediathekview.android.R
 import com.mediathekview.android.compose.models.MediaItem
 import com.mediathekview.android.compose.models.SampleData
 
@@ -96,7 +98,7 @@ fun DetailView(
 
             // Theme section
             Text(
-                text = "Thema",
+                text = stringResource(R.string.theme_label),
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.Gray
             )
@@ -113,7 +115,7 @@ fun DetailView(
 
             // Title section
             Text(
-                text = "Titel",
+                text = stringResource(R.string.title_label),
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.Gray
             )
@@ -140,13 +142,13 @@ fun DetailView(
                         .fillMaxWidth()
                         .padding(16.dp)
                 ) {
-                    MetadataRow("Datum", mediaItem.date)
+                    MetadataRow(stringResource(R.string.date_label), mediaItem.date)
                     Spacer(modifier = Modifier.height(8.dp))
-                    MetadataRow("Zeit", mediaItem.time)
+                    MetadataRow(stringResource(R.string.time_label), mediaItem.time)
                     Spacer(modifier = Modifier.height(8.dp))
-                    MetadataRow("Dauer", mediaItem.duration)
+                    MetadataRow(stringResource(R.string.duration_label), mediaItem.duration)
                     Spacer(modifier = Modifier.height(8.dp))
-                    MetadataRow("Größe", mediaItem.size)
+                    MetadataRow(stringResource(R.string.size_label), mediaItem.size)
                 }
             }
 
@@ -174,7 +176,7 @@ fun DetailView(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Beschreibung",
+                            text = stringResource(R.string.description_label),
                             style = MaterialTheme.typography.titleMedium,
                             color = Color(0xFF81B4D2),
                             fontWeight = FontWeight.Normal
@@ -188,7 +190,7 @@ fun DetailView(
                         )
                         Icon(
                             imageVector = Icons.Default.ExpandMore,
-                            contentDescription = if (isDescriptionExpanded) "Collapse" else "Expand",
+                            contentDescription = if (isDescriptionExpanded) stringResource(R.string.collapse) else stringResource(R.string.expand),
                             modifier = Modifier
                                 .size(24.dp)
                                 .rotate(rotationAngle),
@@ -228,7 +230,7 @@ fun DetailView(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = "Qualität",
+                    text = stringResource(R.string.quality_label),
                     style = MaterialTheme.typography.titleMedium,
                     color = Color.White,
                     fontWeight = FontWeight.Normal
@@ -253,13 +255,13 @@ fun DetailView(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Hoch",
+                            text = stringResource(R.string.quality_high),
                             style = MaterialTheme.typography.bodyLarge,
                             color = Color.White
                         )
                     }
 
-                    // Niedrig radio button
+                    // Low quality radio button
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.weight(1f)
@@ -274,7 +276,7 @@ fun DetailView(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Niedrig",
+                            text = stringResource(R.string.quality_low),
                             style = MaterialTheme.typography.bodyLarge,
                             color = Color.White
                         )
@@ -301,7 +303,7 @@ fun DetailView(
                     ) {
                         Icon(
                             imageVector = Icons.Default.PlayArrow,
-                            contentDescription = "Play",
+                            contentDescription = stringResource(R.string.cd_play),
                             modifier = Modifier.size(32.dp),
                             tint = Color.White
                         )
@@ -320,7 +322,7 @@ fun DetailView(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Download,
-                            contentDescription = "Download",
+                            contentDescription = stringResource(R.string.cd_download),
                             modifier = Modifier.size(32.dp),
                             tint = Color.White
                         )
