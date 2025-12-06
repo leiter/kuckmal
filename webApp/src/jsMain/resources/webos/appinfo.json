@@ -1,0 +1,17 @@
+{
+    "id": "com.mediathekview.webos",
+    "version": "1.0.0",
+    "vendor": "MediathekView",
+    "type": "web",
+    "main": "index.html",
+    "title": "MediathekView",
+    "icon": "icon.png",
+    "largeIcon": "largeIcon.png",
+    "appDescription": "German public TV media library browser",
+    "resolution": "1920x1080",
+    "bgColor": "#1a1a1a",
+    "splashBackground": "#1a1a1a",
+    "transparent": false,
+    "handlesRelaunch": false,
+    "disableBackHistoryAPI": false
+}
