@@ -122,3 +122,6 @@ app/src/test/resources/Filmliste-akt
 app/src/androidTest/assets/test_media_database.db
 sc/
 .idea/
+.kotlin/
+downloaded_logos/
+app/src/test/resources/diff_test/
