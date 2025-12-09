@@ -2,12 +2,13 @@ package com.mediathekview.android.compose.models
 
 import android.app.Application
 import android.app.DownloadManager
+import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import androidx.core.net.toUri
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import com.mediathekview.android.R
@@ -37,14 +38,16 @@ import java.io.File
 /**
  * Streamlined ViewModel for media data - database-backed with reactive Flows
  * No synchronous cache, everything flows from Room database
+ *
+ * Note: Uses standard ViewModel instead of AndroidViewModel.
+ * Call initializeContext() after creation to enable Android-specific features.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ComposeViewModel(
-    application: Application,
     internal val repository: MediaRepository,
     private val downloadRepository: DownloadRepository,
     private val updateChecker: UpdateChecker
-) : AndroidViewModel(application) {
+) : ViewModel() {
 
 
 
@@ -53,13 +56,75 @@ class ComposeViewModel(
         private const val MAX_UI_ITEMS = 1200
     }
 
-    // Video player manager using expect/actual pattern
-    private val videoPlayerManager: VideoPlayerManager by lazy {
-        getApplication<Application>().createVideoPlayerManager()
+    // ===========================================================================================
+    // ANDROID CONTEXT (Late Initialization)
+    // ===========================================================================================
+
+    /**
+     * Application context for Android-specific operations.
+     * Must be initialized by calling initializeContext() after ViewModel creation.
+     */
+    private lateinit var applicationContext: Context
+
+    /**
+     * Check if context has been initialized
+     */
+    val isContextInitialized: Boolean
+        get() = ::applicationContext.isInitialized
+
+    /**
+     * Initialize the Android context. Must be called once after ViewModel creation.
+     * This enables Android-specific features like VideoPlayerManager and Toasts.
+     *
+     * @param context Application context (will be stored as application context)
+     */
+    fun initializeContext(context: Context) {
+        if (::applicationContext.isInitialized) {
+            Log.w(TAG, "Context already initialized, ignoring duplicate call")
+            return
+        }
+        applicationContext = context.applicationContext
+        Log.d(TAG, "Context initialized for ViewModel")
+
+        // Start collecting playback intents now that we have context
+        startPlaybackIntentCollection()
     }
 
-    init {
-        // Collect playback intents from VideoPlayerManager and forward them
+    /**
+     * Get string resource (requires context to be initialized)
+     */
+    private fun getString(resId: Int): String {
+        check(::applicationContext.isInitialized) { "Context not initialized. Call initializeContext() first." }
+        return applicationContext.getString(resId)
+    }
+
+    /**
+     * Get string resource with format args (requires context to be initialized)
+     */
+    private fun getString(resId: Int, vararg formatArgs: Any): String {
+        check(::applicationContext.isInitialized) { "Context not initialized. Call initializeContext() first." }
+        return applicationContext.getString(resId, *formatArgs)
+    }
+
+    /**
+     * Get files directory path (requires context to be initialized)
+     */
+    private fun getFilesDir(): String {
+        check(::applicationContext.isInitialized) { "Context not initialized. Call initializeContext() first." }
+        return applicationContext.filesDir.absolutePath + "/"
+    }
+
+    // Video player manager using lazy initialization (requires context)
+    private val videoPlayerManager: VideoPlayerManager by lazy {
+        check(::applicationContext.isInitialized) { "Context not initialized. Call initializeContext() first." }
+        (applicationContext as Application).createVideoPlayerManager()
+    }
+
+    /**
+     * Start collecting playback intents from VideoPlayerManager.
+     * Called after context is initialized.
+     */
+    private fun startPlaybackIntentCollection() {
         viewModelScope.launch {
             videoPlayerManager.playbackIntents.collect { intent ->
                 _startActivityIntent.emit(intent)
@@ -490,8 +555,8 @@ class ComposeViewModel(
                 // Show download progress dialog
                 showDialog(
                     DialogModel.Progress(
-                        title = getApplication<Application>().getString(R.string.dialog_title_downloading),
-                        message = getApplication<Application>().getString(
+                        title = getString(R.string.dialog_title_downloading),
+                        message = getString(
                             R.string.dialog_msg_downloading_progress,
                             state.downloadedMB.toFloat(),
                             state.totalMB.toFloat(),
@@ -518,8 +583,8 @@ class ComposeViewModel(
                                 // Show decompression dialog
                                 showDialog(
                                     DialogModel.Progress(
-                                        title = getApplication<Application>().getString(R.string.dialog_title_decompressing),
-                                        message = getApplication<Application>().getString(R.string.dialog_msg_decompressing)
+                                        title = getString(R.string.dialog_title_decompressing),
+                                        message = getString(R.string.dialog_msg_decompressing)
                                     )
                                 )
                                 // Decompress
@@ -536,7 +601,7 @@ class ComposeViewModel(
                         Log.d(TAG, "Full list downloaded, triggering decompression and database loading")
                         // Trigger decompression and loading through the unified code path
                         // This uses the same guarded logic as startup, preventing duplicate decompression
-                        val privatePath = getApplication<Application>().filesDir.absolutePath + "/"
+                        val privatePath = getFilesDir()
                         checkAndLoadMediaListToDatabase(privatePath)
                     }
                 }
@@ -546,10 +611,10 @@ class ComposeViewModel(
                 if (state.canRetry && state.retryAction != null) {
                     showDialog(
                         DialogModel.Error(
-                            title = getApplication<Application>().getString(R.string.dialog_title_download_failed),
+                            title = getString(R.string.dialog_title_download_failed),
                             message = state.message,
-                            retryLabel = getApplication<Application>().getString(R.string.btn_retry),
-                            cancelLabel = getApplication<Application>().getString(R.string.btn_cancel),
+                            retryLabel = getString(R.string.btn_retry),
+                            cancelLabel = getString(R.string.btn_cancel),
                             onRetry = state.retryAction,
                             onCancel = {
                                 downloadRepository.resetState()
@@ -559,7 +624,7 @@ class ComposeViewModel(
                 } else {
                     showDialog(
                         DialogModel.Message(
-                            title = getApplication<Application>().getString(R.string.dialog_title_download_failed),
+                            title = getString(R.string.dialog_title_download_failed),
                             message = state.message
                         )
                     )
@@ -569,8 +634,8 @@ class ComposeViewModel(
                 // Show extraction progress
                 showDialog(
                     DialogModel.Progress(
-                        title = getApplication<Application>().getString(R.string.dialog_title_decompressing),
-                        message = getApplication<Application>().getString(R.string.dialog_msg_decompressing)
+                        title = getString(R.string.dialog_title_decompressing),
+                        message = getString(R.string.dialog_msg_decompressing)
                     )
                 )
             }
@@ -638,7 +703,7 @@ class ComposeViewModel(
                             // Show error dialog
                             showDialog(
                                 DialogModel.Message(
-                                    title = getApplication<Application>().getString(R.string.dialog_title_download_failed),
+                                    title = getString(R.string.dialog_title_download_failed),
                                     message = result.exception.message ?: "Unknown error"
                                 )
                             )
@@ -652,7 +717,7 @@ class ComposeViewModel(
                 // Show error dialog
                 showDialog(
                     DialogModel.Message(
-                        title = getApplication<Application>().getString(R.string.dialog_title_download_failed),
+                        title = getString(R.string.dialog_title_download_failed),
                         message = e.message ?: "Unknown error"
                     )
                 )
@@ -703,8 +768,8 @@ class ComposeViewModel(
                     // Show decompression dialog
                     showDialog(
                         DialogModel.Progress(
-                            title = getApplication<Application>().getString(R.string.dialog_title_decompressing),
-                            message = getApplication<Application>().getString(R.string.dialog_msg_decompressing)
+                            title = getString(R.string.dialog_title_decompressing),
+                            message = getString(R.string.dialog_msg_decompressing)
                         )
                     )
                     // Decompress
@@ -788,7 +853,7 @@ class ComposeViewModel(
     fun startSmartMediaListDownload() {
         viewModelScope.launch {
             val hasData = isDataLoaded()
-            val privatePath = getApplication<Application>().filesDir.absolutePath + "/"
+            val privatePath = getFilesDir()
 
             if (hasData) {
                 // Database has data - download diff
@@ -848,7 +913,7 @@ class ComposeViewModel(
                             // Show error dialog
                             showDialog(
                                 DialogModel.Message(
-                                    title = getApplication<Application>().getString(R.string.dialog_title_download_failed),
+                                    title = getString(R.string.dialog_title_download_failed),
                                     message = result.exception.message ?: "Unknown error"
                                 )
                             )
@@ -862,7 +927,7 @@ class ComposeViewModel(
                 // Show error dialog
                 showDialog(
                     DialogModel.Message(
-                        title = getApplication<Application>().getString(R.string.dialog_title_download_failed),
+                        title = getString(R.string.dialog_title_download_failed),
                         message = e.message ?: "Unknown error"
                     )
                 )
@@ -1078,18 +1143,18 @@ class ComposeViewModel(
      * Show time period selection dialog
      */
     fun showTimePeriodDialog() {
-        val context = getApplication<Application>()
+        check(::applicationContext.isInitialized) { "Context not initialized. Call initializeContext() first." }
         val periods = arrayOf(
-            AppConfig.getTimePeriodName(context, AppConfig.TIME_PERIOD_ALL),
-            AppConfig.getTimePeriodName(context, AppConfig.TIME_PERIOD_1_DAY),
-            AppConfig.getTimePeriodName(context, AppConfig.TIME_PERIOD_3_DAYS),
-            AppConfig.getTimePeriodName(context, AppConfig.TIME_PERIOD_7_DAYS),
-            AppConfig.getTimePeriodName(context, AppConfig.TIME_PERIOD_30_DAYS)
+            AppConfig.getTimePeriodName(applicationContext, AppConfig.TIME_PERIOD_ALL),
+            AppConfig.getTimePeriodName(applicationContext, AppConfig.TIME_PERIOD_1_DAY),
+            AppConfig.getTimePeriodName(applicationContext, AppConfig.TIME_PERIOD_3_DAYS),
+            AppConfig.getTimePeriodName(applicationContext, AppConfig.TIME_PERIOD_7_DAYS),
+            AppConfig.getTimePeriodName(applicationContext, AppConfig.TIME_PERIOD_30_DAYS)
         )
 
         showDialog(
             DialogModel.SingleChoice(
-                title = context.getString(R.string.dialog_title_filter_date),
+                title = getString(R.string.dialog_title_filter_date),
                 items = periods,
                 selectedIndex = _timePeriodId.value,
                 onItemSelected = { which ->
@@ -1097,8 +1162,8 @@ class ComposeViewModel(
                     setDateFilter(limitDate, which)
                     dismissDialog()
                     Toast.makeText(
-                        context,
-                        context.getString(R.string.toast_filter, periods[which]),
+                        applicationContext,
+                        getString(R.string.toast_filter, periods[which]),
                         Toast.LENGTH_SHORT
                     ).show()
                 }
@@ -1111,7 +1176,7 @@ class ComposeViewModel(
      * Forces an update check regardless of interval
      */
     fun checkForUpdatesManually() {
-        val context = getApplication<Application>()
+        check(::applicationContext.isInitialized) { "Context not initialized. Call initializeContext() first." }
 
         viewModelScope.launch {
             try {
@@ -1120,8 +1185,8 @@ class ComposeViewModel(
                 // Show progress dialog
                 showDialog(
                     DialogModel.Progress(
-                        title = context.getString(R.string.dialog_title_checking_update),
-                        message = context.getString(R.string.dialog_msg_checking_update)
+                        title = getString(R.string.dialog_title_checking_update),
+                        message = getString(R.string.dialog_msg_checking_update)
                     )
                 )
 
@@ -1138,16 +1203,16 @@ class ComposeViewModel(
                     is UpdateChecker.UpdateCheckResult.NoUpdateNeeded -> {
                         Log.d(TAG, "Film list is up to date")
                         Toast.makeText(
-                            context,
-                            context.getString(R.string.toast_no_update_available),
+                            applicationContext,
+                            getString(R.string.toast_no_update_available),
                             Toast.LENGTH_SHORT
                         ).show()
                     }
                     is UpdateChecker.UpdateCheckResult.CheckFailed -> {
                         Log.w(TAG, "Update check failed: ${result.error}")
                         Toast.makeText(
-                            context,
-                            context.getString(R.string.toast_update_check_failed, result.error),
+                            applicationContext,
+                            getString(R.string.toast_update_check_failed, result.error),
                             Toast.LENGTH_LONG
                         ).show()
                     }
@@ -1160,8 +1225,8 @@ class ComposeViewModel(
                 Log.e(TAG, "Error checking for updates", e)
                 dismissDialog()
                 Toast.makeText(
-                    context,
-                    context.getString(R.string.toast_update_check_failed, e.message),
+                    applicationContext,
+                    getString(R.string.toast_update_check_failed, e.message ?: "Unknown error"),
                     Toast.LENGTH_LONG
                 ).show()
             }
@@ -1172,21 +1237,20 @@ class ComposeViewModel(
      * Show update available confirmation dialog
      */
     private fun showUpdateAvailableDialog() {
-        val context = getApplication<Application>()
         showDialog(
             DialogModel.Confirmation(
-                title = context.getString(R.string.dialog_title_update_available),
-                message = context.getString(R.string.dialog_msg_update_available),
-                positiveLabel = context.getString(R.string.btn_update),
-                negativeLabel = context.getString(R.string.btn_later),
+                title = getString(R.string.dialog_title_update_available),
+                message = getString(R.string.dialog_msg_update_available),
+                positiveLabel = getString(R.string.btn_update),
+                negativeLabel = getString(R.string.btn_later),
                 onPositive = {
                     dismissDialog()
                     startSmartMediaListDownload()
                 },
                 onNegative = {
                     Toast.makeText(
-                        context,
-                        context.getString(R.string.dialog_msg_update_later),
+                        applicationContext,
+                        getString(R.string.dialog_msg_update_later),
                         Toast.LENGTH_SHORT
                     ).show()
                     dismissDialog()
@@ -1199,13 +1263,12 @@ class ComposeViewModel(
      * Show reinstall confirmation dialog
      */
     fun showReinstallConfirmation() {
-        val context = getApplication<Application>()
         showDialog(
             DialogModel.Confirmation(
-                title = context.getString(R.string.menu_reinstall_filmlist),
-                message = context.getString(R.string.dialog_msg_reinstall_confirm),
-                positiveLabel = context.getString(R.string.btn_ok),
-                negativeLabel = context.getString(R.string.btn_cancel),
+                title = getString(R.string.menu_reinstall_filmlist),
+                message = getString(R.string.dialog_msg_reinstall_confirm),
+                positiveLabel = getString(R.string.btn_ok),
+                negativeLabel = getString(R.string.btn_cancel),
                 onPositive = {
                     dismissDialog()
                     reinstallFilmList()
@@ -1221,7 +1284,6 @@ class ComposeViewModel(
      * Clear database and re-download film list
      */
     private fun reinstallFilmList() {
-        val context = getApplication<Application>()
         Log.i(TAG, "Reinstalling film list - clearing database and re-downloading")
 
         viewModelScope.launch(Dispatchers.IO) {
@@ -1233,7 +1295,7 @@ class ComposeViewModel(
                 _hasDataInDatabase.value = false
 
                 // Delete cached files
-                val privatePath = context.filesDir.absolutePath + "/"
+                val privatePath = getFilesDir()
                 val xzFile = File(privatePath + AppConfig.FILENAME_XZ)
                 val uncompressedFile = File(privatePath + AppConfig.FILENAME)
                 val diffXzFile = File(privatePath + AppConfig.FILENAME_DIFF_XZ)
@@ -1256,7 +1318,7 @@ class ComposeViewModel(
                 Log.e(TAG, "Error reinstalling film list", e)
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
-                        context,
+                        applicationContext,
                         "Error: ${e.message}",
                         Toast.LENGTH_LONG
                     ).show()
@@ -1278,8 +1340,8 @@ class ComposeViewModel(
         if (mediaEntry == null) {
             Log.w(TAG, "Play button clicked but no media entry available")
             Toast.makeText(
-                getApplication(),
-                getApplication<Application>().getString(R.string.error_no_media_selected),
+                applicationContext,
+                getString(R.string.error_no_media_selected),
                 Toast.LENGTH_SHORT
             ).show()
             return
@@ -1324,8 +1386,8 @@ class ComposeViewModel(
         if (mediaEntry == null) {
             Log.w(TAG, "Download button clicked but no media entry available")
             Toast.makeText(
-                getApplication(),
-                getApplication<Application>().getString(R.string.error_no_media_selected),
+                applicationContext,
+                getString(R.string.error_no_media_selected),
                 Toast.LENGTH_SHORT
             ).show()
             return
@@ -1346,8 +1408,8 @@ class ComposeViewModel(
         if (videoUrl.isEmpty()) {
             Log.w(TAG, "No video URL available for: ${mediaEntry.title}")
             Toast.makeText(
-                getApplication(),
-                getApplication<Application>().getString(R.string.error_no_video_url),
+                applicationContext,
+                getString(R.string.error_no_video_url),
                 Toast.LENGTH_SHORT
             ).show()
             return
@@ -1369,13 +1431,12 @@ class ComposeViewModel(
         }
 
         // Use Android's DownloadManager for robust downloading
-        val downloadManager = getApplication<Application>()
+        val downloadManager = applicationContext
             .getSystemService(android.content.Context.DOWNLOAD_SERVICE) as? DownloadManager
         if (downloadManager == null) {
             Toast.makeText(
-                getApplication(),
-                getApplication<Application>()
-                    .getString(R.string.error_download_manager_unavailable),
+                applicationContext,
+                getString(R.string.error_download_manager_unavailable),
                 Toast.LENGTH_SHORT
             ).show()
             return
@@ -1400,7 +1461,7 @@ class ComposeViewModel(
             Log.i(TAG, "Download started with ID: $downloadId for ${mediaEntry.title}")
 
             Toast.makeText(
-                getApplication(),
+                applicationContext,
                 "Downloading: ${mediaEntry.title}\nQuality: ${if (isHighQuality) "High" else "Low"}",
                 Toast.LENGTH_LONG
             ).show()
@@ -1408,7 +1469,7 @@ class ComposeViewModel(
         } catch (e: Exception) {
             Log.e(TAG, "Error starting download", e)
             Toast.makeText(
-                getApplication(),
+                applicationContext,
                 "Error starting download: ${e.message}",
                 Toast.LENGTH_SHORT
             ).show()

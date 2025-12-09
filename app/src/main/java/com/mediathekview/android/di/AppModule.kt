@@ -77,10 +77,11 @@ val appModule = module {
         )
     }
 
-    // MediaViewModel - scoped to Activity/Fragment lifecycle
+    // ComposeViewModel - scoped to Activity/Fragment lifecycle
+    // Note: Uses standard ViewModel (not AndroidViewModel)
+    // Call viewModel.initializeContext(context) after obtaining the ViewModel
     viewModel {
         ComposeViewModel(
-            application = androidApplication(),
             repository = get(),
             downloadRepository = get(),
             updateChecker = get()

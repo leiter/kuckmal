@@ -48,6 +48,9 @@ class ComposeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        // Initialize ViewModel with Android context (required for Android-specific features)
+        viewModel.initializeContext(applicationContext)
+
         // Use fallback display (brand color + abbreviation) for channel identification
         // instead of logo icons (MediathekViewWeb style)
         Broadcaster.useFallbackDisplay = true
