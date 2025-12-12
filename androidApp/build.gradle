@@ -52,6 +52,7 @@ android {
 
     lint {
         abortOnError false
+        checkGeneratedSources false
     }
 
     testOptions {

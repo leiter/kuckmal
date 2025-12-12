@@ -1,6 +1,5 @@
 package com.mediathekview.android.di
 
-import android.app.Application
 import android.app.DownloadManager
 import android.content.Context
 import android.widget.Toast
@@ -12,7 +11,6 @@ import com.mediathekview.android.repository.DownloadRepository
 import com.mediathekview.android.repository.MediaRepository
 import com.mediathekview.android.repository.MediaRepositoryImpl
 import com.mediathekview.android.service.DownloadService
-import com.mediathekview.android.util.MediaUrlUtils
 import com.mediathekview.android.util.UpdateChecker
 import com.mediathekview.android.video.VideoPlayerManager
 import com.mediathekview.android.video.createVideoPlayerManager
