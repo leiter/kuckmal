@@ -16,8 +16,22 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.9.0")
 
+    // Lifecycle ViewModel KMP
+    implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
+    implementation("org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose:2.8.4")
+
+    // Room KMP for desktop
+    implementation("androidx.room:room-runtime:2.7.1")
+    implementation("androidx.sqlite:sqlite-bundled:2.5.1")
+
     // Koin for DI
     implementation("io.insert-koin:koin-core:4.0.1")
+
+    // JSON parsing
+    implementation("com.google.code.gson:gson:2.10.1")
+
+    // XZ compression for film list
+    implementation("org.tukaani:xz:1.9")
 }
 
 compose.desktop {
