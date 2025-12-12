@@ -1,5 +1,7 @@
 package com.mediathekview.shared.ui
 
+import com.mediathekview.shared.database.MediaEntry
+
 /**
  * UI data models for Compose screens
  * Platform-independent models used across Android and Web
@@ -63,5 +65,21 @@ object SampleData {
         duration = "43Min 17Sek",
         size = "747 MB",
         description = "Film von Almut Faass und Frank Gensthaler"
+    )
+}
+
+/**
+ * Extension function to convert database MediaEntry to UI MediaItem
+ */
+fun MediaEntry.toMediaItem(): MediaItem {
+    return MediaItem(
+        channel = this.channel,
+        theme = this.theme,
+        title = this.title,
+        date = this.date,
+        time = this.time,
+        duration = this.duration,
+        size = "${this.sizeMB} MB",
+        description = this.description
     )
 }

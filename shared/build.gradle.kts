@@ -61,6 +61,9 @@ kotlin {
                 // Room KMP
                 implementation("androidx.room:room-runtime:2.7.1")
                 implementation("androidx.sqlite:sqlite-bundled:2.5.1")
+
+                // Koin for KMP
+                implementation("io.insert-koin:koin-core:4.0.1")
             }
         }
 

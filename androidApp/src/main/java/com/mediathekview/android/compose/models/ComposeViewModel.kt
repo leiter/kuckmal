@@ -19,6 +19,7 @@ import com.mediathekview.android.util.UpdateChecker
 import com.mediathekview.android.repository.DownloadRepository
 import com.mediathekview.android.repository.DownloadState
 import com.mediathekview.android.repository.MediaRepository
+import com.mediathekview.shared.repository.MediaRepository.LoadingResult
 import com.mediathekview.android.video.VideoPlayerManager
 import com.mediathekview.android.video.createVideoPlayerManager
 import com.mediathekview.android.compose.data.ComposeDataMapper
@@ -671,10 +672,10 @@ class ComposeViewModel(
             try {
                 repository.loadMediaListFromFile(filePath).collect { result ->
                     when (result) {
-                        is MediaRepository.LoadingResult.Progress -> {
+                        is LoadingResult.Progress -> {
                             _loadingProgress.value = result.entriesLoaded
                         }
-                        is MediaRepository.LoadingResult.Complete -> {
+                        is LoadingResult.Complete -> {
                             Log.i(TAG, "Successfully loaded ${result.totalEntries} entries to database")
                             _loadingState.value = LoadingState.LOADED
                             _loadingProgress.value = result.totalEntries
@@ -697,7 +698,7 @@ class ComposeViewModel(
                                 Log.e(TAG, "Error deleting uncompressed file: $filePath", e)
                             }
                         }
-                        is MediaRepository.LoadingResult.Error -> {
+                        is LoadingResult.Error -> {
                             Log.e(TAG, "Error loading media list", result.exception)
                             _loadingState.value = LoadingState.ERROR
                             _errorMessage.value = result.exception.message ?: "Unknown error"
@@ -884,10 +885,10 @@ class ComposeViewModel(
             try {
                 repository.applyDiffToDatabase(filePath).collect { result ->
                     when (result) {
-                        is MediaRepository.LoadingResult.Progress -> {
+                        is LoadingResult.Progress -> {
                             _loadingProgress.value = result.entriesLoaded
                         }
-                        is MediaRepository.LoadingResult.Complete -> {
+                        is LoadingResult.Complete -> {
                             Log.i(TAG, "Successfully applied ${result.totalEntries} diff entries to database")
                             _loadingState.value = LoadingState.LOADED
                             _loadingProgress.value = result.totalEntries
@@ -907,7 +908,7 @@ class ComposeViewModel(
                                 Log.e(TAG, "Error deleting uncompressed diff file: $filePath", e)
                             }
                         }
-                        is MediaRepository.LoadingResult.Error -> {
+                        is LoadingResult.Error -> {
                             Log.e(TAG, "Error applying diff", result.exception)
                             _loadingState.value = LoadingState.ERROR
                             _errorMessage.value = result.exception.message ?: "Unknown error"

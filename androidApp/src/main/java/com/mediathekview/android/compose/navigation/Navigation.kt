@@ -32,29 +32,37 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.mediathekview.android.compose.data.ComposeDataMapper
-import com.mediathekview.android.compose.models.ComposeViewModel
 import com.mediathekview.android.compose.screens.BrowseView
+import com.mediathekview.shared.database.MediaEntry
 import com.mediathekview.shared.ui.screens.DetailView
 import com.mediathekview.shared.ui.navigation.Screen
 import com.mediathekview.shared.ui.navigation.OverviewState
 import com.mediathekview.shared.ui.navigation.NavigationAnimations
 import com.mediathekview.shared.ui.navigation.urlDecode
+import com.mediathekview.shared.viewmodel.LoadingState
+import com.mediathekview.shared.viewmodel.SharedViewModel
 import kotlinx.coroutines.flow.flowOf
 
 /**
  * Main navigation host - simplified to two destinations
+ * Uses SharedViewModel from KMP with callbacks for Android-specific operations
  */
 @Composable
 fun MediathekViewNavHost(
     navController: NavHostController,
-    viewModel: ComposeViewModel,
+    viewModel: SharedViewModel,
+    onTimePeriodClick: () -> Unit = {},
+    onCheckUpdateClick: () -> Unit = {},
+    onReinstallClick: () -> Unit = {},
+    onPlayVideo: (MediaEntry, Boolean) -> Unit = { _, _ -> },
+    onDownloadVideo: (MediaEntry, Boolean) -> Unit = { _, _ -> }
 ) {
     // Use ViewModel directly - no wrapper needed
     val isDataLoaded by viewModel.isDataLoadedFlow.collectAsStateWithLifecycle()
     val loadingState by viewModel.loadingState.collectAsStateWithLifecycle()
 
     // Show loading indicator if data is not yet loaded
-    if (!isDataLoaded && loadingState != ComposeViewModel.LoadingState.ERROR) {
+    if (!isDataLoaded && loadingState != LoadingState.ERROR) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -65,7 +73,7 @@ fun MediathekViewNavHost(
     }
 
     // Show error state if loading failed
-    if (loadingState == ComposeViewModel.LoadingState.ERROR) {
+    if (loadingState == LoadingState.ERROR) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -393,15 +401,9 @@ fun MediathekViewNavHost(
                         }
                     }
                 },
-                onTimePeriodClick = {
-                    viewModel.showTimePeriodDialog()
-                },
-                onCheckUpdateClick = {
-                    viewModel.checkForUpdatesManually()
-                },
-                onReinstallClick = {
-                    viewModel.showReinstallConfirmation()
-                }
+                onTimePeriodClick = onTimePeriodClick,
+                onCheckUpdateClick = onCheckUpdateClick,
+                onReinstallClick = onReinstallClick
             )
         }
 
@@ -488,13 +490,12 @@ fun MediathekViewNavHost(
                 DetailView(
                     mediaItem = item,
                     onPlayClick = { isHighQuality ->
-                        // Use the entry that is guaranteed to be non-null
-                        viewModel.playVideoWithEntry(entry, isHighQuality)
+                        // Use the callback for Android-specific video playback
+                        onPlayVideo(entry, isHighQuality)
                     },
                     onDownloadClick = { isHighQuality ->
-                        // Use the entry that is guaranteed to be non-null
-                        viewModel.setCurrentMediaEntry(entry)
-                        viewModel.onDownloadButtonClicked(isHighQuality)
+                        // Use the callback for Android-specific video download
+                        onDownloadVideo(entry, isHighQuality)
                     }
                 )
             }

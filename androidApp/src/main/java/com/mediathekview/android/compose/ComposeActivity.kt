@@ -2,10 +2,10 @@ package com.mediathekview.android.compose
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,12 +23,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.mediathekview.android.compose.models.ComposeViewModel
 import com.mediathekview.android.compose.navigation.MediathekViewNavHost
-import com.mediathekview.shared.ui.navigation.Screen
-import com.mediathekview.android.compose.ui.dialogs.AppDialogs
 import com.mediathekview.android.compose.ui.theme.MediathekViewTheme
 import com.mediathekview.android.model.Broadcaster
+import com.mediathekview.android.util.MediaUrlUtils
+import com.mediathekview.android.video.VideoPlayerManager
+import com.mediathekview.shared.database.MediaEntry
+import com.mediathekview.shared.ui.navigation.Screen
+import com.mediathekview.shared.viewmodel.SharedViewModel
+import com.mediathekview.shared.viewmodel.ViewState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 /**
@@ -41,15 +48,15 @@ class ComposeActivity : ComponentActivity() {
         private const val TAG = "ComposeActivity"
     }
 
-    // Inject MediaViewModel using Koin
-    private val viewModel: ComposeViewModel by viewModel()
+    // Inject SharedViewModel using Koin (replaces ComposeViewModel)
+    private val viewModel: SharedViewModel by viewModel()
+
+    // Inject VideoPlayerManager for playback intent observation
+    private val videoPlayerManager: VideoPlayerManager by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
-        // Initialize ViewModel with Android context (required for Android-specific features)
-        viewModel.initializeContext(applicationContext)
 
         // Use fallback display (brand color + abbreviation) for channel identification
         // instead of logo icons (MediathekViewWeb style)
@@ -68,7 +75,7 @@ class ComposeActivity : ComponentActivity() {
 
         setContent {
             MediathekViewTheme {
-                ComposeMainScreen(viewModel)
+                ComposeMainScreen(viewModel, videoPlayerManager)
             }
         }
     }
@@ -89,18 +96,19 @@ class ComposeActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ComposeMainScreen(viewModel: ComposeViewModel) {
+fun ComposeMainScreen(viewModel: SharedViewModel, videoPlayerManager: VideoPlayerManager) {
     val navController = rememberNavController()
     val context = LocalContext.current
+    val coroutineScope = remember { CoroutineScope(Dispatchers.Main) }
 
     // Observe ViewModel state for synchronization with traditional UI
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
     val loadingState by viewModel.loadingState.collectAsStateWithLifecycle()
 
-    // Observe start activity intents for video playback
-    LaunchedEffect(viewModel) {
-        Log.d("ComposeActivity", "Setting up intent collector...")
-        viewModel.startActivityIntent.collect { intent ->
+    // Observe playback intents from VideoPlayerManager for video playback
+    LaunchedEffect(videoPlayerManager) {
+        Log.d("ComposeActivity", "Setting up playback intent collector...")
+        videoPlayerManager.playbackIntents.collect { intent ->
             Log.d("ComposeActivity", "Received playback intent, starting activity...")
             context.startActivity(intent)
             Log.d("ComposeActivity", "Activity started successfully")
@@ -120,11 +128,11 @@ fun ComposeMainScreen(viewModel: ComposeViewModel) {
     LaunchedEffect(viewState) {
         val currentViewState = viewState // Capture the value to enable smart cast
         when (currentViewState) {
-            is ComposeViewModel.ViewState.Themes -> {
+            is ViewState.Themes -> {
                 // Could sync navigation state here if needed
                 Log.d("ComposeActivity", "ViewState: Themes - channel=${currentViewState.channel}, theme=${currentViewState.theme}")
             }
-            is ComposeViewModel.ViewState.Detail -> {
+            is ViewState.Detail -> {
                 Log.d("ComposeActivity", "ViewState: Detail - title=${currentViewState.title}")
             }
         }
@@ -167,26 +175,54 @@ fun ComposeMainScreen(viewModel: ComposeViewModel) {
             MediathekViewNavHost(
                 navController = navController,
                 viewModel = viewModel,
-                //startDestination = determineStartDestination(viewState)
+                onTimePeriodClick = {
+                    // TODO: Implement time period dialog
+                    Toast.makeText(context, "Time period filter not yet implemented", Toast.LENGTH_SHORT).show()
+                },
+                onCheckUpdateClick = {
+                    // TODO: Implement update check
+                    Toast.makeText(context, "Update check not yet implemented", Toast.LENGTH_SHORT).show()
+                },
+                onReinstallClick = {
+                    // TODO: Implement reinstall
+                    Toast.makeText(context, "Reinstall not yet implemented", Toast.LENGTH_SHORT).show()
+                },
+                onPlayVideo = { entry, isHighQuality ->
+                    coroutineScope.launch {
+                        videoPlayerManager.playVideo(entry, isHighQuality)
+                    }
+                },
+                onDownloadVideo = { entry, isHighQuality ->
+                    // Get the appropriate video URL based on quality selection
+                    val videoUrl = if (isHighQuality) {
+                        val hdUrl = entry.hdUrl.ifEmpty { entry.url }
+                        MediaUrlUtils.reconstructUrl(hdUrl, entry.url)
+                    } else {
+                        val smallUrl = entry.smallUrl.ifEmpty { entry.url }
+                        MediaUrlUtils.reconstructUrl(smallUrl, entry.url)
+                    }
+                    val quality = if (isHighQuality) "High" else "Low"
+                    viewModel.downloadVideo(entry, videoUrl, quality)
+                }
             )
         }
     }
 
-    // Show dialogs based on ViewModel state
-    AppDialogs(viewModel = viewModel)
+    // TODO: Implement SharedViewModel-compatible dialogs
+    // AppDialogs(viewModel = viewModel)
 }
 
 /**
  * Determine the start destination based on current ViewModel state
  * With simplified navigation, we only have Overview and Detail screens
  */
-private fun determineStartDestination(viewState: ComposeViewModel.ViewState): String {
+private fun determineStartDestination(viewState: ViewState): String {
     return when (viewState) {
-        is ComposeViewModel.ViewState.Themes -> {
+        is ViewState.Themes -> {
             // All browse states use the Overview screen
             Screen.Overview.route
         }
-        is ComposeViewModel.ViewState.Detail -> {
+        is ViewState.Detail -> {
             // Detail screen
             Screen.Detail.createRoute(
                 viewState.title,

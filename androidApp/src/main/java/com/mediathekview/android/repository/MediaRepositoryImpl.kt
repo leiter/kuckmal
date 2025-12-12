@@ -4,6 +4,7 @@ import android.util.Log
 import com.mediathekview.android.data.MediaListParser
 import com.mediathekview.shared.database.MediaDao
 import com.mediathekview.shared.database.MediaEntry
+import com.mediathekview.shared.repository.MediaRepository.LoadingResult
 import com.mediathekview.android.model.MediaEntry as ModelMediaEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -410,7 +411,7 @@ class MediaRepositoryImpl(
         }
     }
 
-    override fun loadMediaListFromFile(filePath: String): Flow<MediaRepository.LoadingResult> = callbackFlow {
+    override fun loadMediaListFromFile(filePath: String): Flow<LoadingResult> = callbackFlow {
         try {
             // Detect low-memory device for sequential vs parallel insertion strategy
             val runtime = Runtime.getRuntime()
@@ -441,11 +442,11 @@ class MediaRepositoryImpl(
                                 mediaDao.insertInBatches(dbEntries, DEFAULT_BATCH_SIZE)
                             }
                             // Emit progress after successful insertion
-                            trySend(MediaRepository.LoadingResult.Progress(totalParsed))
+                            trySend(LoadingResult.Progress(totalParsed))
                             Log.d(TAG, "Processed $totalParsed entries (sequential)")
                         } catch (e: Exception) {
                             Log.e(TAG, "Error inserting batch at $totalParsed", e)
-                            trySend(MediaRepository.LoadingResult.Error(e, totalParsed))
+                            trySend(LoadingResult.Error(e, totalParsed))
                         }
                     } else {
                         // HIGH-MEMORY MODE: Parallel async insertion (original behavior)
@@ -457,16 +458,16 @@ class MediaRepositoryImpl(
                             try {
                                 mediaDao.insertInBatches(dbEntries, DEFAULT_BATCH_SIZE)
                                 // Emit progress after successful insertion
-                                trySend(MediaRepository.LoadingResult.Progress(totalParsed))
+                                trySend(LoadingResult.Progress(totalParsed))
                                 Log.d(TAG, "Processed $totalParsed entries")
                             } catch (e: Exception) {
                                 Log.e(TAG, "Error inserting batch at $totalParsed", e)
-                                trySend(MediaRepository.LoadingResult.Error(e, totalParsed))
+                                trySend(LoadingResult.Error(e, totalParsed))
                             } finally {
                                 // Decrement pending counter and check if all done
                                 if (pendingInsertions.decrementAndGet() == 0 && parsingComplete) {
                                     Log.i(TAG, "All insertions complete for $totalCount entries")
-                                    trySend(MediaRepository.LoadingResult.Complete(totalCount))
+                                    trySend(LoadingResult.Complete(totalCount))
                                     close()
                                 }
                             }
@@ -482,13 +483,13 @@ class MediaRepositoryImpl(
                     if (isLowMemory) {
                         // LOW-MEMORY MODE: All insertions already complete (sequential)
                         Log.i(TAG, "All insertions complete for $count entries (sequential)")
-                        trySend(MediaRepository.LoadingResult.Complete(count))
+                        trySend(LoadingResult.Complete(count))
                         close()
                     } else {
                         // HIGH-MEMORY MODE: Wait for async insertions to complete
                         if (pendingInsertions.get() == 0) {
                             Log.i(TAG, "All insertions complete for $count entries")
-                            trySend(MediaRepository.LoadingResult.Complete(count))
+                            trySend(LoadingResult.Complete(count))
                             close()
                         }
                     }
@@ -497,7 +498,7 @@ class MediaRepositoryImpl(
                 override fun onError(error: Exception, entriesParsed: Int) {
                     Log.e(TAG, "Error parsing at entry $entriesParsed", error)
                     // Emit error
-                    trySend(MediaRepository.LoadingResult.Error(error, entriesParsed))
+                    trySend(LoadingResult.Error(error, entriesParsed))
                     close(error)
                 }
             }
@@ -524,12 +525,12 @@ class MediaRepositoryImpl(
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error loading media list", e)
-            send(MediaRepository.LoadingResult.Error(e, 0))
+            send(LoadingResult.Error(e, 0))
             close(e)
         }
     }.flowOn(Dispatchers.IO)
 
-    override fun applyDiffToDatabase(filePath: String): Flow<MediaRepository.LoadingResult> = callbackFlow {
+    override fun applyDiffToDatabase(filePath: String): Flow<LoadingResult> = callbackFlow {
         try {
             // Detect low-memory device for sequential vs parallel insertion strategy
             val runtime = Runtime.getRuntime()
@@ -559,11 +560,11 @@ class MediaRepositoryImpl(
                                 mediaDao.insertInBatches(dbEntries, DEFAULT_BATCH_SIZE)
                             }
                             // Emit progress after successful insertion
-                            trySend(MediaRepository.LoadingResult.Progress(totalParsed))
+                            trySend(LoadingResult.Progress(totalParsed))
                             Log.d(TAG, "Applied $totalParsed diff entries (sequential)")
                         } catch (e: Exception) {
                             Log.e(TAG, "Error applying diff batch at $totalParsed", e)
-                            trySend(MediaRepository.LoadingResult.Error(e, totalParsed))
+                            trySend(LoadingResult.Error(e, totalParsed))
                         }
                     } else {
                         // HIGH-MEMORY MODE: Parallel async insertion
@@ -573,15 +574,15 @@ class MediaRepositoryImpl(
                             try {
                                 // Use INSERT OR REPLACE to update existing entries or insert new ones
                                 mediaDao.insertInBatches(dbEntries, DEFAULT_BATCH_SIZE)
-                                trySend(MediaRepository.LoadingResult.Progress(totalParsed))
+                                trySend(LoadingResult.Progress(totalParsed))
                                 Log.d(TAG, "Applied $totalParsed diff entries")
                             } catch (e: Exception) {
                                 Log.e(TAG, "Error applying diff batch at $totalParsed", e)
-                                trySend(MediaRepository.LoadingResult.Error(e, totalParsed))
+                                trySend(LoadingResult.Error(e, totalParsed))
                             } finally {
                                 if (pendingInsertions.decrementAndGet() == 0 && parsingComplete) {
                                     Log.i(TAG, "All diff insertions complete for $totalCount entries")
-                                    trySend(MediaRepository.LoadingResult.Complete(totalCount))
+                                    trySend(LoadingResult.Complete(totalCount))
                                     close()
                                 }
                             }
@@ -601,13 +602,13 @@ class MediaRepositoryImpl(
                     if (isLowMemory) {
                         // LOW-MEMORY MODE: All insertions already complete
                         Log.i(TAG, "All diff insertions complete for $count entries (sequential)")
-                        trySend(MediaRepository.LoadingResult.Complete(count))
+                        trySend(LoadingResult.Complete(count))
                         close()
                     } else {
                         // HIGH-MEMORY MODE: Wait for async insertions
                         if (pendingInsertions.get() == 0) {
                             Log.i(TAG, "All diff insertions complete for $count entries")
-                            trySend(MediaRepository.LoadingResult.Complete(count))
+                            trySend(LoadingResult.Complete(count))
                             close()
                         }
                     }
@@ -615,7 +616,7 @@ class MediaRepositoryImpl(
 
                 override fun onError(error: Exception, entriesParsed: Int) {
                     Log.e(TAG, "Error parsing diff at entry $entriesParsed", error)
-                    trySend(MediaRepository.LoadingResult.Error(error, entriesParsed))
+                    trySend(LoadingResult.Error(error, entriesParsed))
                     close(error)
                 }
             }
@@ -635,7 +636,7 @@ class MediaRepositoryImpl(
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error applying diff", e)
-            send(MediaRepository.LoadingResult.Error(e, 0))
+            send(LoadingResult.Error(e, 0))
             close(e)
         }
     }.flowOn(Dispatchers.IO)
@@ -652,10 +653,10 @@ class MediaRepositoryImpl(
                 var success = false
                 loadMediaListFromFile(mediaListFile.absolutePath).collect { result ->
                     when (result) {
-                        is MediaRepository.LoadingResult.Complete -> {
+                        is LoadingResult.Complete -> {
                             success = result.totalEntries > 0
                         }
-                        is MediaRepository.LoadingResult.Error -> {
+                        is LoadingResult.Error -> {
                             success = false
                         }
                         else -> { /* Progress - do nothing */ }
