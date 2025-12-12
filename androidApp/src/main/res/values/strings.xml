@@ -125,12 +125,28 @@
     <string name="btn_later">Later</string>
 
     <!-- Time Period Filter Options -->
+    <string name="time_period_title">Filter by Time Period</string>
     <string name="time_period_all">All Time</string>
+    <string name="time_period_today">Last 24 Hours</string>
+    <string name="time_period_week">Last 7 Days</string>
+    <string name="time_period_month">Last 30 Days</string>
     <string name="time_period_1_day">Last 24 Hours</string>
     <string name="time_period_3_days">Last 3 Days</string>
     <string name="time_period_7_days">Last 7 Days</string>
     <string name="time_period_30_days">Last 30 Days</string>
     <string name="time_period_unknown">Unknown</string>
+
+    <!-- Update Messages -->
+    <string name="update_available">Update available! Starting download…</string>
+    <string name="update_complete">Update complete!</string>
+    <string name="no_update_available">Film list is up to date</string>
+
+    <!-- Reinstall Dialog -->
+    <string name="reinstall_title">Reinstall Film List</string>
+    <string name="reinstall_message">This will clear all data and download the media list again. Continue?</string>
+    <string name="btn_reinstall">Reinstall</string>
+    <string name="reinstall_complete">Film list reinstalled successfully!</string>
+    <string name="reinstall_failed">Failed to reinstall film list</string>
 
     <!-- Duration Formatting -->
     <string name="duration_hours_short">h</string>

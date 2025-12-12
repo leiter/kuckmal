@@ -15,21 +15,28 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.mediathekview.android.R
 import com.mediathekview.android.compose.navigation.MediathekViewNavHost
+import com.mediathekview.android.compose.ui.dialogs.AppDialogs
+import com.mediathekview.android.compose.ui.dialogs.ConfirmationDialog
+import com.mediathekview.android.compose.ui.dialogs.SingleChoiceDialog
 import com.mediathekview.android.compose.ui.theme.MediathekViewTheme
 import com.mediathekview.android.model.Broadcaster
 import com.mediathekview.android.util.MediaUrlUtils
+import com.mediathekview.android.util.UpdateChecker
 import com.mediathekview.android.video.VideoPlayerManager
-import com.mediathekview.shared.database.MediaEntry
 import com.mediathekview.shared.ui.navigation.Screen
+import com.mediathekview.shared.viewmodel.DialogState
 import com.mediathekview.shared.viewmodel.SharedViewModel
 import com.mediathekview.shared.viewmodel.ViewState
 import kotlinx.coroutines.CoroutineScope
@@ -54,6 +61,9 @@ class ComposeActivity : ComponentActivity() {
     // Inject VideoPlayerManager for playback intent observation
     private val videoPlayerManager: VideoPlayerManager by inject()
 
+    // Inject UpdateChecker for update functionality
+    private val updateChecker: UpdateChecker by inject()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -75,7 +85,12 @@ class ComposeActivity : ComponentActivity() {
 
         setContent {
             MediathekViewTheme {
-                ComposeMainScreen(viewModel, videoPlayerManager)
+                ComposeMainScreen(
+                    viewModel = viewModel,
+                    videoPlayerManager = videoPlayerManager,
+                    updateChecker = updateChecker,
+                    filesPath = filesDir.absolutePath + "/"
+                )
             }
         }
     }
@@ -96,7 +111,12 @@ class ComposeActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ComposeMainScreen(viewModel: SharedViewModel, videoPlayerManager: VideoPlayerManager) {
+fun ComposeMainScreen(
+    viewModel: SharedViewModel,
+    videoPlayerManager: VideoPlayerManager,
+    updateChecker: UpdateChecker,
+    filesPath: String
+) {
     val navController = rememberNavController()
     val context = LocalContext.current
     val coroutineScope = remember { CoroutineScope(Dispatchers.Main) }
@@ -104,6 +124,19 @@ fun ComposeMainScreen(viewModel: SharedViewModel, videoPlayerManager: VideoPlaye
     // Observe ViewModel state for synchronization with traditional UI
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
     val loadingState by viewModel.loadingState.collectAsStateWithLifecycle()
+    val timePeriodId by viewModel.timePeriodId.collectAsStateWithLifecycle()
+
+    // Dialog states for menu actions
+    var showTimePeriodDialog by remember { mutableStateOf(false) }
+    var showReinstallDialog by remember { mutableStateOf(false) }
+
+    // Time period options
+    val timePeriodLabels = listOf(
+        stringResource(R.string.time_period_all),
+        stringResource(R.string.time_period_today),
+        stringResource(R.string.time_period_week),
+        stringResource(R.string.time_period_month)
+    )
 
     // Observe playback intents from VideoPlayerManager for video playback
     LaunchedEffect(videoPlayerManager) {
@@ -129,7 +162,6 @@ fun ComposeMainScreen(viewModel: SharedViewModel, videoPlayerManager: VideoPlaye
         val currentViewState = viewState // Capture the value to enable smart cast
         when (currentViewState) {
             is ViewState.Themes -> {
-                // Could sync navigation state here if needed
                 Log.d("ComposeActivity", "ViewState: Themes - channel=${currentViewState.channel}, theme=${currentViewState.theme}")
             }
             is ViewState.Detail -> {
@@ -138,34 +170,7 @@ fun ComposeMainScreen(viewModel: SharedViewModel, videoPlayerManager: VideoPlaye
         }
     }
 
-    // Overflow menu state
-    var showMenu by remember { mutableStateOf(false) }
-
-    Scaffold(
-        topBar = {
-//            TopAppBar(
-//                title = { Text("MediathekView") },
-//                actions = {
-//                    IconButton(onClick = { showMenu = true }) {
-//                        Icon(Icons.Default.MoreVert, contentDescription = "Menu")
-//                    }
-//                    DropdownMenu(
-//                        expanded = showMenu,
-//                        onDismissRequest = { showMenu = false }
-//                    ) {
-//                        DropdownMenuItem(
-//                            text = { Text("Legacy UI") },
-//                            onClick = {
-//                                showMenu = false
-//                                val intent = Intent(context, MediaActivity::class.java)
-//                                context.startActivity(intent)
-//                            }
-//                        )
-//                    }
-//                }
-//            )
-        }
-    ) { paddingValues ->
+    Scaffold { paddingValues ->
         Surface(
             modifier = Modifier
                 .fillMaxSize()
@@ -176,16 +181,39 @@ fun ComposeMainScreen(viewModel: SharedViewModel, videoPlayerManager: VideoPlaye
                 navController = navController,
                 viewModel = viewModel,
                 onTimePeriodClick = {
-                    // TODO: Implement time period dialog
-                    Toast.makeText(context, "Time period filter not yet implemented", Toast.LENGTH_SHORT).show()
+                    showTimePeriodDialog = true
                 },
                 onCheckUpdateClick = {
-                    // TODO: Implement update check
-                    Toast.makeText(context, "Update check not yet implemented", Toast.LENGTH_SHORT).show()
+                    coroutineScope.launch(Dispatchers.IO) {
+                        try {
+                            val result = updateChecker.checkForUpdate()
+                            coroutineScope.launch(Dispatchers.Main) {
+                                when (result) {
+                                    is UpdateChecker.UpdateCheckResult.UpdateAvailable -> {
+                                        Toast.makeText(context, R.string.update_available, Toast.LENGTH_LONG).show()
+                                        // Trigger reload through viewModel
+                                        viewModel.checkAndLoadMediaListToDatabase(filesPath)
+                                    }
+                                    is UpdateChecker.UpdateCheckResult.NoUpdateNeeded -> {
+                                        Toast.makeText(context, R.string.no_update_available, Toast.LENGTH_SHORT).show()
+                                    }
+                                    is UpdateChecker.UpdateCheckResult.CheckSkipped -> {
+                                        Toast.makeText(context, R.string.no_update_available, Toast.LENGTH_SHORT).show()
+                                    }
+                                    is UpdateChecker.UpdateCheckResult.CheckFailed -> {
+                                        Toast.makeText(context, "Error: ${result.error}", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
+                        } catch (e: Exception) {
+                            coroutineScope.launch(Dispatchers.Main) {
+                                Toast.makeText(context, "Error checking for updates: ${e.message}", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
                 },
                 onReinstallClick = {
-                    // TODO: Implement reinstall
-                    Toast.makeText(context, "Reinstall not yet implemented", Toast.LENGTH_SHORT).show()
+                    showReinstallDialog = true
                 },
                 onPlayVideo = { entry, isHighQuality ->
                     coroutineScope.launch {
@@ -208,8 +236,72 @@ fun ComposeMainScreen(viewModel: SharedViewModel, videoPlayerManager: VideoPlaye
         }
     }
 
-    // TODO: Implement SharedViewModel-compatible dialogs
-    // AppDialogs(viewModel = viewModel)
+    // Time Period Selection Dialog
+    if (showTimePeriodDialog) {
+        SingleChoiceDialog(
+            title = stringResource(R.string.time_period_title),
+            items = timePeriodLabels,
+            selectedIndex = timePeriodId,
+            onItemSelected = { index ->
+                showTimePeriodDialog = false
+                // Calculate timestamp based on selection
+                val now = System.currentTimeMillis() / 1000
+                val limitDate = when (index) {
+                    1 -> now - 86400        // Today (24 hours)
+                    2 -> now - 604800       // Week (7 days)
+                    3 -> now - 2592000      // Month (30 days)
+                    else -> 0L              // All time
+                }
+                viewModel.setDateFilter(limitDate, index)
+                Log.d("ComposeActivity", "Time period changed to: ${timePeriodLabels[index]}")
+            },
+            negativeLabel = stringResource(R.string.btn_cancel),
+            onNegative = { showTimePeriodDialog = false }
+        )
+    }
+
+    // Reinstall Confirmation Dialog
+    if (showReinstallDialog) {
+        ConfirmationDialog(
+            title = stringResource(R.string.reinstall_title),
+            message = stringResource(R.string.reinstall_message),
+            positiveLabel = stringResource(R.string.btn_reinstall),
+            negativeLabel = stringResource(R.string.btn_cancel),
+            onPositive = {
+                showReinstallDialog = false
+                // Clear data and trigger fresh load
+                viewModel.clearData()
+                Toast.makeText(context, "Clearing data and reloading...", Toast.LENGTH_SHORT).show()
+                coroutineScope.launch(Dispatchers.IO) {
+                    // Wait a moment for data to clear
+                    kotlinx.coroutines.delay(500)
+                    viewModel.checkAndLoadMediaListToDatabase(filesPath)
+                    coroutineScope.launch(Dispatchers.Main) {
+                        Toast.makeText(context, R.string.reinstall_complete, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            },
+            onNegative = { showReinstallDialog = false }
+        )
+    }
+
+    // SharedViewModel dialogs (for progress, errors, etc.)
+    AppDialogs(
+        viewModel = viewModel,
+        onDialogAction = { action, _ ->
+            when (action) {
+                DialogState.Action.RETRY -> {
+                    // Retry loading
+                    viewModel.checkAndLoadMediaListToDatabase(filesPath)
+                }
+                DialogState.Action.START_DOWNLOAD -> {
+                    // Start initial download
+                    viewModel.checkAndLoadMediaListToDatabase(filesPath)
+                }
+                else -> { /* Other actions handled by dismiss */ }
+            }
+        }
+    )
 }
 
 /**

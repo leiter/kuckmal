@@ -12,114 +12,100 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mediathekview.android.R
-import com.mediathekview.android.compose.models.ComposeViewModel
-import com.mediathekview.android.ui.dialog.DialogModel
-import com.mediathekview.android.util.AppConfig
+import com.mediathekview.shared.viewmodel.DialogState
+import com.mediathekview.shared.viewmodel.LoadingState
+import com.mediathekview.shared.viewmodel.SharedViewModel
 
 /**
- * Main dialog host that observes ViewModel state and displays appropriate dialogs
+ * Main dialog host that observes SharedViewModel state and displays appropriate dialogs
  */
 @Composable
-fun AppDialogs(viewModel: ComposeViewModel) {
-    val showWelcomeDialog by viewModel.showWelcomeDialog.collectAsStateWithLifecycle()
-    val dialogModel by viewModel.dialogModel.collectAsStateWithLifecycle()
+fun AppDialogs(
+    viewModel: SharedViewModel,
+    onDialogAction: (DialogState.Action, Int?) -> Unit = { _, _ -> }
+) {
+    val dialogState by viewModel.dialogState.collectAsStateWithLifecycle()
     val loadingProgress by viewModel.loadingProgress.collectAsStateWithLifecycle()
     val loadingState by viewModel.loadingState.collectAsStateWithLifecycle()
 
-    // Welcome dialog for first-time setup
-    if (showWelcomeDialog) {
-        WelcomeDialog(
-            onStartDownload = {
-                viewModel.welcomeDialogShown()
-                viewModel.startSmartMediaListDownload()
-            },
-            onCancel = {
-                viewModel.welcomeDialogShown()
-            }
-        )
-    }
-
-    // Dialog model based dialogs (progress, error, message, etc.)
-    dialogModel?.let { model ->
-        when (model) {
-            is DialogModel.Progress -> {
+    // Dialog state based dialogs
+    dialogState?.let { state ->
+        when (state) {
+            is DialogState.Progress -> {
                 // Check if we're in database loading phase
-                val message = if (loadingState == ComposeViewModel.LoadingState.LOADING && loadingProgress > 0) {
+                val message = if (loadingState == LoadingState.LOADING && loadingProgress > 0) {
                     stringResource(R.string.dialog_msg_loaded_entries, loadingProgress)
                 } else {
-                    model.message
+                    state.message
                 }
                 ProgressDialog(
-                    title = model.title,
+                    title = state.title,
                     message = message,
-                    onDismiss = if (model.cancelable) {{ viewModel.dismissDialog() }} else null
+                    onDismiss = if (state.cancelable) {{ viewModel.dismissDialog() }} else null
                 )
             }
-            is DialogModel.Error -> {
+            is DialogState.Error -> {
                 ErrorDialog(
-                    title = model.title,
-                    message = model.message,
-                    retryLabel = model.retryLabel,
-                    cancelLabel = model.cancelLabel,
+                    title = state.title,
+                    message = state.message,
+                    retryLabel = state.retryLabel,
+                    cancelLabel = state.cancelLabel,
+                    showRetry = state.canRetry,
                     onRetry = {
                         viewModel.dismissDialog()
-                        model.onRetry()
+                        onDialogAction(state.retryAction, null)
                     },
                     onCancel = {
                         viewModel.dismissDialog()
-                        model.onCancel?.invoke()
+                        onDialogAction(state.cancelAction, null)
                     }
                 )
             }
-            is DialogModel.Message -> {
+            is DialogState.Message -> {
                 MessageDialog(
-                    title = model.title,
-                    message = model.message,
-                    positiveLabel = model.positiveLabel,
+                    title = state.title,
+                    message = state.message,
+                    positiveLabel = state.positiveLabel,
                     onPositive = {
                         viewModel.dismissDialog()
-                        model.onPositive?.invoke()
+                        onDialogAction(state.positiveAction, null)
                     },
-                    onDismiss = if (model.cancelable) {{ viewModel.dismissDialog() }} else null
+                    onDismiss = if (state.cancelable) {{ viewModel.dismissDialog() }} else null
                 )
             }
-            is DialogModel.Confirmation -> {
+            is DialogState.Confirmation -> {
                 ConfirmationDialog(
-                    title = model.title,
-                    message = model.message,
-                    positiveLabel = model.positiveLabel,
-                    negativeLabel = model.negativeLabel,
+                    title = state.title,
+                    message = state.message,
+                    positiveLabel = state.positiveLabel,
+                    negativeLabel = state.negativeLabel,
                     onPositive = {
                         viewModel.dismissDialog()
-                        model.onPositive()
+                        onDialogAction(state.positiveAction, null)
                     },
                     onNegative = {
                         viewModel.dismissDialog()
-                        model.onNegative?.invoke()
+                        onDialogAction(state.negativeAction, null)
                     },
-                    onDismiss = if (model.cancelable) {{ viewModel.dismissDialog() }} else null
+                    onDismiss = if (state.cancelable) {{ viewModel.dismissDialog() }} else null
                 )
             }
-            is DialogModel.SingleChoice -> {
+            is DialogState.SingleChoice -> {
                 SingleChoiceDialog(
-                    title = model.title,
-                    items = model.items.toList(),
-                    selectedIndex = model.selectedIndex,
+                    title = state.title,
+                    items = state.items,
+                    selectedIndex = state.selectedIndex,
                     onItemSelected = { index ->
                         viewModel.dismissDialog()
-                        model.onItemSelected(index)
+                        onDialogAction(DialogState.Action.CONFIRM, index)
                     },
-                    negativeLabel = model.negativeLabel,
+                    negativeLabel = state.negativeLabel,
                     onNegative = {
                         viewModel.dismissDialog()
-                        model.onNegative?.invoke()
+                        onDialogAction(DialogState.Action.CANCEL, null)
                     },
-                    onDismiss = if (model.cancelable) {{ viewModel.dismissDialog() }} else null
+                    onDismiss = if (state.cancelable) {{ viewModel.dismissDialog() }} else null
                 )
-            }
-            // CustomView and Welcome are handled separately (they use Android Views)
-            is DialogModel.CustomView, is DialogModel.Welcome -> {
-                // These require Android View integration, not used in Compose
             }
         }
     }
@@ -248,6 +234,7 @@ fun ErrorDialog(
     message: String,
     retryLabel: String,
     cancelLabel: String,
+    showRetry: Boolean = true,
     onRetry: () -> Unit,
     onCancel: () -> Unit
 ) {
@@ -256,8 +243,10 @@ fun ErrorDialog(
         title = { Text(title) },
         text = { Text(message) },
         confirmButton = {
-            Button(onClick = onRetry) {
-                Text(retryLabel)
+            if (showRetry) {
+                Button(onClick = onRetry) {
+                    Text(retryLabel)
+                }
             }
         },
         dismissButton = {

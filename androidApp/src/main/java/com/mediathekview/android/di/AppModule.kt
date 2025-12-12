@@ -6,7 +6,6 @@ import android.content.Context
 import android.widget.Toast
 import androidx.core.net.toUri
 import com.mediathekview.android.compose.data.ComposeDataMapper
-import com.mediathekview.android.compose.models.ComposeViewModel
 import com.mediathekview.android.data.MediaListParser
 import com.mediathekview.android.data.MediaViewModel
 import com.mediathekview.android.repository.DownloadRepository
@@ -119,21 +118,10 @@ val appModule = module {
         )
     }
 
-    // MediaViewModel - scoped to Activity/Fragment lifecycle
+    // MediaViewModel - scoped to Activity/Fragment lifecycle (legacy XML UI)
     viewModel {
         MediaViewModel(
             application = androidApplication(),
-            repository = get(),
-            downloadRepository = get(),
-            updateChecker = get()
-        )
-    }
-
-    // ComposeViewModel - scoped to Activity/Fragment lifecycle
-    // Note: Uses standard ViewModel (not AndroidViewModel)
-    // Call viewModel.initializeContext(context) after obtaining the ViewModel
-    viewModel {
-        ComposeViewModel(
             repository = get(),
             downloadRepository = get(),
             updateChecker = get()
