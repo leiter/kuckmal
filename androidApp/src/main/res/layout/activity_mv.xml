@@ -1,0 +1,24 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/active_view"
+    android:layout_margin="6dp"
+    android:fitsSystemWindows="true">
+
+    <!-- Main Browse View (Channels + Themes/Titles) -->
+    <include
+        android:id="@+id/browse_view"
+        layout="@layout/browse_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible" />
+
+    <!-- Detail View (initially hidden) -->
+    <include
+        android:id="@+id/detail_view"
+        layout="@layout/detail_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
+</FrameLayout>

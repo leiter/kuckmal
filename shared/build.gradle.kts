@@ -14,16 +14,17 @@ kotlin {
         }
     }
 
-    js(IR) {
-        browser {
-            commonWebpackConfig {
-                cssSupport {
-                    enabled.set(true)
-                }
-            }
-        }
-        binaries.executable()
-    }
+    // JS target disabled for now
+    // js(IR) {
+    //     browser {
+    //         commonWebpackConfig {
+    //             cssSupport {
+    //                 enabled.set(true)
+    //             }
+    //         }
+    //     }
+    //     binaries.executable()
+    // }
 
     sourceSets {
         val commonMain by getting {
@@ -31,6 +32,7 @@ kotlin {
                 implementation(compose.runtime)
                 implementation(compose.foundation)
                 implementation(compose.material3)
+                implementation(compose.materialIconsExtended)
                 implementation(compose.ui)
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
             }
@@ -48,12 +50,13 @@ kotlin {
             }
         }
 
-        val jsMain by getting {
-            dependencies {
-                implementation(compose.html.core)
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.9.0")
-            }
-        }
+        // jsMain disabled for now
+        // val jsMain by getting {
+        //     dependencies {
+        //         implementation(compose.html.core)
+        //         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.9.0")
+        //     }
+        // }
     }
 }
 

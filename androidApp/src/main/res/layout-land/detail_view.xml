@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:baselineAligned="false"
+    android:background="@color/md_theme_background">
+
+    <!-- Left Panel: Channel, Theme, Title, Metadata (40%) -->
+    <ScrollView
+        android:id="@+id/detail_scroll_left_land"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="0.4"
+        android:fillViewport="true"
+        android:background="@color/md_theme_surfaceContainerLow"
+        android:saveEnabled="false"
+        android:focusable="true"
+        android:focusableInTouchMode="false"
+        android:scrollbars="vertical"
+        android:fadeScrollbars="true"
+        android:nextFocusRight="@id/play">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="top"
+            android:padding="24dp">
+
+            <!--   Channel Logo Section  -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:background="@color/channel_list_background"
+                android:padding="16dp"
+                android:layout_marginBottom="24dp"
+                android:elevation="2dp">
+
+                <ImageView
+                    android:layout_width="80dp"
+                    android:layout_height="48dp"
+                    android:scaleType="fitCenter"
+                    android:id="@+id/dvSenderImg" />
+            </LinearLayout>
+
+            <!--   Theme Section  -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/theme_label"
+                android:textSize="14sp"
+                android:textColor="@color/md_theme_onSurfaceVariant"
+                android:textStyle="bold"
+                android:layout_marginBottom="4dp"
+                android:id="@+id/dv2" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:textColor="@color/md_theme_primary"
+                android:textStyle="bold"
+                android:layout_marginBottom="20dp"
+                android:id="@+id/dvThema" />
+
+            <!--   Title Section  -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/title_label"
+                android:textSize="14sp"
+                android:textColor="@color/md_theme_onSurfaceVariant"
+                android:textStyle="bold"
+                android:layout_marginBottom="4dp"
+                android:id="@+id/dv3" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="22sp"
+                android:textColor="@color/md_theme_onSurface"
+                android:textStyle="bold"
+                android:layout_marginBottom="24dp"
+                android:lineSpacingExtra="4dp"
+                android:id="@+id/dvTitel" />
+
+            <!--   Metadata Section  -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@color/md_theme_surfaceContainer"
+                android:padding="16dp"
+                android:layout_marginBottom="24dp">
+
+                <!--   Date Row  -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="12dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/date_label"
+                        android:textSize="14sp"
+                        android:textColor="@color/md_theme_onSurfaceVariant"
+                        android:id="@+id/dv4" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:textSize="16sp"
+                        android:textColor="@color/md_theme_onSurface"
+                        android:textStyle="bold"
+                        android:id="@+id/dvDatum" />
+                </LinearLayout>
+
+                <!--   Time Row  -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="12dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/time_label"
+                        android:textSize="14sp"
+                        android:textColor="@color/md_theme_onSurfaceVariant"
+                        android:id="@+id/dv5" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:textSize="16sp"
+                        android:textColor="@color/md_theme_onSurface"
+                        android:textStyle="bold"
+                        android:id="@+id/dvZeit" />
+                </LinearLayout>
+
+                <!--   Duration Row  -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="12dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/duration_label"
+                        android:textSize="14sp"
+                        android:textColor="@color/md_theme_onSurfaceVariant"
+                        android:id="@+id/dv6" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:textSize="16sp"
+                        android:textColor="@color/md_theme_onSurface"
+                        android:textStyle="bold"
+                        android:id="@+id/dvDauer" />
+                </LinearLayout>
+
+                <!--   Size Row  -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/size_label"
+                        android:textSize="14sp"
+                        android:textColor="@color/md_theme_onSurfaceVariant"
+                        android:id="@+id/dv6b" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:textSize="16sp"
+                        android:textColor="@color/md_theme_onSurface"
+                        android:textStyle="bold"
+                        android:id="@+id/dvGroesse" />
+                </LinearLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Right Panel: Description, Quality, Actions (60%) -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="0.6"
+        android:orientation="vertical"
+        android:background="@color/md_theme_surface">
+
+        <!-- Scrollable content area -->
+        <ScrollView
+            android:id="@+id/detail_scroll_right_land"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true"
+            android:saveEnabled="false"
+            android:focusable="true"
+            android:focusableInTouchMode="false"
+            android:scrollbars="vertical"
+            android:fadeScrollbars="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="top"
+                android:padding="24dp"
+                android:paddingBottom="0dp">
+
+                <!--   Description Section - Collapsible UX  -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@drawable/description_container_background"
+                    android:padding="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:elevation="1dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:id="@+id/descriptionContainer"
+                    android:nextFocusUp="@id/play"
+                    android:nextFocusLeft="@id/detail_scroll_left_land">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/description_label"
+                        android:textSize="14sp"
+                        android:textColor="@color/md_theme_primary"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="12dp"
+                        android:id="@+id/dv7" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="15sp"
+                        android:textColor="@color/md_theme_onSurface"
+                        android:lineSpacingExtra="8dp"
+                        android:lineSpacingMultiplier="1.2"
+                        android:maxLines="3"
+                        android:ellipsize="end"
+                        android:id="@+id/dvBeschreibung" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="8dp"
+                        android:visibility="gone"
+                        android:id="@+id/showMoreButton">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/show_more"
+                            android:textSize="13sp"
+                            android:textColor="@color/md_theme_primary"
+                            android:textStyle="bold"
+                            android:id="@+id/showMoreText" />
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_marginStart="4dp"
+                            android:src="@drawable/ic_chevron_down"
+                            android:id="@+id/showMoreChevron" />
+                    </LinearLayout>
+                </LinearLayout>
+
+            </LinearLayout>
+        </ScrollView>
+
+        <!--   Playback Controls - Fixed Bottom Component  -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/md_theme_surfaceContainer"
+            android:padding="20dp"
+            android:elevation="8dp">
+
+            <!--   Quality Selection  -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/quality_label"
+                android:textSize="14sp"
+                android:textColor="@color/md_theme_primary"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp" />
+
+            <RadioGroup
+                android:id="@+id/radioGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="20dp">
+
+                <RadioButton
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/quality_high"
+                    android:textSize="15sp"
+                    android:textColor="@color/md_theme_onSurface"
+                    android:id="@+id/qualityHigh"
+                    android:background="@drawable/radio_button_background"
+                    android:focusable="true"
+                    android:padding="12dp"
+                    android:nextFocusRight="@id/qualityLow"
+                    android:nextFocusDown="@id/play" />
+
+                <RadioButton
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/quality_low"
+                    android:textSize="15sp"
+                    android:textColor="@color/md_theme_onSurface"
+                    android:id="@+id/qualityLow"
+                    android:checked="true"
+                    android:background="@drawable/radio_button_background"
+                    android:focusable="true"
+                    android:padding="12dp"
+                    android:nextFocusLeft="@id/qualityHigh"
+                    android:nextFocusDown="@id/download" />
+            </RadioGroup>
+
+            <!--   Action Buttons Row  -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
+
+                <ImageButton
+                    android:layout_width="0dp"
+                    android:layout_height="60dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="12dp"
+                    android:src="@drawable/ic_play"
+                    android:id="@+id/play"
+                    android:background="@drawable/button_play_background"
+                    android:scaleType="fitCenter"
+                    android:padding="16dp"
+                    android:focusable="true"
+                    android:contentDescription="@string/cd_play"
+                    app:tint="@color/button_play_icon"
+                    android:nextFocusRight="@id/download"
+                    android:nextFocusUp="@id/qualityHigh"
+                    android:nextFocusDown="@id/descriptionContainer"
+                    android:nextFocusLeft="@id/detail_scroll_left_land" />
+
+                <ImageButton
+                    android:layout_width="0dp"
+                    android:layout_height="60dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp"
+                    android:src="@drawable/ic_download"
+                    android:id="@+id/download"
+                    android:background="@drawable/button_download_background"
+                    android:scaleType="fitCenter"
+                    android:padding="16dp"
+                    android:focusable="true"
+                    android:contentDescription="@string/cd_download"
+                    app:tint="@color/button_download_icon"
+                    android:nextFocusLeft="@id/play"
+                    android:nextFocusDown="@id/descriptionContainer"
+                    android:nextFocusUp="@id/qualityLow" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

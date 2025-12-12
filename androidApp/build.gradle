@@ -1,0 +1,185 @@
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'com.google.devtools.ksp' version '2.1.0-1.0.29'
+    id 'org.jetbrains.kotlin.plugin.compose' version '2.1.0'
+}
+
+android {
+    namespace 'com.mediathekview.android'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId "com.mediathekview.android"
+        minSdk 21
+        targetSdk 36
+        versionCode 1
+        versionName "1.0"
+
+        // Test runner for instrumentation tests
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        debug {
+//            minifyEnabled true
+//            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // Disable debuggable to enable R8 obfuscation/optimization
+            // Debug symbols are preserved in proguard-rules.pro
+            debuggable true //false
+        }
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            debuggable false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    buildFeatures {
+        compose = true
+    }
+
+    lint {
+        abortOnError false
+    }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
+
+    // Don't compress database files in assets (required for large files)
+    aaptOptions {
+        noCompress "db"
+    }
+
+    // Add KSP generated sources to source sets
+    applicationVariants.configureEach { variant ->
+        def variantName = variant.name
+        def capitalizedVariantName = variantName.capitalize()
+
+        kotlin.sourceSets {
+            getByName(variantName) {
+                kotlin.srcDir("${buildDir}/generated/ksp/${variantName}/kotlin")
+            }
+        }
+    }
+}
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+    arg("room.incremental", "true")
+    arg("room.expandProjection", "true")
+}
+
+dependencies {
+    // Shared Kotlin Multiplatform module
+    implementation project(':shared')
+
+    // Kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0'
+
+    // AndroidX
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation 'androidx.activity:activity-ktx:1.9.3'
+    implementation 'androidx.core:core-ktx:1.15.0'
+
+    // Jetpack Compose BOM (Bill of Materials)
+    def composeBom = platform('androidx.compose:compose-bom:2025.01.00')
+    implementation composeBom
+    androidTestImplementation composeBom
+
+    // Compose Core
+    implementation 'androidx.compose.ui:ui'
+    implementation 'androidx.compose.ui:ui-graphics'
+    implementation 'androidx.compose.ui:ui-tooling-preview'
+    debugImplementation 'androidx.compose.ui:ui-tooling'
+    debugImplementation 'androidx.compose.ui:ui-test-manifest'
+
+    // Material Design 3
+    implementation 'androidx.compose.material3:material3'
+    implementation 'androidx.compose.material:material-icons-extended'
+
+    // Compose Activity Integration
+    implementation 'androidx.activity:activity-compose:1.9.3'
+
+    // Compose ViewModel Integration
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4'
+    implementation 'androidx.lifecycle:lifecycle-runtime-compose:2.9.4'
+
+    // Compose Navigation
+    implementation 'androidx.navigation:navigation-compose:2.8.5'
+
+    // Compose Testing
+    androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
+
+    // Lifecycle
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.4'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.9.4'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.9.4'
+    implementation 'androidx.lifecycle:lifecycle-process:2.9.4'
+
+    // TV
+    implementation 'androidx.leanback:leanback:1.2.0-alpha04'
+
+    // Parsing & Compression
+    implementation 'org.tukaani:xz:1.10'
+    implementation 'com.google.code.gson:gson:2.11.0'
+
+    // Room Database
+    implementation 'androidx.room:room-runtime:2.6.1'
+    implementation 'androidx.room:room-ktx:2.6.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
+    ksp 'androidx.room:room-compiler:2.6.1'
+
+    // ExoPlayer for video playback with custom headers
+    implementation 'androidx.media3:media3-exoplayer:1.5.0'
+    implementation 'androidx.media3:media3-ui:1.5.0'
+    implementation 'androidx.media3:media3-exoplayer-hls:1.5.0'
+
+    // Koin for Dependency Injection
+    implementation 'io.insert-koin:koin-android:4.0.1'
+    implementation 'io.insert-koin:koin-androidx-compose:4.0.1'
+    implementation 'io.insert-koin:koin-core:4.0.1'
+
+    // Testing
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0'
+    testImplementation 'io.insert-koin:koin-test:4.0.1'
+    testImplementation 'io.insert-koin:koin-test-junit4:4.0.1'
+
+    // Android Testing
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test:runner:1.6.2'
+    androidTestImplementation 'androidx.test:rules:1.6.1'
+    androidTestImplementation 'androidx.room:room-testing:2.6.1'
+    androidTestImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0'
+    androidTestImplementation 'io.insert-koin:koin-test:4.0.1'
+    androidTestImplementation 'io.insert-koin:koin-test-junit4:4.0.1'
+
+    // Espresso for UI testing
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.6.1'
+
+    // UiAutomator for device-level UI testing
+    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.3.0'
+
+    // Screenshot testing
+    androidTestImplementation 'androidx.test:core:1.5.0'
+    androidTestImplementation 'androidx.test:core-ktx:1.5.0'
+
+    // Activity testing
+    debugImplementation 'androidx.fragment:fragment-testing:1.8.5'
+}

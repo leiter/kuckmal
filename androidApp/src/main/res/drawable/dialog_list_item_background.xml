@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Background selector for dialog list items with prominent focus state for TV -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Focused state (D-pad navigation for TV) -->
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <!-- Semi-transparent overlay with prominent border -->
+            <solid android:color="#3000A0FF"/>
+            <stroke android:width="3dp" android:color="@color/md_theme_primary"/>
+        </shape>
+    </item>
+
+    <!-- Pressed state -->
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#20000000"/>
+        </shape>
+    </item>
+
+    <!-- Selected/Checked state (for radio buttons in dialogs) -->
+    <item android:state_selected="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#1500A0FF"/>
+        </shape>
+    </item>
+
+    <!-- Activated state (alternative to selected) -->
+    <item android:state_activated="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#1500A0FF"/>
+        </shape>
+    </item>
+
+    <!-- Default state -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/transparent"/>
+        </shape>
+    </item>
+</selector>

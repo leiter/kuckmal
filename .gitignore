@@ -118,10 +118,15 @@ fastlane/readme.md
 tmp/
 
 # Test resources - large files
-app/src/test/resources/Filmliste-akt
-app/src/androidTest/assets/test_media_database.db
+androidApp/src/test/resources/Filmliste-akt
+androidApp/src/test/resources/diff_test/
+
+# Test files in assets and resources
+**/assets/test_*.json
+**/assets/test_*.db
+**/resources/test_*.json
+
 sc/
 .idea/
 .kotlin/
 downloaded_logos/
-app/src/test/resources/diff_test/

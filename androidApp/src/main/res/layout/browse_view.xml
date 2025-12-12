@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/relativeLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/md_theme_background">
+
+    <!-- Guideline at 30% for left/right panel split -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline30"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.3" />
+
+    <!-- Barrier at bottom of right panel header (title, search toggle, or menu button, whichever is lower) -->
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/rightPanelHeaderBarrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="rightPanelTitle,searchToggleButton,menuButton" />
+
+    <!-- Left Panel Background -->
+    <View
+        android:id="@+id/leftPanelBackground"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="6dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/panel_background_rounded"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/guideline30"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <!-- Channel ListView -->
+    <ListView
+        android:id="@+id/channelList"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/channel_list_background_rounded"
+        android:choiceMode="singleChoice"
+        android:clickable="true"
+        android:divider="@color/md_theme_outlineVariant"
+        android:dividerHeight="1dp"
+        android:focusable="true"
+        android:listSelector="@drawable/list_item_selector"
+        android:nextFocusRight="@id/contentList"
+        android:nextFocusUp="@id/searchButton"
+        android:padding="8dp"
+        android:scrollbars="none"
+        tools:listitem="@layout/list_element"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/guideline30"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <!-- Right Panel Background -->
+
+    <!-- Right Panel Header Background -->
+
+    <View
+        android:id="@+id/rightPanelBackground"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="6dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/panel_background_rounded"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@id/guideline30"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <View
+        android:id="@+id/rightPanelHeaderBackground"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="0dp"
+        android:background="@drawable/header_background_rounded"
+        app:layout_constraintStart_toEndOf="@id/guideline30"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/rightPanelHeaderBarrier" />
+
+    <!-- Right Panel Title -->
+    <TextView
+        android:id="@+id/rightPanelTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="4dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:text="@string/themes"
+        tools:text="Much more text than you might think"
+        android:maxLines="3"
+        android:ellipsize="end"
+        android:textColor="@color/channel_selected_border"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-medium"
+        android:letterSpacing="0.01"
+        app:layout_constraintStart_toEndOf="@id/guideline30"
+        app:layout_constraintEnd_toStartOf="@id/searchToggleButton"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Search Toggle Button (opens sticky search bar) -->
+    <ImageButton
+        android:id="@+id/searchToggleButton"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:background="@drawable/search_button_selector"
+        android:contentDescription="@string/search"
+        android:focusable="true"
+        android:nextFocusLeft="@id/channelList"
+        android:nextFocusRight="@id/menuButton"
+        android:nextFocusDown="@id/stickySearchContainer"
+        android:padding="10dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_search"
+        app:layout_constraintEnd_toStartOf="@id/menuButton"
+        app:layout_constraintTop_toTopOf="@id/rightPanelTitle"
+        app:layout_constraintBottom_toBottomOf="@id/rightPanelTitle"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <!-- Menu Button -->
+    <ImageButton
+        android:id="@+id/menuButton"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_marginEnd="28dp"
+        android:background="@drawable/menu_button_selector"
+        android:contentDescription="@string/menu"
+        android:focusable="true"
+        android:nextFocusLeft="@id/channelList"
+        android:nextFocusRight="@id/contentList"
+        android:nextFocusDown="@id/stickySearchContainer"
+        android:src="@drawable/ic_more_vert"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/rightPanelTitle"
+        app:layout_constraintBottom_toBottomOf="@id/rightPanelTitle"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <!-- Sticky Search Container (appears below header when toggled) -->
+    <LinearLayout
+        android:id="@+id/stickySearchContainer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/search_input_background_rounded"
+        android:orientation="horizontal"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:visibility="gone"
+        android:elevation="2dp"
+        app:layout_constraintStart_toEndOf="@id/guideline30"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/rightPanelHeaderBarrier">
+
+        <!-- Search Button (toggle) -->
+        <ImageButton
+            android:id="@+id/searchButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/search_button_selector"
+            android:contentDescription="@string/search"
+            android:focusable="true"
+            android:nextFocusLeft="@id/channelList"
+            android:nextFocusRight="@id/searchInput"
+            android:nextFocusUp="@id/menuButton"
+            android:nextFocusDown="@id/contentList"
+            android:src="@drawable/ic_search" />
+
+        <!-- Search Input Field -->
+        <EditText
+            android:id="@+id/searchInput"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:hint="@string/search_hint"
+            android:importantForAutofill="no"
+            android:inputType="text"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:textColor="@color/md_theme_onSurface"
+            android:textColorHint="@color/md_theme_onSurfaceVariant"
+            android:nextFocusLeft="@id/searchButton"
+            android:nextFocusRight="@id/searchClearButton"
+            android:nextFocusUp="@id/menuButton"
+            android:nextFocusDown="@id/contentList" />
+
+        <!-- Search Clear Button -->
+        <ImageButton
+            android:id="@+id/searchClearButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/search_button_selector"
+            android:contentDescription="@string/close_search"
+            android:src="@drawable/ic_close"
+            android:visibility="gone"
+            android:focusable="true"
+            android:nextFocusLeft="@id/searchInput"
+            android:nextFocusUp="@id/menuButton"
+            android:nextFocusDown="@id/contentList" />
+
+        <!-- Search Loading Spinner (shown during active search) -->
+        <ProgressBar
+            android:id="@+id/searchLoadingSpinner"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_gravity="center_vertical"
+            android:visibility="gone"
+            android:indeterminateTint="@color/channel_selected_border" />
+    </LinearLayout>
+
+    <!-- Content RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/contentList"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/content_container_rounded"
+        android:clickable="true"
+        android:focusable="true"
+        android:nextFocusLeft="@id/channelList"
+        android:nextFocusUp="@id/stickySearchContainer"
+        android:padding="8dp"
+        tools:listitem="@layout/item_simple_text"
+        app:layout_constraintStart_toEndOf="@id/guideline30"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/stickySearchContainer"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modern radio button background with rounded corners -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Focused state (D-pad navigation for TV) -->
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/md_theme_surfaceContainerHigh"/>
+            <stroke android:width="2dp" android:color="@color/channel_selected_border"/>
+            <corners android:radius="8dp"/>
+        </shape>
+    </item>
+
+    <!-- Pressed state -->
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/md_theme_surfaceContainerHighest"/>
+            <corners android:radius="8dp"/>
+        </shape>
+    </item>
+
+    <!-- Checked state (not focused) -->
+    <item android:state_checked="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/md_theme_surfaceContainerHigh"/>
+            <corners android:radius="8dp"/>
+        </shape>
+    </item>
+
+    <!-- Default state (transparent) -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/md_theme_surfaceContainer"/>
+            <corners android:radius="8dp"/>
+        </shape>
+    </item>
+</selector>

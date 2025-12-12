@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modern card-style selector for list items -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Pressed state -->
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/md_theme_surfaceContainerHighest"/>
+            <corners android:radius="8dp"/>
+        </shape>
+    </item>
+
+    <!-- Focused state (D-pad/keyboard navigation for TV) -->
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/md_theme_surfaceContainerHigh"/>
+            <stroke android:width="2dp" android:color="@color/channel_selected_border"/>
+            <corners android:radius="8dp"/>
+        </shape>
+    </item>
+
+    <!-- Selected state -->
+    <item android:state_selected="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/md_theme_surfaceContainerHighest"/>
+            <corners android:radius="8dp"/>
+        </shape>
+    </item>
+
+    <!-- Activated state -->
+    <item android:state_activated="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/md_theme_surfaceContainerHighest"/>
+            <corners android:radius="8dp"/>
+        </shape>
+    </item>
+
+    <!-- Default state -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/md_theme_surfaceContainerHigh"/>
+            <corners android:radius="8dp"/>
+        </shape>
+    </item>
+</selector>

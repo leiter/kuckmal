@@ -54,5 +54,11 @@ data class Broadcaster(
 
         fun getChannelPosition(name: String): Int =
             channelList.indexOfFirst { it.name == name }
+
+        /**
+         * Alias for backward compatibility with Android module
+         */
+        val channelListArray: List<Broadcaster>
+            get() = channelList
     }
 }
