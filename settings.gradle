@@ -20,4 +20,4 @@ rootProject.name = "Mediathekview"
 include ':androidApp'
 include ':desktopApp'
 include ':shared'
-// include ':webApp'  // disabled for now
+include ':webApp'

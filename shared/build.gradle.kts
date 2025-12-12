@@ -37,15 +37,9 @@ kotlin {
         }
     }
 
-    // JS target disabled for now
+    // JS target disabled - webApp uses standalone models
     // js(IR) {
-    //     browser {
-    //         commonWebpackConfig {
-    //             cssSupport {
-    //                 enabled.set(true)
-    //             }
-    //         }
-    //     }
+    //     browser()
     //     binaries.executable()
     // }
 
@@ -104,14 +98,6 @@ kotlin {
             iosArm64Main.dependsOn(this)
             iosSimulatorArm64Main.dependsOn(this)
         }
-
-        // jsMain disabled for now
-        // val jsMain by getting {
-        //     dependencies {
-        //         implementation(compose.html.core)
-        //         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.9.0")
-        //     }
-        // }
     }
 }
 

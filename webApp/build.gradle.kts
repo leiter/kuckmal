@@ -26,7 +26,7 @@ kotlin {
     sourceSets {
         val jsMain by getting {
             dependencies {
-                implementation(project(":shared"))
+                // Standalone - no shared module dependency (Room not supported on JS)
                 implementation(compose.html.core)
                 implementation(compose.runtime)
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-js:1.9.0")
