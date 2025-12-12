@@ -1,7 +1,7 @@
 package com.mediathekview.android.repository
 
 import android.util.LruCache
-import com.mediathekview.android.database.MediaEntry
+import com.mediathekview.shared.database.MediaEntry
 
 /**
  * LRU cache for search results with expiration time

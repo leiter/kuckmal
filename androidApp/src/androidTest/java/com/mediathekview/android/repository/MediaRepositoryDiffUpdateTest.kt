@@ -4,9 +4,11 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mediathekview.android.data.MediaListParser
-import com.mediathekview.android.database.AppDatabase
-import com.mediathekview.android.database.MediaDao
-import com.mediathekview.android.database.MediaEntry
+import com.mediathekview.shared.database.AppDatabase
+import com.mediathekview.shared.database.MediaDao
+import com.mediathekview.shared.database.MediaEntry
+import com.mediathekview.shared.database.getDatabaseBuilder
+import com.mediathekview.shared.database.getRoomDatabase
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.*

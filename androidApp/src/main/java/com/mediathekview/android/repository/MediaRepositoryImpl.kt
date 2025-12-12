@@ -2,8 +2,8 @@ package com.mediathekview.android.repository
 
 import android.util.Log
 import com.mediathekview.android.data.MediaListParser
-import com.mediathekview.android.database.MediaDao
-import com.mediathekview.android.database.MediaEntry
+import com.mediathekview.shared.database.MediaDao
+import com.mediathekview.shared.database.MediaEntry
 import com.mediathekview.android.model.MediaEntry as ModelMediaEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope

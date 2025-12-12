@@ -25,7 +25,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.mediathekview.android.compose.models.ComposeViewModel
 import com.mediathekview.android.compose.navigation.MediathekViewNavHost
-import com.mediathekview.android.compose.navigation.Screen
+import com.mediathekview.shared.ui.navigation.Screen
 import com.mediathekview.android.compose.ui.dialogs.AppDialogs
 import com.mediathekview.android.compose.ui.theme.MediathekViewTheme
 import com.mediathekview.android.model.Broadcaster

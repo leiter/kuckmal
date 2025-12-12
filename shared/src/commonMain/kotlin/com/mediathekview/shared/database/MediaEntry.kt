@@ -1,4 +1,4 @@
-package com.mediathekview.android.database
+package com.mediathekview.shared.database
 
 import androidx.room.Entity
 import androidx.room.Index

@@ -2,7 +2,7 @@ package com.mediathekview.android.compose.data
 
 import com.mediathekview.shared.ui.Channel
 import com.mediathekview.shared.ui.MediaItem
-import com.mediathekview.android.database.MediaEntry
+import com.mediathekview.shared.database.MediaEntry
 import com.mediathekview.android.model.Broadcaster
 import com.mediathekview.android.util.FormatUtils
 

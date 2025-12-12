@@ -5,7 +5,7 @@ import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import com.mediathekview.android.R
-import com.mediathekview.android.database.MediaEntry
+import com.mediathekview.shared.database.MediaEntry
 import com.mediathekview.android.util.MediaUrlUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

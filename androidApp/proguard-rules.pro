@@ -35,7 +35,7 @@
 -keep class * extends androidx.room.RoomDatabase
 -keep @androidx.room.Entity class *
 -dontwarn androidx.room.paging.**
--keep class com.mediathekview.android.database.** { *; }
+-keep class com.mediathekview.shared.database.** { *; }
 
 # Gson
 -keepattributes Signature

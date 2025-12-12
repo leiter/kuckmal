@@ -1,15 +1,16 @@
 package com.mediathekview.android.di
 
-import androidx.room.Room
 import com.mediathekview.android.compose.models.ComposeViewModel
 import com.mediathekview.android.data.MediaListParser
 import com.mediathekview.android.data.MediaViewModel
-import com.mediathekview.android.database.AppDatabase
 import com.mediathekview.android.repository.DownloadRepository
 import com.mediathekview.android.repository.MediaRepository
 import com.mediathekview.android.repository.MediaRepositoryImpl
 import com.mediathekview.android.service.DownloadService
 import com.mediathekview.android.util.UpdateChecker
+import com.mediathekview.shared.database.AppDatabase
+import com.mediathekview.shared.database.getDatabaseBuilder
+import com.mediathekview.shared.database.getRoomDatabase
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -21,15 +22,11 @@ import org.koin.dsl.module
  */
 val appModule = module {
 
-    // Database - Singleton
+    // Database - Singleton (using shared KMP Room)
     single {
-        Room.databaseBuilder(
-            androidApplication(),
-            AppDatabase::class.java,
-            "mediathekview.db"
+        getRoomDatabase(
+            getDatabaseBuilder(androidApplication())
         )
-            .fallbackToDestructiveMigration() // For development
-            .build()
     }
 
     // DAO - Singleton (provided by database)

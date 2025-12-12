@@ -1,6 +1,5 @@
-package com.mediathekview.android.database
+package com.mediathekview.shared.database
 
-import androidx.lifecycle.LiveData
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 
@@ -27,47 +26,9 @@ interface MediaDao {
      * This is more efficient for very large datasets
      */
     @Transaction
-    suspend fun insertInBatches(entries: List<MediaEntry>, batchSize: Int = 1000) {
-        val runtime = Runtime.getRuntime()
-        val maxMemory = runtime.maxMemory()
-        val totalMemory = runtime.totalMemory()
-        val freeMemory = runtime.freeMemory()
-        val usedMemory = totalMemory - freeMemory
-        val availableMemory = maxMemory - usedMemory
-
-        // Detect low-memory device (< 1GB heap limit)
-        val isLowMemory = maxMemory < 1024 * 1024 * 1024
-
-        // Use smaller batch size on low-memory devices
-        val adaptiveBatchSize = if (isLowMemory) {
-            minOf(batchSize, 200) // Max 200 entries per batch on low-memory devices
-        } else {
-            batchSize
-        }
-
-        android.util.Log.d("MediaDao", "Memory status: max=${maxMemory / 1024 / 1024}MB, available=${availableMemory / 1024 / 1024}MB, isLowMemory=$isLowMemory, batchSize=$adaptiveBatchSize")
-
-        val chunks = entries.chunked(adaptiveBatchSize)
-        chunks.forEachIndexed { index, batch ->
+    suspend fun insertInBatches(entries: List<MediaEntry>, batchSize: Int = 500) {
+        entries.chunked(batchSize).forEach { batch ->
             insertAll(batch)
-
-            // On low-memory devices, add delay between batches to allow GC
-            if (isLowMemory && index % 10 == 0 && index > 0) {
-                // Check memory pressure every 10 batches
-                val currentUsed = runtime.totalMemory() - runtime.freeMemory()
-                val currentAvailable = runtime.maxMemory() - currentUsed
-                val memoryPressure = (currentUsed.toFloat() / runtime.maxMemory().toFloat())
-
-                if (memoryPressure > 0.9f) {
-                    // Very high memory pressure - force GC and wait longer
-                    android.util.Log.w("MediaDao", "High memory pressure: ${(memoryPressure * 100).toInt()}% - forcing GC")
-                    System.gc()
-                    kotlinx.coroutines.delay(100)
-                } else if (memoryPressure > 0.8f) {
-                    // Moderate memory pressure - small delay for background GC
-                    kotlinx.coroutines.delay(20)
-                }
-            }
         }
     }
 
@@ -94,10 +55,10 @@ interface MediaDao {
     suspend fun getCount(): Int
 
     /**
-     * Get count as LiveData for observing
+     * Get count as Flow for observing
      */
     @Query("SELECT COUNT(*) FROM media_entries")
-    fun getCountLiveData(): LiveData<Int>
+    fun getCountFlow(): Flow<Int>
 
     /**
      * Get all unique channels sorted alphabetically
@@ -376,7 +337,6 @@ interface MediaDao {
      * Get one representative MediaEntry per theme (all channels)
      * Returns the first entry for each theme, sorted by theme name
      * Used for displaying themes as full MediaEntry objects
-     * Optimized: Uses simpler subquery with GROUP BY directly in FROM clause
      */
     @Query("""
         SELECT e.* FROM media_entries e
@@ -395,8 +355,6 @@ interface MediaDao {
     /**
      * Get one representative MediaEntry per theme (specific channel)
      * Returns the first entry for each theme in the channel
-     * Used for displaying themes as full MediaEntry objects
-     * Optimized: Uses INNER JOIN with subquery that applies LIMIT before join
      */
     @Query("""
         SELECT e.* FROM media_entries e
@@ -419,9 +377,6 @@ interface MediaDao {
 
     /**
      * Get one representative MediaEntry per title (specific theme, all channels)
-     * Returns the first entry for each title in the theme
-     * Used for displaying titles as full MediaEntry objects
-     * Optimized: Uses INNER JOIN with grouped subquery
      */
     @Query("""
         SELECT e.* FROM media_entries e
@@ -437,9 +392,6 @@ interface MediaDao {
 
     /**
      * Get one representative MediaEntry per title (specific channel and theme)
-     * Returns the first entry for each title in the channel/theme combination
-     * Used for displaying titles as full MediaEntry objects
-     * Optimized: Uses INNER JOIN with grouped subquery
      */
     @Query("""
         SELECT e.* FROM media_entries e

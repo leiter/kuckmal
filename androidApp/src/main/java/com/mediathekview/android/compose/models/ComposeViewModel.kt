@@ -25,7 +25,7 @@ import com.mediathekview.android.compose.data.ComposeDataMapper
 import com.mediathekview.android.compose.data.ComposeDataMapper.extractUniqueThemes
 import com.mediathekview.android.compose.data.ComposeDataMapper.extractUniqueTitles
 import com.mediathekview.android.compose.data.ComposeDataMapper.toMediaItem
-import com.mediathekview.android.database.MediaEntry
+import com.mediathekview.shared.database.MediaEntry
 import com.mediathekview.shared.ui.Channel
 import com.mediathekview.shared.ui.MediaItem
 import kotlinx.coroutines.Dispatchers

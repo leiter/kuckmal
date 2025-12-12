@@ -139,14 +139,14 @@ class MediaViewModel(
             override val channel: String? = null,
             override val theme: String? = null,
             val searchFilter: SearchFilter = SearchFilter(),  // Separate queries for themes and titles
-            val selectedItem: com.mediathekview.android.database.MediaEntry? = null  // Unified: context determines if theme or title
+            val selectedItem: com.mediathekview.shared.database.MediaEntry? = null  // Unified: context determines if theme or title
         ) : ViewState
         data class Detail(
-            val mediaEntry: com.mediathekview.android.database.MediaEntry,
+            val mediaEntry: com.mediathekview.shared.database.MediaEntry,
             val navigationChannel: String? = null,  // User's filter context (may be null for "All Themes")
             val navigationTheme: String? = null,     // User's current theme filter
             val searchFilter: SearchFilter = SearchFilter(),  // Preserved search filter
-            val selectedItem: com.mediathekview.android.database.MediaEntry? = null  // Unified: preserved from Themes state
+            val selectedItem: com.mediathekview.shared.database.MediaEntry? = null  // Unified: preserved from Themes state
         ) : ViewState {
             // These return the NAVIGATION context, not the media entry's actual channel/theme
             override val channel: String? get() = navigationChannel
@@ -162,7 +162,7 @@ class MediaViewModel(
     val selectedChannel: String? get() = _viewState.value.channel
     val selectedTheme: String? get() = _viewState.value.theme
     val selectedTitle: String? get() = (_viewState.value as? ViewState.Detail)?.title
-    val currentMediaEntry: com.mediathekview.android.database.MediaEntry? get() = (_viewState.value as? ViewState.Detail)?.mediaEntry
+    val currentMediaEntry: com.mediathekview.shared.database.MediaEntry? get() = (_viewState.value as? ViewState.Detail)?.mediaEntry
 
 
     // Pagination
@@ -199,7 +199,7 @@ class MediaViewModel(
      * This replaces the separate themes/titles flows with a unified architecture
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    val contentList: StateFlow<List<com.mediathekview.android.database.MediaEntry>> = combine(
+    val contentList: StateFlow<List<com.mediathekview.shared.database.MediaEntry>> = combine(
         _viewState,
         _dateFilter,
         _currentPart,
@@ -273,10 +273,10 @@ class MediaViewModel(
     // Legacy flows - kept for backward compatibility during migration
     // TODO: Remove after UIManager is updated
     @Deprecated("Use contentList instead", ReplaceWith("contentList"))
-    val themes: StateFlow<List<com.mediathekview.android.database.MediaEntry>> = contentList
+    val themes: StateFlow<List<com.mediathekview.shared.database.MediaEntry>> = contentList
 
     @Deprecated("Use contentList instead", ReplaceWith("contentList"))
-    val titles: StateFlow<List<com.mediathekview.android.database.MediaEntry>> = contentList
+    val titles: StateFlow<List<com.mediathekview.shared.database.MediaEntry>> = contentList
 
     // ===========================================================================================
     // INITIALIZATION
@@ -727,7 +727,7 @@ class MediaViewModel(
      * Called when user selects a theme or title from the list
      * Context (themes vs titles) is determined by whether theme is null
      */
-    fun setSelectedItem(item: com.mediathekview.android.database.MediaEntry?) {
+    fun setSelectedItem(item: com.mediathekview.shared.database.MediaEntry?) {
         val currentState = _viewState.value
         if (currentState is ViewState.Themes) {
             _viewState.value = currentState.copy(selectedItem = item)

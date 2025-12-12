@@ -96,8 +96,8 @@ data class MediaEntry(
     /**
      * Convert to database MediaEntry for Room storage
      */
-    fun toDatabaseEntry(): com.mediathekview.android.database.MediaEntry {
-        return com.mediathekview.android.database.MediaEntry(
+    fun toDatabaseEntry(): com.mediathekview.shared.database.MediaEntry {
+        return com.mediathekview.shared.database.MediaEntry(
             channel = channel,
             theme = theme,
             title = title,

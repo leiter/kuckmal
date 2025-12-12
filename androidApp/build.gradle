@@ -76,11 +76,7 @@ android {
     }
 }
 
-ksp {
-    arg("room.schemaLocation", "$projectDir/schemas")
-    arg("room.incremental", "true")
-    arg("room.expandProjection", "true")
-}
+// Room is now in shared module - KSP config moved there
 
 dependencies {
     // Shared Kotlin Multiplatform module
@@ -138,11 +134,9 @@ dependencies {
     implementation 'org.tukaani:xz:1.10'
     implementation 'com.google.code.gson:gson:2.11.0'
 
-    // Room Database
-    implementation 'androidx.room:room-runtime:2.6.1'
-    implementation 'androidx.room:room-ktx:2.6.1'
+    // Room API (database is in shared module)
+    implementation 'androidx.room:room-runtime:2.7.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
-    ksp 'androidx.room:room-compiler:2.6.1'
 
     // ExoPlayer for video playback with custom headers
     implementation 'androidx.media3:media3-exoplayer:1.5.0'
@@ -164,7 +158,7 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     androidTestImplementation 'androidx.test:runner:1.6.2'
     androidTestImplementation 'androidx.test:rules:1.6.1'
-    androidTestImplementation 'androidx.room:room-testing:2.6.1'
+    // Room testing provided by shared module
     androidTestImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0'
     androidTestImplementation 'io.insert-koin:koin-test:4.0.1'
     androidTestImplementation 'io.insert-koin:koin-test-junit4:4.0.1'

@@ -1043,7 +1043,7 @@ class UIManager(
      * Applies search filter to Flow data if present (for hidden/cached filters)
      * Preserves selection of previously selected items from viewState
      */
-    fun updateContentListFromFlow(entries: List<com.mediathekview.android.database.MediaEntry>) {
+    fun updateContentListFromFlow(entries: List<com.mediathekview.shared.database.MediaEntry>) {
         val currentView = viewModel.viewState.value
         if (currentView !is MediaViewModel.ViewState.Themes) {
             Log.d(TAG, "updateContentListFromFlow: Skipping - not in Themes view (currentView=${currentView::class.simpleName})")
@@ -1148,7 +1148,7 @@ class UIManager(
      * Update detail view from reactive Flow
      * Called when current media entry changes
      */
-    fun updateDetailViewFromFlow(mediaEntry: com.mediathekview.android.database.MediaEntry?) {
+    fun updateDetailViewFromFlow(mediaEntry: com.mediathekview.shared.database.MediaEntry?) {
         if (mediaEntry == null) {
             Log.w(TAG, "Cannot update detail view: media entry is null")
             return

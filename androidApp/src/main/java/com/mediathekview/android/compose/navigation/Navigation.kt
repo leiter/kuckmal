@@ -1,12 +1,6 @@
 package com.mediathekview.android.compose.navigation
 
-import android.net.Uri
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,83 +35,11 @@ import com.mediathekview.android.compose.data.ComposeDataMapper
 import com.mediathekview.android.compose.models.ComposeViewModel
 import com.mediathekview.android.compose.screens.BrowseView
 import com.mediathekview.shared.ui.screens.DetailView
-import com.mediathekview.android.util.AppConfig
+import com.mediathekview.shared.ui.navigation.Screen
+import com.mediathekview.shared.ui.navigation.OverviewState
+import com.mediathekview.shared.ui.navigation.NavigationAnimations
+import com.mediathekview.shared.ui.navigation.urlDecode
 import kotlinx.coroutines.flow.flowOf
-
-/**
- * Navigation routes - simplified to just two screens
- */
-sealed class Screen(val route: String) {
-    // Overview screen (handles all browsing: themes, channels, titles)
-    object Overview : Screen("overview")
-
-    // Detail screen
-    data class Detail(
-        val title: String,
-        val channel: String? = null,
-        val theme: String? = null
-    ) : Screen("detail/{title}?channel={channel}&theme={theme}") {
-        companion object {
-            fun createRoute(
-                title: String,
-                channel: String? = null,
-                theme: String? = null
-            ): String {
-                val encodedTitle = Uri.encode(title)
-                val encodedChannel = channel?.let { Uri.encode(it) } ?: ""
-                val encodedTheme = theme?.let { Uri.encode(it) } ?: ""
-                return "detail/$encodedTitle?channel=$encodedChannel&theme=$encodedTheme"
-            }
-        }
-    }
-}
-
-/**
- * Overview screen state - tracks what data is being displayed
- */
-sealed class OverviewState {
-    // Showing all themes (no channel filter)
-    object AllThemes : OverviewState()
-
-    // Showing themes for a specific channel
-    data class ChannelThemes(val channelName: String) : OverviewState()
-
-    // Showing titles within a theme
-    data class ThemeTitles(val channelName: String?, val themeName: String) : OverviewState()
-}
-
-/**
- * Animation specifications for navigation transitions
- */
-object NavigationAnimations {
-    const val ANIMATION_DURATION = 300
-
-    // Forward navigation (going to detail)
-    val slideInFromRight = slideInHorizontally(
-        initialOffsetX = { fullWidth -> fullWidth },
-        animationSpec = tween(ANIMATION_DURATION)
-    ) + fadeIn(animationSpec = tween(ANIMATION_DURATION))
-
-    val slideOutToLeft = slideOutHorizontally(
-        targetOffsetX = { fullWidth -> -fullWidth / 3 },
-        animationSpec = tween(ANIMATION_DURATION)
-    ) + fadeOut(animationSpec = tween(ANIMATION_DURATION))
-
-    // Backward navigation (returning from detail)
-    val slideInFromLeft = slideInHorizontally(
-        initialOffsetX = { fullWidth -> -fullWidth / 3 },
-        animationSpec = tween(ANIMATION_DURATION)
-    ) + fadeIn(animationSpec = tween(ANIMATION_DURATION))
-
-    val slideOutToRight = slideOutHorizontally(
-        targetOffsetX = { fullWidth -> fullWidth },
-        animationSpec = tween(ANIMATION_DURATION)
-    ) + fadeOut(animationSpec = tween(ANIMATION_DURATION))
-
-    // Fade transitions
-    val fadeIn = fadeIn(animationSpec = tween(ANIMATION_DURATION))
-    val fadeOut = fadeOut(animationSpec = tween(ANIMATION_DURATION))
-}
 
 /**
  * Main navigation host - simplified to two destinations
@@ -160,10 +82,10 @@ fun MediathekViewNavHost(
         // Overview screen (manages its own internal state)
         composable(
             route = Screen.Overview.route,
-            enterTransition = { NavigationAnimations.fadeIn },
+            enterTransition = { NavigationAnimations.fadeInTransition },
             exitTransition = { NavigationAnimations.slideOutToLeft },
             popEnterTransition = { NavigationAnimations.slideInFromLeft },
-            popExitTransition = { NavigationAnimations.fadeOut }
+            popExitTransition = { NavigationAnimations.fadeOutTransition }
         ) {
             // Overview screen manages its own state - use rememberSaveable for persistence
             // Store state as strings since sealed classes aren't directly saveable
@@ -206,9 +128,9 @@ fun MediathekViewNavHost(
                         updateOverviewState(OverviewState.AllThemes)
                     }
                     is OverviewState.ThemeTitles -> {
-                        val state = overviewState
-                        if (state.channelName != null) {
-                            updateOverviewState(OverviewState.ChannelThemes(state.channelName))
+                        val channelName = overviewState.channelName
+                        if (channelName != null) {
+                            updateOverviewState(OverviewState.ChannelThemes(channelName))
                         } else {
                             updateOverviewState(OverviewState.AllThemes)
                         }
@@ -462,9 +384,9 @@ fun MediathekViewNavHost(
                             updateOverviewState(OverviewState.AllThemes)
                         }
                         is OverviewState.ThemeTitles -> {
-                            val state = overviewState
-                            if (state.channelName != null) {
-                                updateOverviewState(OverviewState.ChannelThemes(state.channelName))
+                            val channelName = overviewState.channelName
+                            if (channelName != null) {
+                                updateOverviewState(OverviewState.ChannelThemes(channelName))
                             } else {
                                 updateOverviewState(OverviewState.AllThemes)
                             }
@@ -504,9 +426,9 @@ fun MediathekViewNavHost(
             popEnterTransition = { NavigationAnimations.slideInFromLeft },
             popExitTransition = { NavigationAnimations.slideOutToRight }
         ) { backStackEntry ->
-            val title = Uri.decode(backStackEntry.arguments?.getString("title") ?: "")
-            val channel = backStackEntry.arguments?.getString("channel")?.takeIf { it.isNotEmpty() }?.let { Uri.decode(it) }
-            val theme = backStackEntry.arguments?.getString("theme")?.takeIf { it.isNotEmpty() }?.let { Uri.decode(it) }
+            val title = urlDecode(backStackEntry.arguments?.getString("title") ?: "")
+            val channel = backStackEntry.arguments?.getString("channel")?.takeIf { it.isNotEmpty() }?.let { urlDecode(it) }
+            val theme = backStackEntry.arguments?.getString("theme")?.takeIf { it.isNotEmpty() }?.let { urlDecode(it) }
 
             // Handle back button press to navigate back to Overview (titles list)
             BackHandler(enabled = true) {

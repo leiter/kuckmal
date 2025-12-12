@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.mediathekview.android.R
-import com.mediathekview.android.database.MediaEntry
+import com.mediathekview.shared.database.MediaEntry
 
 /**
  * RecyclerView adapter for browsing media entries by theme or title

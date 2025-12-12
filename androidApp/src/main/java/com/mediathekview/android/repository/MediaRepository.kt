@@ -1,6 +1,6 @@
 package com.mediathekview.android.repository
 
-import com.mediathekview.android.database.MediaEntry
+import com.mediathekview.shared.database.MediaEntry
 import kotlinx.coroutines.flow.Flow
 
 /**
