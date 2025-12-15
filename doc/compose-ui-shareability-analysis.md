@@ -86,11 +86,11 @@ androidx.lifecycle.ProcessLifecycleOwner
 androidx.core.net.toUri
 
 // Project-specific Android
-com.mediathekview.android.repository.MediaRepository
-com.mediathekview.android.repository.DownloadRepository
-com.mediathekview.android.video.VideoPlayerManager
-com.mediathekview.android.util.UpdateChecker
-com.mediathekview.android.util.AppConfig
+cut.the.crap.repository.MediaRepository
+cut.the.crap.repository.DownloadRepository
+cut.the.crap.video.VideoPlayerManager
+cut.the.crap.util.UpdateChecker
+cut.the.crap.util.AppConfig
 ```
 
 ### Theme.kt - Android Dependencies

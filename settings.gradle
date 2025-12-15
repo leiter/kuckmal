@@ -16,7 +16,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Mediathekview"
+rootProject.name = "Kuckmal"
 include ':androidApp'
 include ':desktopApp'
 include ':shared'

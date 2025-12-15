@@ -36,7 +36,7 @@ dependencies {
 
 compose.desktop {
     application {
-        mainClass = "com.mediathekview.desktop.MainKt"
+        mainClass = "cut.the.crap.desktop.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Rpm)
@@ -61,7 +61,7 @@ compose.desktop {
 
             macOS {
                 iconFile.set(project.file("src/main/resources/icon.icns"))
-                bundleID = "com.mediathekview.desktop"
+                bundleID = "cut.the.crap.desktop"
             }
         }
     }

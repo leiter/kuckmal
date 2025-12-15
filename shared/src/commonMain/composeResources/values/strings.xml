@@ -45,6 +45,8 @@
     <!-- Description expand/collapse -->
     <string name="show_more">Show more</string>
     <string name="show_less">Show less</string>
+    <string name="expand">Expand</string>
+    <string name="collapse">Collapse</string>
 
     <!-- Menu Items -->
     <string name="menu_time_period">Time Period</string>

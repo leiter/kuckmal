@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace 'com.mediathekview.android'
+    namespace 'cut.the.crap.android'
     compileSdk 36
 
     defaultConfig {
-        applicationId "com.mediathekview.android"
+        applicationId "cut.the.crap.kuckmal"
         minSdk 21
         targetSdk 36
         versionCode 1

@@ -58,9 +58,9 @@
 -dontwarn androidx.media3.**
 
 # Keep application classes
--keep class com.mediathekview.android.** { *; }
--keep interface com.mediathekview.android.** { *; }
--keep enum com.mediathekview.android.** { *; }
+-keep class cut.the.crap.** { *; }
+-keep interface cut.the.crap.** { *; }
+-keep enum cut.the.crap.** { *; }
 
 # Keep native methods
 -keepclasseswithmembernames class * {

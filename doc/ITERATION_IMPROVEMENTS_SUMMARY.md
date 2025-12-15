@@ -271,11 +271,11 @@ LazyColumn {
 ```bash
 # Run screenshot test
 adb shell am instrument -w -r -e debug false \
-  -e class 'com.mediathekview.android.compose.ComposeBrowseViewScreenshotTest#captureBrowseView' \
-  com.mediathekview.android.test/androidx.test.runner.AndroidJUnitRunner
+  -e class 'cut.the.crap.compose.ComposeBrowseViewScreenshotTest#captureBrowseView' \
+  cut.the.crap.test/androidx.test.runner.AndroidJUnitRunner
 
 # Pull screenshot
-adb pull /sdcard/Android/data/com.mediathekview.android/files/test-screenshots/<file> ./tmp/
+adb pull /sdcard/Android/data/cut.the.crap/files/test-screenshots/<file> ./tmp/
 
 # Build and install
 ./gradlew assembleDebug

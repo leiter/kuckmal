@@ -102,7 +102,7 @@ kotlin {
 }
 
 android {
-    namespace = "com.mediathekview.shared"
+    namespace = "cut.the.crap.shared"
     compileSdk = 36
 
     defaultConfig {
@@ -117,6 +117,13 @@ android {
     lint {
         checkGeneratedSources = false
     }
+}
+
+// Compose resources configuration
+compose.resources {
+    publicResClass = true
+    packageOfResClass = "kuckmal.shared.generated.resources"
+    generateResClass = always
 }
 
 // Room KMP configuration

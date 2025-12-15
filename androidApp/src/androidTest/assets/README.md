@@ -17,7 +17,7 @@ The `SearchQueryIntegrationTest` requires a production database snapshot.
 
 2. **Export database from device:**
    ```bash
-   adb exec-out run-as com.mediathekview.android cat databases/media_database > test_media_database.db
+   adb exec-out run-as cut.the.crap cat databases/media_database > test_media_database.db
    ```
 
 3. **Place in this folder:**

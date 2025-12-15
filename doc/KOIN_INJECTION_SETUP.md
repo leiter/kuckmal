@@ -14,7 +14,7 @@ Successfully integrated Koin dependency injection to inject `MediaViewModel` int
 
 #### Added Koin Import
 ```kotlin
-import com.mediathekview.android.data.MediaViewModel
+import cut.the.crap.data.MediaViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 ```
 
