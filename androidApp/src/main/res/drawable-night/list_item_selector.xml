@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Selector for dark theme - uses lighter overlays for visibility -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Pressed state -->
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#20FFFFFF"/>
+            <corners android:radius="4dp"/>
+        </shape>
+    </item>
+
+    <!-- Focused state (D-pad/keyboard navigation for TV) -->
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#15FFFFFF"/>
+            <stroke android:width="2dp" android:color="@color/md_theme_primary"/>
+            <corners android:radius="4dp"/>
+        </shape>
+    </item>
+
+    <!-- Selected state -->
+    <item android:state_selected="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#10FFFFFF"/>
+            <corners android:radius="4dp"/>
+        </shape>
+    </item>
+
+    <!-- Activated state -->
+    <item android:state_activated="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#10FFFFFF"/>
+            <corners android:radius="4dp"/>
+        </shape>
+    </item>
+
+    <!-- Default state -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#00000000"/>
+            <corners android:radius="4dp"/>
+        </shape>
+    </item>
+</selector>

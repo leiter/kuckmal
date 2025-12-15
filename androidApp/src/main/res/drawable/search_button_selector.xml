@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Selector for search button with prominent focus state for TV/DPAD navigation -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Pressed state -->
+    <item android:state_pressed="true">
+        <shape android:shape="oval">
+            <solid android:color="#30000000"/>
+        </shape>
+    </item>
+
+    <!-- Focused state (D-pad/keyboard navigation for TV) -->
+    <item android:state_focused="true">
+        <shape android:shape="oval">
+            <solid android:color="#20000000"/>
+            <stroke android:width="3dp" android:color="@color/md_theme_primary"/>
+        </shape>
+    </item>
+
+    <!-- Default state -->
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="#00000000"/>
+        </shape>
+    </item>
+</selector>
