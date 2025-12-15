@@ -15,7 +15,7 @@
     <string name="close_search">Suche schließen</string>
 
     <!-- Welcome Dialog -->
-    <string name="welcome_title">Willkommen bei MediathekView</string>
+    <string name="welcome_title">Willkommen bei Kuckmal</string>
     <string name="welcome_message">Um zu beginnen, müssen wir die Mediathek-Liste herunterladen.\n\nDies ist ein einmaliger Einrichtungsprozess.</string>
 
     <!-- Progress Dialog -->

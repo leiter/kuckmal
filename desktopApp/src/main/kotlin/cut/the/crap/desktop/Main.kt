@@ -23,7 +23,7 @@ import cut.the.crap.shared.repository.MediaRepository
 import cut.the.crap.shared.ui.Channel
 import cut.the.crap.shared.ui.screens.BrowseView
 import cut.the.crap.shared.ui.screens.DetailView
-import cut.the.crap.shared.ui.theme.MediathekViewTheme
+import cut.the.crap.shared.ui.theme.KuckmalTheme
 import cut.the.crap.shared.ui.toMediaItem
 import cut.the.crap.shared.viewmodel.LoadingState
 import cut.the.crap.shared.viewmodel.SharedViewModel
@@ -53,9 +53,9 @@ fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
         state = windowState,
-        title = "MediathekView"
+        title = "Kuckmal"
     ) {
-        MediathekViewTheme {
+        KuckmalTheme {
             DesktopApp()
         }
     }
@@ -293,7 +293,7 @@ fun DesktopApp() {
                         modifier = Modifier.padding(32.dp)
                     ) {
                         Text(
-                            text = "MediathekView",
+                            text = "Kuckmal",
                             style = MaterialTheme.typography.displayMedium,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -489,14 +489,14 @@ private fun getAppDataPath(): String {
     val path = when {
         os.contains("win") -> {
             val appData = System.getenv("APPDATA") ?: "$userHome\\AppData\\Roaming"
-            "$appData\\MediathekView"
+            "$appData\\Kuckmal"
         }
         os.contains("mac") -> {
-            "$userHome/Library/Application Support/MediathekView"
+            "$userHome/Library/Application Support/Kuckmal"
         }
         else -> {
             val xdgDataHome = System.getenv("XDG_DATA_HOME") ?: "$userHome/.local/share"
-            "$xdgDataHome/mediathekview"
+            "$xdgDataHome/kuckmal"
         }
     }
 

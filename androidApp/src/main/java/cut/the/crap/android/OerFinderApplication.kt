@@ -8,7 +8,7 @@ import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
 
 /**
- * Application class for MediathekView
+ * Application class for Kuckmal
  * Initializes Koin dependency injection
  */
 class OerFinderApplication : Application() {

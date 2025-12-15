@@ -30,8 +30,8 @@ class DesktopDownloadManager {
                 }
             }
 
-            // Create MediathekView subfolder
-            val mediaThekDir = File(downloadsDir, "MediathekView")
+            // Create Kuckmal subfolder
+            val mediaThekDir = File(downloadsDir, "Kuckmal")
             if (!mediaThekDir.exists()) {
                 mediaThekDir.mkdirs()
             }

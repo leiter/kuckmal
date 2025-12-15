@@ -1,6 +1,6 @@
 # Kotlin Multiplatform (KMP) Migration Analysis
 
-**Project**: MediathekView Android
+**Project**: Kuckmal Android
 **Date**: November 2025
 **Current Status**: Pure Android (100% Kotlin)
 **Target**: Kotlin Multiplatform (KMP)
@@ -50,7 +50,7 @@
 ### Source Code Structure
 
 ```
-app/src/main/java/com/mediathekview/android/
+androidApp/src/main/java/cut/the/crap/android/
 ├── database/          # Room database (3 files)
 ├── data/              # ViewModels and parsers (2 files)
 ├── di/                # Dependency injection - Koin (1 file)
@@ -664,7 +664,7 @@ actual class VideoPlayer {
 
 ## Conclusion
 
-The **MediathekView Android** project is an **excellent candidate for KMP migration** due to its pure Kotlin codebase and clean architecture. The main effort will be:
+The **Kuckmal Android** project is an **excellent candidate for KMP migration** due to its pure Kotlin codebase and clean architecture. The main effort will be:
 
 1. **Serialization migration** (Gson → kotlinx.serialization)
 2. **Database migration** (Room → SQLDelight or Room KMP)

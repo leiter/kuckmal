@@ -26,14 +26,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import cut.the.crap.android.R
-import cut.the.crap.android.compose.navigation.MediathekViewNavHost
+import cut.the.crap.android.compose.navigation.KuckmalNavHost
 import cut.the.crap.android.compose.ui.dialogs.AppDialogs
 import cut.the.crap.android.compose.ui.dialogs.ConfirmationDialog
 import cut.the.crap.android.compose.ui.dialogs.ErrorDialog
 import cut.the.crap.android.compose.ui.dialogs.ProgressDialog
 import cut.the.crap.android.compose.ui.dialogs.SingleChoiceDialog
 import cut.the.crap.android.compose.ui.dialogs.WelcomeDialog
-import cut.the.crap.android.compose.ui.theme.MediathekViewTheme
+import cut.the.crap.android.compose.ui.theme.KuckmalTheme
 import cut.the.crap.android.model.Broadcaster
 import cut.the.crap.android.util.MediaUrlUtils
 import cut.the.crap.android.util.UpdateChecker
@@ -77,7 +77,7 @@ class ComposeActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         // Use fallback display (brand color + abbreviation) for channel identification
-        // instead of logo icons (MediathekViewWeb style)
+        // instead of logo icons (KuckmalWeb style)
         Broadcaster.useFallbackDisplay = true
 
         // Check and load media list on startup (fresh install flow)
@@ -92,7 +92,7 @@ class ComposeActivity : ComponentActivity() {
         }
 
         setContent {
-            MediathekViewTheme {
+            KuckmalTheme {
                 ComposeMainScreen(
                     viewModel = viewModel,
                     mediaViewModel = mediaViewModel,
@@ -225,7 +225,7 @@ fun ComposeMainScreen(
                 .padding(paddingValues),
             color = MaterialTheme.colorScheme.background
         ) {
-            MediathekViewNavHost(
+            KuckmalNavHost(
                 navController = navController,
                 viewModel = viewModel,
                 onTimePeriodClick = {

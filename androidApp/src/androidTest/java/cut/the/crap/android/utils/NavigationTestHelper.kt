@@ -13,7 +13,7 @@ import cut.the.crap.android.R
 import org.hamcrest.Matchers.not
 
 /**
- * Helper class for testing navigation flows in MediathekView app
+ * Helper class for testing navigation flows in Kuckmal app
  *
  * Provides utilities to:
  * - Navigate through the app screens

@@ -9,7 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 
 /**
- * Room database for MediathekView - KMP compatible
+ * Room database for Kuckmal - KMP compatible
  */
 @Database(
     entities = [MediaEntry::class],
@@ -19,6 +19,10 @@ import kotlinx.coroutines.IO
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun mediaDao(): MediaDao
+
+    companion object {
+        const val DATABASE_NAME = "kuckmal.db"
+    }
 }
 
 /**

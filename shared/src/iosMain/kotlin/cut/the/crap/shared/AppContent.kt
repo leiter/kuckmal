@@ -26,7 +26,7 @@ fun AppContent() {
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "MediathekView",
+                text = "Kuckmal",
                 style = MaterialTheme.typography.headlineLarge,
                 color = MaterialTheme.colorScheme.primary
             )

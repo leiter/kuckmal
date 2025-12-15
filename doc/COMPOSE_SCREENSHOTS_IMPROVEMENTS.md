@@ -6,7 +6,7 @@ Successfully created instrumentation tests for Compose screens, captured screens
 
 ## Test Created
 
-**File:** `app/src/androidTest/java/com/mediathekview/android/compose/ComposeBrowseViewScreenshotTest.kt`
+**File:** `androidApp/src/androidTest/java/cut/the/crap/android/compose/ComposeBrowseViewScreenshotTest.kt`
 
 ### Test Methods:
 - `captureBrowseView()` - Captures BrowseView screenshot
@@ -46,7 +46,7 @@ adb pull /sdcard/Android/data/cut.the.crap/files/test-screenshots/ ./tmp/
 
 ### 1. Channel Logos/Branding Boxes
 
-**File:** `app/src/main/java/com/mediathekview/android/compose/screens/BrowseView.kt`
+**File:** `androidApp/src/main/java/cut/the/crap/android/compose/screens/BrowseView.kt`
 
 **Changes:**
 - Added channel-specific brand colors:
@@ -153,12 +153,12 @@ Card(
 - AndroidX Test (UI Automator)
 
 ### Files Modified
-1. `app/src/main/java/com/mediathekview/android/compose/screens/BrowseView.kt`
+1. `androidApp/src/main/java/cut/the/crap/android/compose/screens/BrowseView.kt`
    - Added channel brand colors
    - Improved ChannelItem composable
    - Added RoundedCornerShape import
 
-2. `app/src/androidTest/java/com/mediathekview/android/compose/ComposeBrowseViewScreenshotTest.kt`
+2. `androidApp/src/androidTest/java/cut/the/crap/android/compose/ComposeBrowseViewScreenshotTest.kt`
    - Created new instrumentation test file
    - Implemented screenshot capture logic
 

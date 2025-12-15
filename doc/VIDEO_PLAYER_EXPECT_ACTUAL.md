@@ -1,7 +1,7 @@
 # Video Player Expect/Actual Implementation
 
 ## Overview
-Successfully implemented an expect/actual pattern for video playback in the MediathekView Android app. This provides a clean abstraction layer that separates platform-specific video player implementations from the business logic, making the code more maintainable and potentially supporting multiple platforms in the future.
+Successfully implemented an expect/actual pattern for video playback in the Kuckmal Android app. This provides a clean abstraction layer that separates platform-specific video player implementations from the business logic, making the code more maintainable and potentially supporting multiple platforms in the future.
 
 ## Architecture
 
@@ -171,13 +171,13 @@ The implementation can be tested by:
 ## Files Created/Modified
 
 ### Created
-- `/app/src/main/java/com/mediathekview/android/video/VideoPlayer.kt`
-- `/app/src/main/java/com/mediathekview/android/video/AndroidVideoPlayer.kt`
-- `/app/src/main/java/com/mediathekview/android/video/VideoPlayerManager.kt`
+- `/androidApp/src/main/java/cut/the/crap/android/video/VideoPlayer.kt`
+- `/androidApp/src/main/java/cut/the/crap/android/video/AndroidVideoPlayer.kt`
+- `/androidApp/src/main/java/cut/the/crap/android/video/VideoPlayerManager.kt`
 
 ### Modified
-- `/app/src/main/java/com/mediathekview/android/data/MediaViewModel.kt`
-- `/app/src/main/res/values/strings.xml`
+- `/androidApp/src/main/java/cut/the/crap/android/data/MediaViewModel.kt`
+- `/androidApp/src/main/res/values/strings.xml`
 
 ## Migration Notes
 

@@ -37,7 +37,7 @@ class MediaListParserTest {
         val testFile = createTestFile("test.json")
         testFile.writeText("""
             {
-              "Filmliste": ["30.10.2025", "21:00", "abc123", "MediathekView", "1.0"],
+              "Filmliste": ["30.10.2025", "21:00", "abc123", "Kuckmal", "1.0"],
               "X": ["ARD", "News", "Title1", "30.10.2025", "20:00:00", "00:15:00", "150", "Description", "https://example.com/v1.mp4", "https://ard.de", "", "", "", "", "", "", "1730318400", "", "DE", "true"],
               "X": ["", "", "Title2", "30.10.2025", "21:00:00", "00:20:00", "200", "Desc2", "https://example.com/v2.mp4", "", "", "", "", "", "", "", "1730322000", "", "", "false"]
             }
@@ -71,7 +71,7 @@ class MediaListParserTest {
         // Create a larger test file with multiple entries
         val testFile = createTestFile("test_chunked.json")
         val sb = StringBuilder()
-        sb.append("{\"Filmliste\":[\"30.10.2025\",\"21:00\",\"abc123\",\"MediathekView\",\"1.0\"]")
+        sb.append("{\"Filmliste\":[\"30.10.2025\",\"21:00\",\"abc123\",\"Kuckmal\",\"1.0\"]")
 
         // Add 2500 entries to test chunking (default chunk size is 1000)
         for (i in 1..2500) {
@@ -136,7 +136,7 @@ class MediaListParserTest {
         val testFile = createTestFile("test_limit.json")
         testFile.writeText("""
             {
-              "Filmliste": ["30.10.2025", "21:00", "abc123", "MediathekView", "1.0"],
+              "Filmliste": ["30.10.2025", "21:00", "abc123", "Kuckmal", "1.0"],
               "X": ["ARD", "News", "Old", "", "", "", "", "", "", "", "", "", "", "", "", "", "1000000", "", "", "false"],
               "X": ["ARD", "News", "New", "", "", "", "", "", "", "", "", "", "", "", "", "", "2000000", "", "", "false"]
             }
@@ -160,7 +160,7 @@ class MediaListParserTest {
         val testFile = createTestFile("test_themes.json")
         testFile.writeText("""
             {
-              "Filmliste": ["30.10.2025", "21:00", "abc123", "MediathekView", "1.0"],
+              "Filmliste": ["30.10.2025", "21:00", "abc123", "Kuckmal", "1.0"],
               "X": ["ARD", "News", "T1", "", "", "", "", "", "", "", "", "", "", "", "", "", "1000000", "", "", "false"],
               "X": ["ARD", "Sport", "T2", "", "", "", "", "", "", "", "", "", "", "", "", "", "1000000", "", "", "false"],
               "X": ["ZDF", "News", "T3", "", "", "", "", "", "", "", "", "", "", "", "", "", "1000000", "", "", "false"],
@@ -182,7 +182,7 @@ class MediaListParserTest {
         val testFile = createTestFile("test_channel_themes.json")
         testFile.writeText("""
             {
-              "Filmliste": ["30.10.2025", "21:00", "abc123", "MediathekView", "1.0"],
+              "Filmliste": ["30.10.2025", "21:00", "abc123", "Kuckmal", "1.0"],
               "X": ["ARD", "News", "T1", "", "", "", "", "", "", "", "", "", "", "", "", "", "1000000", "", "", "false"],
               "X": ["ARD", "Sport", "T2", "", "", "", "", "", "", "", "", "", "", "", "", "", "1000000", "", "", "false"],
               "X": ["ZDF", "Movies", "T3", "", "", "", "", "", "", "", "", "", "", "", "", "", "1000000", "", "", "false"]
@@ -203,7 +203,7 @@ class MediaListParserTest {
         val testFile = createTestFile("test_titles.json")
         testFile.writeText("""
             {
-              "Filmliste": ["30.10.2025", "21:00", "abc123", "MediathekView", "1.0"],
+              "Filmliste": ["30.10.2025", "21:00", "abc123", "Kuckmal", "1.0"],
               "X": ["ARD", "News", "Title1", "", "", "", "", "", "", "", "", "", "", "", "", "", "1000000", "", "", "false"],
               "X": ["ARD", "News", "Title2", "", "", "", "", "", "", "", "", "", "", "", "", "", "1000000", "", "", "false"],
               "X": ["ARD", "Sport", "Title3", "", "", "", "", "", "", "", "", "", "", "", "", "", "1000000", "", "", "false"]
@@ -223,7 +223,7 @@ class MediaListParserTest {
         val testFile = createTestFile("test_info.json")
         testFile.writeText("""
             {
-              "Filmliste": ["30.10.2025", "21:00", "abc123", "MediathekView", "1.0"],
+              "Filmliste": ["30.10.2025", "21:00", "abc123", "Kuckmal", "1.0"],
               "X": ["ARD", "News", "TestTitle", "30.10.2025", "20:00:00", "00:15:00", "150", "Test Description", "https://example.com/video.mp4", "https://ard.de", "", "", "https://example.com/small.mp4", "", "", "", "1730318400", "", "DE", "true"]
             }
         """.trimIndent())
@@ -251,7 +251,7 @@ class MediaListParserTest {
         val testFile = createTestFile("test_clean.json")
         testFile.writeText("""
             {
-              "Filmliste": ["30.10.2025", "21:00", "abc123", "MediathekView", "1.0"],
+              "Filmliste": ["30.10.2025", "21:00", "abc123", "Kuckmal", "1.0"],
               "X": ["ARD", "News", "Title", "", "", "", "", "", "", "", "", "", "", "", "", "", "1000000", "", "", "false"]
             }
         """.trimIndent())

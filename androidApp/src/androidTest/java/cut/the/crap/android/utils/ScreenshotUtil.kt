@@ -15,7 +15,7 @@ import java.util.Locale
  *
  * Screenshots are saved to:
  * - Primary: app/build/outputs/androidTest-results/screenshots/
- * - External (optional): /sdcard/Pictures/MediathekView/test-screenshots/
+ * - External (optional): /sdcard/Pictures/Kuckmal/test-screenshots/
  */
 object ScreenshotUtil {
 
@@ -101,7 +101,7 @@ object ScreenshotUtil {
                 File(context.getExternalFilesDir(null), "test-screenshots")
             } else {
                 // Use public Pictures directory
-                File("/sdcard/Pictures/MediathekView/test-screenshots")
+                File("/sdcard/Pictures/Kuckmal/test-screenshots")
             }
 
             externalDir.mkdirs()

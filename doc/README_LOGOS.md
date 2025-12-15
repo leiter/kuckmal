@@ -24,7 +24,7 @@ This will:
 - ✅ Convert to PNG with transparency
 - ✅ Optimize file size
 - ✅ Rename to correct filenames
-- ✅ Copy to `app/src/main/res/drawable/`
+- ✅ Copy to `androidApp/src/main/res/drawable/`
 
 ### Step 3: Build App
 ```bash
@@ -91,11 +91,11 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 - Examples: `3sat.png` ✅, `ard-logo.svg` ✅, `image123.png` ❌
 
 ### Current logos:
-Your current logos are already in `app/src/main/res/drawable/`
+Your current logos are already in `androidApp/src/main/res/drawable/`
 - They will be overwritten when you process new ones
 - You can back them up first if needed:
   ```bash
-  cp -r app/src/main/res/drawable app/src/main/res/drawable_backup
+  cp -r androidApp/src/main/res/drawable androidApp/src/main/res/drawable_backup
   ```
 
 ---

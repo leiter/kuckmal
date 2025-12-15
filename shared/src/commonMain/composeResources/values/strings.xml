@@ -2,7 +2,7 @@
 <resources>
 
     <!-- App -->
-    <string name="app_name">MediathekView</string>
+    <string name="app_name">Kuckmal</string>
 
     <!-- Browse View -->
     <string name="channels">Channels</string>
@@ -14,7 +14,7 @@
     <string name="close_search">Close search</string>
 
     <!-- Welcome Dialog -->
-    <string name="welcome_title">Welcome to MediathekView</string>
+    <string name="welcome_title">Welcome to Kuckmal</string>
     <string name="welcome_message">To get started, we need to download the media library list.\n\nThis is a one-time setup process.</string>
     <string name="welcome_download_size">Download size: ~30 MB</string>
 

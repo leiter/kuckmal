@@ -113,10 +113,10 @@ private val _startActivityIntent = MutableSharedFlow<Intent>(replay = 1, extraBu
 5. Test with different videos to ensure consistent behavior
 
 ## Files Modified
-- `/app/src/main/java/com/mediathekview/android/compose/screens/ComposeMediaScreen.kt`
-- `/app/src/main/java/com/mediathekview/android/compose/navigation/Navigation.kt`
-- `/app/src/main/java/com/mediathekview/android/data/MediaViewModel.kt`
-- `/app/src/main/java/com/mediathekview/android/compose/ComposeActivity.kt`
+- `/androidApp/src/main/java/cut/the/crap/android/compose/screens/ComposeMediaScreen.kt`
+- `/androidApp/src/main/java/cut/the/crap/android/compose/navigation/Navigation.kt`
+- `/androidApp/src/main/java/cut/the/crap/android/data/MediaViewModel.kt`
+- `/androidApp/src/main/java/cut/the/crap/android/compose/ComposeActivity.kt`
 
 ## Future Improvements
 1. Consider preloading media entries when navigating to detail view

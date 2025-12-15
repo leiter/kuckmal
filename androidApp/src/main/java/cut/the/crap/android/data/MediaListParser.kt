@@ -12,7 +12,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 /**
- * Parser for MediathekView film list JSON files.
+ * Parser for Kuckmal film list JSON files.
  * Streams and parses large JSON files (685K+ entries) with memory efficiency.
  * Supports chunked parsing to avoid OutOfMemoryError.
  */

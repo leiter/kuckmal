@@ -1,9 +1,9 @@
 package cut.the.crap.desktop.util
 
 /**
- * Utility class for MediathekView URL processing
+ * Utility class for Kuckmal URL processing
  *
- * MediathekView uses a space-saving format for URLs where low/small/HD quality URLs
+ * Kuckmal uses a space-saving format for URLs where low/small/HD quality URLs
  * are stored in pipe-delimited format: "prefixLength|urlPath"
  *
  * Example:

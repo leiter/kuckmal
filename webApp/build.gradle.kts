@@ -1,3 +1,7 @@
+@file:OptIn(ExperimentalDistributionDsl::class)
+
+import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalDistributionDsl
+
 plugins {
     kotlin("multiplatform")
     id("org.jetbrains.compose")
@@ -11,10 +15,10 @@ kotlin {
                 cssSupport {
                     enabled.set(true)
                 }
-                outputFileName = "mediathekview.js"
+                outputFileName = "kuckmal.js"
             }
             webpackTask {
-                mainOutputFileName.set("mediathekview.js")
+                mainOutputFileName.set("kuckmal.js")
             }
             distribution {
                 outputDirectory.set(File("${projectDir}/build/distributions"))

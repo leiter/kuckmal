@@ -45,7 +45,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
     }
 
     setContent {
-        MediathekViewTheme {
+        KuckmalTheme {
             ComposeMainScreen(viewModel)
         }
     }
@@ -117,8 +117,8 @@ To verify the fix:
 - **Backwards compatible**: Works with existing ViewModel logic
 
 ## Files Modified
-- `/app/src/main/java/com/mediathekview/android/compose/screens/ComposeMediaScreen.kt`
-- `/app/src/main/java/com/mediathekview/android/compose/ComposeActivity.kt`
-- `/app/src/main/java/com/mediathekview/android/compose/navigation/Navigation.kt`
+- `/androidApp/src/main/java/cut/the/crap/android/compose/screens/ComposeMediaScreen.kt`
+- `/androidApp/src/main/java/cut/the/crap/android/compose/ComposeActivity.kt`
+- `/androidApp/src/main/java/cut/the/crap/android/compose/navigation/Navigation.kt`
 
 This fix ensures the Compose UI loads reliably when started from the main activity, providing a smooth user experience.

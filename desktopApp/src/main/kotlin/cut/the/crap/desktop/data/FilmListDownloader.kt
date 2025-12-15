@@ -9,7 +9,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 /**
- * Downloads and decompresses the MediathekView film list
+ * Downloads and decompresses the Kuckmal film list
  */
 class FilmListDownloader {
 

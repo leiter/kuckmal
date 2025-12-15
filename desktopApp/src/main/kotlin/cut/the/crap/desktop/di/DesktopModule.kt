@@ -106,14 +106,14 @@ private fun getAppDataPath(): String {
     return when {
         os.contains("win") -> {
             val appData = System.getenv("APPDATA") ?: "$userHome\\AppData\\Roaming"
-            "$appData\\MediathekView\\"
+            "$appData\\Kuckmal\\"
         }
         os.contains("mac") -> {
-            "$userHome/Library/Application Support/MediathekView/"
+            "$userHome/Library/Application Support/Kuckmal/"
         }
         else -> {
             val xdgDataHome = System.getenv("XDG_DATA_HOME") ?: "$userHome/.local/share"
-            "$xdgDataHome/mediathekview/"
+            "$xdgDataHome/Kuckmal/"
         }
     }
 }

@@ -10,7 +10,7 @@ import platform.Foundation.NSUserDomainMask
  * iOS-specific database builder
  */
 fun getDatabaseBuilder(): RoomDatabase.Builder<AppDatabase> {
-    val dbFilePath = documentDirectory() + "/mediathekview.db"
+    val dbFilePath = documentDirectory() + "/${AppDatabase.DATABASE_NAME}"
     return Room.databaseBuilder<AppDatabase>(
         name = dbFilePath
     )

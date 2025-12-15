@@ -161,5 +161,5 @@ def display_entry(entry_data, field_names):
     print()
 
 if __name__ == "__main__":
-    filepath = "/home/mandroid/Videos/andriod-mediathekview-code/tmp/Filmliste-akt"
+    filepath = "/home/mandroid/Videos/kuckmal-apps/tmp/Filmliste-akt"
     analyze_outliers(filepath)

@@ -9,7 +9,7 @@ This directory should contain the `Filmliste-akt` file for testing purposes.
 ### How to obtain the file:
 
 The `Filmliste-akt` file can be obtained from:
-- MediathekView servers: https://verteiler1.mediathekview.de/Filmliste-akt.xz
+- Kuckmal servers: https://verteiler1.mediathekview.de/Filmliste-akt.xz
 - Extract the .xz file after downloading
 
 ### Usage:

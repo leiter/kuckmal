@@ -1,10 +1,10 @@
 {
-    "id": "com.mediathekview.webos",
+    "id": "cut.the.crap.webos",
     "version": "1.0.0",
-    "vendor": "MediathekView",
+    "vendor": "Kuckmal",
     "type": "web",
     "main": "index.html",
-    "title": "MediathekView",
+    "title": "Kuckmal",
     "icon": "icon.png",
     "largeIcon": "largeIcon.png",
     "appDescription": "German public TV media library browser",

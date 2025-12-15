@@ -1,6 +1,6 @@
 # TV Channel Logos Download Guide
 
-This guide provides direct links to download high-quality logos for all channels in the MediathekView app.
+This guide provides direct links to download high-quality logos for all channels in the Kuckmal app.
 
 ## Quick Reference
 
@@ -205,7 +205,7 @@ I can create a Python script to batch resize and optimize all downloaded logos.
 - **Resize:** Keep aspect ratio, target width 200-400px
 - **Format:** Ensure PNG with transparency
 - **Optimize:** Use tools like pngcrush or optipng to reduce file size
-- **Location:** Place in `app/src/main/res/drawable/`
+- **Location:** Place in `androidApp/src/main/res/drawable/`
 
 ---
 
@@ -222,7 +222,7 @@ Let me know if you need help with any of these steps!
 
 ## License Note
 
-All logos are trademarks of their respective broadcasters. They are used here for the purpose of identifying media content from those broadcasters in the MediathekView app. Usage should comply with fair use and trademark guidelines.
+All logos are trademarks of their respective broadcasters. They are used here for the purpose of identifying media content from those broadcasters in the Kuckmal app. Usage should comply with fair use and trademark guidelines.
 
 **Sources used:**
 - Wikimedia Commons (CC0/Public Domain)

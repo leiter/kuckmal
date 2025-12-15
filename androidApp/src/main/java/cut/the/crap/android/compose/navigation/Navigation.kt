@@ -52,7 +52,7 @@ import kotlinx.coroutines.withContext
  * Uses SharedViewModel from KMP with callbacks for Android-specific operations
  */
 @Composable
-fun MediathekViewNavHost(
+fun KuckmalNavHost(
     navController: NavHostController,
     viewModel: SharedViewModel,
     onTimePeriodClick: () -> Unit = {},

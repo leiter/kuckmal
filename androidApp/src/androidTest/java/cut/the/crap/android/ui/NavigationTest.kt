@@ -13,7 +13,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Comprehensive navigation tests for MediathekView app
+ * Comprehensive navigation tests for Kuckmal app
  *
  * Tests the complete navigation flow:
  * - Forward: Channels → Themes → Titles → Detail

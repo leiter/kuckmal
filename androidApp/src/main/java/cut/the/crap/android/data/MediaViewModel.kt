@@ -1074,7 +1074,7 @@ class MediaViewModel(
                 setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
                 setDestinationInExternalPublicDir(
                     android.os.Environment.DIRECTORY_DOWNLOADS,
-                    "MediathekView/${mediaEntry.channel}/${sanitizedTitle}${fileExtension}"
+                    "Kuckmal/${mediaEntry.channel}/${sanitizedTitle}${fileExtension}"
                 )
                 setAllowedNetworkTypes(
                     DownloadManager.Request.NETWORK_WIFI or

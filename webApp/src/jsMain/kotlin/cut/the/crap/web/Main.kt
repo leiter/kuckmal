@@ -35,12 +35,12 @@ private val repository: MediaRepository = MockMediaRepository()
 
 fun main() {
     renderComposable(rootElementId = "root") {
-        MediathekViewApp()
+        KuckmalApp()
     }
 }
 
 @Composable
-fun MediathekViewApp() {
+fun KuckmalApp() {
     var navigationState by remember { mutableStateOf<NavigationState>(NavigationState.ChannelList) }
     var searchQuery by remember { mutableStateOf("") }
     var selectedChannelIndex by remember { mutableStateOf(-1) }
@@ -88,7 +88,7 @@ fun MediathekViewApp() {
                         searchQuery = ""
                     }
                     style { property("cursor", "pointer") }
-                }) { Text("MediathekView") }
+                }) { Text("Kuckmal") }
             }
             Div({ classes(AppStyleSheet.headerCenter) }) {
                 Breadcrumb(navigationState) { newState ->
@@ -203,7 +203,7 @@ fun MediathekViewApp() {
 
         // Footer
         Footer({ classes(AppStyleSheet.footer) }) {
-            Text("MediathekView Web - Powered by Kotlin/JS & Compose HTML")
+            Text("Kuckmal Web - Powered by Kotlin/JS & Compose HTML")
         }
     }
 }
@@ -329,7 +329,7 @@ fun ChannelButton(
 @Composable
 fun WelcomeView(onBrowseClick: () -> Unit = {}) {
     Div({ classes(AppStyleSheet.welcomeContainer) }) {
-        H2({ classes(AppStyleSheet.welcomeTitle) }) { Text("Willkommen bei MediathekView") }
+        H2({ classes(AppStyleSheet.welcomeTitle) }) { Text("Willkommen bei Kuckmal") }
         P({ classes(AppStyleSheet.welcomeText) }) {
             Text("Bitte waehlen Sie einen Sender aus der Liste links, um Sendungen zu durchsuchen.")
         }

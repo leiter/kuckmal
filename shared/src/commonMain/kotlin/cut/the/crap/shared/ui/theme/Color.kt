@@ -3,7 +3,7 @@ package cut.the.crap.shared.ui.theme
 import androidx.compose.ui.graphics.Color
 
 /**
- * Shared color definitions for MediathekView theme
+ * Shared color definitions for Kuckmal theme
  * These colors are platform-independent and used across Android and Web
  */
 

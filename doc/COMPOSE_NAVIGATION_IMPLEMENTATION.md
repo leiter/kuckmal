@@ -1,7 +1,7 @@
 # Compose Navigation Implementation
 
 ## Overview
-Successfully implemented Compose Navigation with animated transitions for the MediathekView Android app. This replaces the manual Screen enum-based navigation with a more robust, declarative navigation system.
+Successfully implemented Compose Navigation with animated transitions for the Kuckmal Android app. This replaces the manual Screen enum-based navigation with a more robust, declarative navigation system.
 
 ## Implementation Details
 
@@ -101,10 +101,10 @@ To fully integrate Compose Navigation with real data:
 ## Files Modified/Created
 
 - **Created**:
-  - `/app/src/main/java/com/mediathekview/android/compose/navigation/Navigation.kt`
+  - `/androidApp/src/main/java/cut/the/crap/android/compose/navigation/Navigation.kt`
 
 - **Modified**:
-  - `/app/src/main/java/com/mediathekview/android/compose/ComposeActivity.kt`
+  - `/androidApp/src/main/java/cut/the/crap/android/compose/ComposeActivity.kt`
 
 ## Dependencies Used
 

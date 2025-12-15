@@ -4,18 +4,18 @@
 
 ---
 
-**Betreff: Anfrage zur Nutzung des Senderlogos in der kostenlosen Android-App „MediathekView Android"**
+**Betreff: Anfrage zur Nutzung des Senderlogos in der kostenlosen Android-App „Kuckmal Android"**
 
 Sehr geehrte Damen und Herren,
 
-mein Name ist [IHR NAME], und ich bin der Entwickler der kostenlosen Android-Anwendung **„MediathekView Android"**.
+mein Name ist [IHR NAME], und ich bin der Entwickler der kostenlosen Android-Anwendung **„Kuckmal Android"**.
 
 ### Über die App
 
-MediathekView Android ist eine kostenlose, werbefreie Open-Source-App, die Nutzern einen einfachen Zugang zu den öffentlich-rechtlichen Mediatheken im deutschsprachigen Raum ermöglicht. Die App ist Teil des bekannten MediathekView-Ökosystems und orientiert sich an den etablierten Projekten:
+Kuckmal Android ist eine kostenlose, werbefreie Open-Source-App, die Nutzern einen einfachen Zugang zu den öffentlich-rechtlichen Mediatheken im deutschsprachigen Raum ermöglicht. Die App ist Teil des bekannten Kuckmal-Ökosystems und orientiert sich an den etablierten Projekten:
 
-- **MediathekView** (Desktop-Anwendung): https://mediathekview.de
-- **MediathekViewWeb** (Web-Anwendung): https://mediathekviewweb.de
+- **Kuckmal** (Desktop-Anwendung): https://mediathekview.de
+- **KuckmalWeb** (Web-Anwendung): https://mediathekviewweb.de
 
 ### Zweck der App
 
@@ -31,7 +31,7 @@ Die App dient ausschließlich dazu, den Zuschauern einen komfortablen mobilen Zu
 
 Um den Nutzern eine übersichtliche und intuitive Navigation zu ermöglichen, möchte ich das offizielle Logo Ihres Senders in der App verwenden. Das Logo würde ausschließlich zur **Identifikation des Senders** in der Senderliste dienen.
 
-Ich bitte Sie hiermit höflich um die Genehmigung, das Logo von **[SENDERNAME]** in der App „MediathekView Android" verwenden zu dürfen.
+Ich bitte Sie hiermit höflich um die Genehmigung, das Logo von **[SENDERNAME]** in der App „Kuckmal Android" verwenden zu dürfen.
 
 ### Zusicherungen
 
@@ -65,18 +65,18 @@ Mit freundlichen Grüßen,
 
 ---
 
-**Subject: Request for Permission to Use Broadcaster Logo in Free Android App "MediathekView Android"**
+**Subject: Request for Permission to Use Broadcaster Logo in Free Android App "Kuckmal Android"**
 
 Dear Sir or Madam,
 
-My name is [YOUR NAME], and I am the developer of the free Android application **"MediathekView Android"**.
+My name is [YOUR NAME], and I am the developer of the free Android application **"Kuckmal Android"**.
 
 ### About the App
 
-MediathekView Android is a free, ad-free, open-source app that provides users with easy access to public broadcasting media libraries in German-speaking countries. The app is part of the well-known MediathekView ecosystem and is based on the established projects:
+Kuckmal Android is a free, ad-free, open-source app that provides users with easy access to public broadcasting media libraries in German-speaking countries. The app is part of the well-known Kuckmal ecosystem and is based on the established projects:
 
-- **MediathekView** (Desktop application): https://mediathekview.de
-- **MediathekViewWeb** (Web application): https://mediathekviewweb.de
+- **Kuckmal** (Desktop application): https://mediathekview.de
+- **KuckmalWeb** (Web application): https://mediathekviewweb.de
 
 ### Purpose of the App
 
@@ -92,7 +92,7 @@ The app serves solely to provide viewers with convenient mobile access to alread
 
 To provide users with a clear and intuitive navigation experience, I would like to use your broadcaster's official logo in the app. The logo would be used exclusively for **identifying the broadcaster** in the channel list.
 
-I hereby kindly request permission to use the logo of **[BROADCASTER NAME]** in the "MediathekView Android" app.
+I hereby kindly request permission to use the logo of **[BROADCASTER NAME]** in the "Kuckmal Android" app.
 
 ### Assurances
 

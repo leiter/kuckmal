@@ -3,9 +3,9 @@ package cut.the.crap.android.util
 import android.util.Log
 
 /**
- * Utility class for MediathekView URL processing
+ * Utility class for Kuckmal URL processing
  *
- * MediathekView uses a space-saving format for URLs where low/small quality URLs
+ * Kuckmal uses a space-saving format for URLs where low/small quality URLs
  * are stored in pipe-delimited format: "prefixLength|urlPath"
  */
 object MediaUrlUtils {
@@ -14,7 +14,7 @@ object MediaUrlUtils {
 
     /**
      * Clean media URL by removing pipe-delimited prefix and adding protocol if needed
-     * MediathekView URLs are stored in format: "index|domain/path" or just "domain/path"
+     * Kuckmal URLs are stored in format: "index|domain/path" or just "domain/path"
      *
      * @param url The URL to clean
      * @return Cleaned URL with protocol
@@ -46,7 +46,7 @@ object MediaUrlUtils {
     /**
      * Reconstruct URL from pipe-delimited format
      *
-     * MediathekView uses a space-saving format where low/small quality URLs are stored as:
+     * Kuckmal uses a space-saving format where low/small quality URLs are stored as:
      * "prefixLength|urlPath"
      *
      * Example:

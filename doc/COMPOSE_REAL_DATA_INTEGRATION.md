@@ -178,12 +178,12 @@ To test the real data integration:
 ## Files Created/Modified
 
 ### Created
-- `/app/src/main/java/com/mediathekview/android/compose/data/ComposeDataMapper.kt`
-- `/app/src/main/java/com/mediathekview/android/compose/screens/ComposeMediaScreen.kt`
+- `/androidApp/src/main/java/cut/the/crap/android/compose/data/ComposeDataMapper.kt`
+- `/androidApp/src/main/java/cut/the/crap/android/compose/screens/ComposeMediaScreen.kt`
 
 ### Modified
-- `/app/src/main/java/com/mediathekview/android/compose/navigation/Navigation.kt`
-- `/app/src/main/java/com/mediathekview/android/compose/ComposeActivity.kt`
+- `/androidApp/src/main/java/cut/the/crap/android/compose/navigation/Navigation.kt`
+- `/androidApp/src/main/java/cut/the/crap/android/compose/ComposeActivity.kt`
 
 ## Summary
 

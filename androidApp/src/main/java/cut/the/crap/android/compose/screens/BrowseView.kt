@@ -59,7 +59,7 @@ import androidx.compose.ui.unit.sp
 import cut.the.crap.android.R
 import cut.the.crap.shared.ui.Channel
 import cut.the.crap.shared.ui.SampleData
-import cut.the.crap.android.compose.ui.theme.MediathekViewTheme
+import cut.the.crap.android.compose.ui.theme.KuckmalTheme
 import cut.the.crap.android.model.Broadcaster
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -336,7 +336,7 @@ fun ChannelList(
  * Channel item with two display modes controlled by [Broadcaster.useFallbackDisplay]:
  * - Logo mode (useFallbackDisplay = false): Shows the channel logo icon
  * - Fallback mode (useFallbackDisplay = true): Shows brand color background with abbreviation
- *   (MediathekViewWeb style)
+ *   (KuckmalWeb style)
  *
  * Uses the official brand colors and icons from [Broadcaster] model.
  */
@@ -510,7 +510,7 @@ fun TitleItem(
 @Preview(showBackground = true, widthDp = 800, heightDp = 600)
 @Composable
 fun BrowseViewPreview() {
-    MediathekViewTheme {
+    KuckmalTheme {
         BrowseView(
             channels = SampleData.sampleChannels,
             selectedChannel = SampleData.sampleChannels.find { it.name == "ZDF" },
@@ -522,7 +522,7 @@ fun BrowseViewPreview() {
 @Preview(showBackground = true, widthDp = 400)
 @Composable
 fun TitleItemPreview() {
-    MediathekViewTheme {
+    KuckmalTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)

@@ -7,7 +7,7 @@ import cut.the.crap.android.R
  * brand color (for fallback display), and short abbreviation.
  *
  * The brand color is used as a fallback when the logo is not available,
- * displaying the abbreviation on a colored background (similar to MediathekViewWeb).
+ * displaying the abbreviation on a colored background (similar to KuckmalWeb).
  *
  * This is a data class which automatically generates:
  * - equals() and hashCode()
@@ -33,7 +33,7 @@ data class Broadcaster(
         /**
          * Global flag to control channel display mode.
          * - false (default): Use logo icons (for legacy View-based UI)
-         * - true: Use fallback display with brand color + abbreviation (MediathekViewWeb style)
+         * - true: Use fallback display with brand color + abbreviation (KuckmalWeb style)
          *
          * Set this to true in Compose UI to use the fallback display.
          */

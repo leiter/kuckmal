@@ -8,7 +8,7 @@ import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
 
 /**
- * Parser for MediathekView film list JSON files on desktop.
+ * Parser for Kuckmal film list JSON files on desktop.
  * Streams and parses large JSON files with memory efficiency.
  */
 class DesktopMediaListParser {

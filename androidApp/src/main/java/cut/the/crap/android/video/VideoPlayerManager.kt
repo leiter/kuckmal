@@ -40,7 +40,7 @@ class VideoPlayerManager(
             enableSubtitles = true,
             autoPlay = true,
             rememberPosition = false,
-            userAgent = "MediathekView-Android/1.0"
+            userAgent = "Kuckmal-Android/1.0"
         )
     ).also { player ->
         // Set up collection from AndroidVideoPlayer's flow at initialization time

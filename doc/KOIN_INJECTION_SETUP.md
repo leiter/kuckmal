@@ -10,7 +10,7 @@ Successfully integrated Koin dependency injection to inject `MediaViewModel` int
 
 ### 1. ComposeActivity Update
 
-**File:** `app/src/main/java/com/mediathekview/android/compose/ComposeActivity.kt`
+**File:** `androidApp/src/main/java/cut/the/crap/android/compose/ComposeActivity.kt`
 
 #### Added Koin Import
 ```kotlin
@@ -29,7 +29,7 @@ class ComposeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MediathekViewTheme {
+            KuckmalTheme {
                 ComposeMainScreen(viewModel)
             }
         }
@@ -59,7 +59,7 @@ fun ComposeMainScreen(viewModel: MediaViewModel) {
 
 The `MediaViewModel` was already configured in the Koin module:
 
-**File:** `app/src/main/java/com/mediathekview/android/di/AppModule.kt`
+**File:** `androidApp/src/main/java/cut/the/crap/android/di/AppModule.kt`
 
 ```kotlin
 val appModule = module {
@@ -240,19 +240,19 @@ Success
 ## Code Structure
 
 ### Files Modified
-1. ✅ `app/src/main/java/com/mediathekview/android/compose/ComposeActivity.kt`
+1. ✅ `androidApp/src/main/java/cut/the/crap/android/compose/ComposeActivity.kt`
    - Added Koin ViewModel injection
    - Updated ComposeMainScreen to accept ViewModel
    - Added state observation example
 
 ### Files Removed
-1. ✅ `app/src/main/java/com/mediathekview/android/compose/ComposeViewModel.kt`
+1. ✅ `androidApp/src/main/java/cut/the/crap/android/compose/ComposeViewModel.kt`
    - Removed duplicate ViewModel (using MediaViewModel instead)
 
 ### Existing Files (Unchanged)
-1. ✅ `app/src/main/java/com/mediathekview/android/di/AppModule.kt`
+1. ✅ `androidApp/src/main/java/cut/the/crap/android/di/AppModule.kt`
    - MediaViewModel already configured
-2. ✅ `app/src/main/java/com/mediathekview/android/data/MediaViewModel.kt`
+2. ✅ `androidApp/src/main/java/cut/the/crap/android/data/MediaViewModel.kt`
    - Existing implementation works perfectly
 
 ---

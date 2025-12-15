@@ -6,7 +6,7 @@ Analysis of which Compose UI code can be moved to the shared module for Kotlin M
 
 ### Shared Module (Already Platform-Agnostic)
 
-The shared module at `shared/src/commonMain/kotlin/com/mediathekview/shared/` already contains:
+The shared module at `shared/src/commonMain/kotlin/cut/the/crap/shared/` already contains:
 
 | File | Description |
 |------|-------------|
@@ -16,7 +16,7 @@ The shared module at `shared/src/commonMain/kotlin/com/mediathekview/shared/` al
 
 ### Compose UI Files in App Module
 
-Located at `app/src/main/java/com/mediathekview/android/compose/`:
+Located at `androidApp/src/main/java/cut/the/crap/android/compose/`:
 
 ```
 compose/
@@ -126,7 +126,7 @@ androidx.navigation.compose.composable
 
 ### Phase 1: Quick Wins (Immediate)
 
-Move to `shared/commonMain/kotlin/com/mediathekview/shared/`:
+Move to `shared/commonMain/kotlin/cut/the/crap/shared/`:
 
 1. **ComposeModels.kt** → `shared/model/`
    - `data class MediaItem`

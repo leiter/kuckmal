@@ -373,7 +373,7 @@ class MediaActivity : FragmentActivity() {
      * - Only checks if the configured interval has elapsed (default: once per day)
      * - Uses lightweight HTTP HEAD requests (~1KB vs ~50MB)
      * - Avoids unnecessary server load by comparing metadata
-     * - Respects MediathekView team's best practices
+     * - Respects Kuckmal team's best practices
      * - Silently checks in background, only shows dialog if update available
      */
     private fun checkForUpdatesOnForeground() {

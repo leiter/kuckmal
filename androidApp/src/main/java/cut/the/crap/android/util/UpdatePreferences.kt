@@ -8,7 +8,7 @@ import androidx.core.content.edit
  * Manages preferences for film list updates to implement server-friendly differential updates.
  *
  * Server-Friendly Best Practices:
- * - MediathekView team recommends avoiding unnecessary downloads
+ * - Kuckmal team recommends avoiding unnecessary downloads
  * - Film lists are updated approximately every 4 hours
  * - Check if server file has changed before downloading
  * - Use HTTP headers (Last-Modified, ETag, Content-Length) for validation

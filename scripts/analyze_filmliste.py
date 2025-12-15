@@ -137,7 +137,7 @@ def analyze_filmliste(filepath):
         sys.exit(1)
 
 if __name__ == "__main__":
-    filepath = "/home/mandroid/Videos/andriod-mediathekview-code/tmp/Filmliste-akt"
+    filepath = "/home/mandroid/Videos/kuckmal-apps/tmp/Filmliste-akt"
 
     if len(sys.argv) > 1:
         filepath = sys.argv[1]

@@ -66,7 +66,7 @@ class MediaRepositoryDiffUpdateTest {
         // Load initial 3 entries
         val initialFile = createTestFile("initial.json", """
             {
-              "Filmliste": ["13.11.2025", "10:00", "abc123", "MediathekView", "1.0"],
+              "Filmliste": ["13.11.2025", "10:00", "abc123", "Kuckmal", "1.0"],
               "X": ["ARD", "News", "Title1", "13.11.2025", "10:00:00", "00:15:00", "150", "Original description", "https://example.com/v1.mp4", "https://ard.de", "", "", "", "", "", "", "1731488400", "", "DE", "false"],
               "X": ["ARD", "News", "Title2", "13.11.2025", "10:30:00", "00:20:00", "200", "Description 2", "https://example.com/v2.mp4", "", "", "", "", "", "", "", "1731490200", "", "DE", "false"],
               "X": ["ZDF", "Sport", "Title3", "13.11.2025", "11:00:00", "00:25:00", "250", "Description 3", "https://example.com/v3.mp4", "", "", "", "", "", "", "", "1731492000", "", "DE", "false"]
@@ -84,7 +84,7 @@ class MediaRepositoryDiffUpdateTest {
         // Apply diff with 1 updated entry and 2 new entries
         val diffFile = createTestFile("diff.json", """
             {
-              "Filmliste": ["13.11.2025", "12:00", "def456", "MediathekView", "1.0"],
+              "Filmliste": ["13.11.2025", "12:00", "def456", "Kuckmal", "1.0"],
               "X": ["ARD", "News", "Title1", "13.11.2025", "10:00:00", "00:15:00", "150", "UPDATED description", "https://example.com/v1.mp4", "https://ard.de", "", "", "", "", "", "", "1731488400", "", "DE", "true"],
               "X": ["ARD", "News", "Title4", "13.11.2025", "12:00:00", "00:30:00", "300", "New entry 4", "https://example.com/v4.mp4", "", "", "", "", "", "", "", "1731495600", "", "DE", "false"],
               "X": ["ZDF", "Movies", "Title5", "13.11.2025", "12:30:00", "00:35:00", "350", "New entry 5", "https://example.com/v5.mp4", "", "", "", "", "", "", "", "1731497400", "", "DE", "false"]
@@ -124,7 +124,7 @@ class MediaRepositoryDiffUpdateTest {
         // Initial load
         val initialFile = createTestFile("initial2.json", """
             {
-              "Filmliste": ["13.11.2025", "10:00", "abc", "MediathekView", "1.0"],
+              "Filmliste": ["13.11.2025", "10:00", "abc", "Kuckmal", "1.0"],
               "X": ["ARD", "News", "Title1", "13.11.2025", "10:00:00", "00:15:00", "150", "Version 1", "https://example.com/v1.mp4", "", "", "", "", "", "", "", "1731488400", "", "", "false"]
             }
         """.trimIndent())
@@ -140,7 +140,7 @@ class MediaRepositoryDiffUpdateTest {
         // Apply first diff
         val diff1File = createTestFile("diff1.json", """
             {
-              "Filmliste": ["13.11.2025", "11:00", "def", "MediathekView", "1.0"],
+              "Filmliste": ["13.11.2025", "11:00", "def", "Kuckmal", "1.0"],
               "X": ["ARD", "News", "Title1", "13.11.2025", "10:00:00", "00:15:00", "150", "Version 2", "https://example.com/v1.mp4", "", "", "", "", "", "", "", "1731488400", "", "", "false"]
             }
         """.trimIndent())
@@ -159,7 +159,7 @@ class MediaRepositoryDiffUpdateTest {
         // Apply second diff
         val diff2File = createTestFile("diff2.json", """
             {
-              "Filmliste": ["13.11.2025", "12:00", "ghi", "MediathekView", "1.0"],
+              "Filmliste": ["13.11.2025", "12:00", "ghi", "Kuckmal", "1.0"],
               "X": ["ARD", "News", "Title1", "13.11.2025", "10:00:00", "00:15:00", "150", "Version 3", "https://example.com/v1.mp4", "", "", "", "", "", "", "", "1731488400", "", "", "false"]
             }
         """.trimIndent())
@@ -181,7 +181,7 @@ class MediaRepositoryDiffUpdateTest {
         // Primary key in MediaEntry is channel, theme, title
         val initialFile = createTestFile("initial4.json", """
             {
-              "Filmliste": ["13.11.2025", "10:00", "abc", "MediathekView", "1.0"],
+              "Filmliste": ["13.11.2025", "10:00", "abc", "Kuckmal", "1.0"],
               "X": ["ARD", "News", "Breaking", "13.11.2025", "10:00:00", "00:10:00", "100", "Original story", "https://example.com/breaking.mp4", "", "", "", "", "", "", "", "1731488400", "", "", "false"]
             }
         """.trimIndent())
@@ -195,7 +195,7 @@ class MediaRepositoryDiffUpdateTest {
         // Apply diff with same channel+theme+title but different content
         val diffFile = createTestFile("diff4.json", """
             {
-              "Filmliste": ["13.11.2025", "12:00", "def", "MediathekView", "1.0"],
+              "Filmliste": ["13.11.2025", "12:00", "def", "Kuckmal", "1.0"],
               "X": ["ARD", "News", "Breaking", "13.11.2025", "12:00:00", "00:15:00", "150", "Updated story with more details", "https://example.com/breaking_updated.mp4", "", "", "", "", "", "", "", "1731495600", "", "", "true"]
             }
         """.trimIndent())

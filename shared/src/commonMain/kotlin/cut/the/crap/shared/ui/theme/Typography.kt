@@ -7,7 +7,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 /**
- * Shared typography definitions for MediathekView theme
+ * Shared typography definitions for Kuckmal theme
  * Platform-independent typography used across Android and Web
  */
 val SharedTypography = Typography(

@@ -7,7 +7,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 
 /**
- * Shared color schemes for MediathekView theme
+ * Shared color schemes for Kuckmal theme
  * These are the fallback schemes when platform-specific dynamic colors are not available
  */
 val DarkColorScheme = darkColorScheme(
@@ -49,7 +49,7 @@ val LightColorScheme = lightColorScheme(
 expect fun getPlatformColorScheme(darkTheme: Boolean, dynamicColor: Boolean): ColorScheme
 
 /**
- * Shared MediathekView theme composable
+ * Shared Kuckmal theme composable
  * Uses platform-specific color scheme with shared typography
  *
  * @param darkTheme Whether to use dark theme (defaults to system setting)
@@ -57,7 +57,7 @@ expect fun getPlatformColorScheme(darkTheme: Boolean, dynamicColor: Boolean): Co
  * @param content The content to display with this theme
  */
 @Composable
-fun MediathekViewTheme(
+fun KuckmalTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit

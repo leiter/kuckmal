@@ -6,7 +6,7 @@ This document summarizes the 8 iterations of improvements made to the Compose De
 
 **Process**: Screenshot-driven iterative design refinement
 **Total Iterations**: 8 (Iteration 0 = initial state, Iterations 1-8 = improvements)
-**File Modified**: `app/src/main/java/com/mediathekview/android/compose/screens/DetailView.kt`
+**File Modified**: `androidApp/src/main/java/cut/the/crap/android/compose/screens/DetailView.kt`
 
 ---
 

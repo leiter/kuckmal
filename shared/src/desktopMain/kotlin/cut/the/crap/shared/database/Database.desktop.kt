@@ -8,7 +8,7 @@ import java.io.File
  * Desktop-specific database builder
  */
 fun getDatabaseBuilder(): RoomDatabase.Builder<AppDatabase> {
-    val dbFile = File(getAppDataDirectory(), "mediathekview.db")
+    val dbFile = File(getAppDataDirectory(), AppDatabase.DATABASE_NAME)
     return Room.databaseBuilder<AppDatabase>(
         name = dbFile.absolutePath
     )
@@ -23,18 +23,18 @@ private fun getAppDataDirectory(): File {
 
     val appDir = when {
         os.contains("win") -> {
-            // Windows: %APPDATA%\MediathekView
+            // Windows: %APPDATA%\Kuckmal
             val appData = System.getenv("APPDATA") ?: "$userHome\\AppData\\Roaming"
-            File(appData, "MediathekView")
+            File(appData, "Kuckmal")
         }
         os.contains("mac") -> {
-            // macOS: ~/Library/Application Support/MediathekView
-            File(userHome, "Library/Application Support/MediathekView")
+            // macOS: ~/Library/Application Support/Kuckmal
+            File(userHome, "Library/Application Support/Kuckmal")
         }
         else -> {
-            // Linux/Unix: ~/.local/share/mediathekview
+            // Linux/Unix: ~/.local/share/kuckmal
             val xdgDataHome = System.getenv("XDG_DATA_HOME") ?: "$userHome/.local/share"
-            File(xdgDataHome, "mediathekview")
+            File(xdgDataHome, "kuckmal")
         }
     }
 

@@ -41,22 +41,22 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Rpm)
 
-            packageName = "MediathekView"
+            packageName = "Kuckmal"
             packageVersion = "1.0.0"
-            description = "MediathekView - Browse German public media libraries"
-            vendor = "MediathekView"
+            description = "Kuckmal - Browse German public media libraries"
+            vendor = "Kuckmal"
 
             linux {
                 iconFile.set(project.file("src/main/resources/icon.png"))
-                debMaintainer = "mediathekview@example.com"
+                debMaintainer = "kuckmal@example.com"
                 menuGroup = "Multimedia"
                 appCategory = "Video"
             }
 
             windows {
                 iconFile.set(project.file("src/main/resources/icon.ico"))
-                menuGroup = "MediathekView"
-                upgradeUuid = "mediathekview-desktop-app"
+                menuGroup = "Kuckmal"
+                upgradeUuid = "kuckmal-desktop-app"
             }
 
             macOS {

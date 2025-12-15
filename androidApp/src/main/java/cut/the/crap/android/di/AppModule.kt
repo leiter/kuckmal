@@ -162,7 +162,7 @@ private fun downloadVideo(context: Context, entry: MediaEntry, url: String, qual
             setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
             setDestinationInExternalPublicDir(
                 android.os.Environment.DIRECTORY_DOWNLOADS,
-                "MediathekView/${entry.channel}/${sanitizedTitle}${fileExtension}"
+                "Kuckmal/${entry.channel}/${sanitizedTitle}${fileExtension}"
             )
             setAllowedNetworkTypes(
                 DownloadManager.Request.NETWORK_WIFI or

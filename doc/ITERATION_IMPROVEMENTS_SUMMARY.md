@@ -50,7 +50,7 @@ Card(
 ```
 
 **Files Modified:**
-- `app/src/main/java/com/mediathekview/android/compose/screens/BrowseView.kt`
+- `androidApp/src/main/java/cut/the/crap/android/compose/screens/BrowseView.kt`
 
 ---
 
@@ -95,7 +95,7 @@ Card(
 ```
 
 **Files Modified:**
-- `app/src/main/java/com/mediathekview/android/compose/screens/BrowseView.kt`
+- `androidApp/src/main/java/cut/the/crap/android/compose/screens/BrowseView.kt`
 
 ---
 
@@ -153,7 +153,7 @@ Box(
 ```
 
 **Files Modified:**
-- `app/src/main/java/com/mediathekview/android/compose/screens/BrowseView.kt`
+- `androidApp/src/main/java/cut/the/crap/android/compose/screens/BrowseView.kt`
 
 ---
 
@@ -196,7 +196,7 @@ LazyColumn {
 ```
 
 **Files Modified:**
-- `app/src/main/java/com/mediathekview/android/compose/screens/BrowseView.kt`
+- `androidApp/src/main/java/cut/the/crap/android/compose/screens/BrowseView.kt`
 
 ---
 
@@ -243,7 +243,7 @@ LazyColumn {
 ## Files Modified
 
 ### Primary File
-`app/src/main/java/com/mediathekview/android/compose/screens/BrowseView.kt`
+`androidApp/src/main/java/cut/the/crap/android/compose/screens/BrowseView.kt`
 
 ### Changes Made (Line Count)
 - Initial implementation: ~200 lines
@@ -251,7 +251,7 @@ LazyColumn {
 - Net additions: ~70 lines of refinements
 
 ### Test File
-`app/src/androidTest/java/com/mediathekview/android/compose/ComposeBrowseViewScreenshotTest.kt`
+`androidApp/src/androidTest/java/cut/the/crap/android/compose/ComposeBrowseViewScreenshotTest.kt`
 
 ---
 

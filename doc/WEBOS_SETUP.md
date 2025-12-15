@@ -62,10 +62,10 @@ cd webApp/build
 ares-package webos-package -o webos-output
 
 # Install on TV
-ares-install -d <device-name> webos-output/com.mediathekview.webos_1.0.0_all.ipk
+ares-install -d <device-name> webos-output/cut.the.crap.webos_1.0.0_all.ipk
 
 # Launch the app
-ares-launch -d <device-name> com.mediathekview.webos
+ares-launch -d <device-name> cut.the.crap.webos
 ```
 
 ## Icon Requirements
