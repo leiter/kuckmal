@@ -6,7 +6,7 @@ struct iOSApp: App {
 
     init() {
         // Initialize Koin for dependency injection
-        // KoinHelperKt.doInitKoin()
+        KoinHelperKt.doInitKoin()
     }
 
     var body: some Scene {

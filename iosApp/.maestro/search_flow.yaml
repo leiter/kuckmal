@@ -1,0 +1,40 @@
+appId: cut.the.crap.kuckmal
+---
+# Test: Search Flow (requires film data)
+# Tests opening search, entering query, and viewing results
+
+- launchApp
+
+# Only run search tests if data is available
+- runFlow:
+    when:
+      visible: "Alle Themen"
+    commands:
+      # Step 1: Open search
+      - tapOn:
+          accessibilityLabel: "Search"
+      - takeScreenshot: search_01_opened
+
+      # Step 2: Enter search query
+      - inputText: "Tatort"
+      - takeScreenshot: search_02_query_entered
+
+      # Step 3: Wait for results
+      - extendedWaitUntil:
+          visible:
+            text: ".*Tatort.*"
+          timeout: 5000
+
+      - takeScreenshot: search_03_results
+
+      # Step 4: Close search
+      - tapOn:
+          accessibilityLabel: "Close"
+      - takeScreenshot: search_04_closed
+
+# If no data, skip search tests
+- runFlow:
+    when:
+      visible: "No film list found"
+    commands:
+      - takeScreenshot: search_skip_no_data

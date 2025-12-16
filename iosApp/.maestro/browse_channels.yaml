@@ -1,0 +1,33 @@
+appId: cut.the.crap.kuckmal
+---
+# Test: Browse Channels (requires film data)
+# This test requires the database to be populated with film data
+# Skip if "No film list found" is visible
+
+- launchApp
+
+# Check if data is available by looking for channel list
+- runFlow:
+    when:
+      visible: "ARD"
+    commands:
+      - tapOn:
+          text: "ARD"
+      - takeScreenshot: browse_ard_selected
+
+      - tapOn:
+          text: "ZDF"
+      - takeScreenshot: browse_zdf_selected
+
+      - tapOn:
+          text: "3sat"
+      - takeScreenshot: browse_3sat_selected
+
+# If no data, just verify the empty state
+- runFlow:
+    when:
+      visible: "No film list found"
+    commands:
+      - assertVisible:
+          text: "Kuckmal"
+      - takeScreenshot: browse_no_data

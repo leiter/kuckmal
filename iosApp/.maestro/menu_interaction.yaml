@@ -1,0 +1,40 @@
+appId: cut.the.crap.kuckmal
+---
+# Test: Menu Interaction (requires film data)
+# Tests opening the overflow menu and tapping options
+
+- launchApp
+
+# Only run menu tests if browse view is available
+- runFlow:
+    when:
+      visible: "Alle Themen"
+    commands:
+      # Step 1: Open overflow menu
+      - tapOn:
+          accessibilityLabel: "Menu"
+      - takeScreenshot: menu_01_opened
+
+      # Step 2: Verify menu items visible
+      - assertVisible:
+          text: "Zeitraum"
+      - assertVisible:
+          text: "Update prüfen"
+      - assertVisible:
+          text: "Filmliste neu laden"
+
+      # Step 3: Tap time period option
+      - tapOn:
+          text: "Zeitraum"
+
+      # Step 4: Verify snackbar appears
+      - assertVisible:
+          text: "Time period filter coming soon"
+      - takeScreenshot: menu_02_time_period_tapped
+
+# If no data, skip menu tests
+- runFlow:
+    when:
+      visible: "No film list found"
+    commands:
+      - takeScreenshot: menu_skip_no_data

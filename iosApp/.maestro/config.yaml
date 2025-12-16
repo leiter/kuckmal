@@ -1,0 +1,22 @@
+# Maestro Test Suite Configuration for Kuckmal iOS App
+
+appId: cut.the.crap.kuckmal
+
+# Test flows to execute (in order)
+flows:
+  - app_launch.yaml
+  - download_button_tap.yaml
+  - browse_channels.yaml
+  - navigation_flow.yaml
+  - search_flow.yaml
+  - menu_interaction.yaml
+
+# Environment configuration
+env:
+  APP_NAME: Kuckmal
+
+# Output configuration
+outputDir: ./test-output
+
+# Device configuration (for iOS)
+# Maestro will use the booted simulator by default

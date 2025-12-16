@@ -2,6 +2,7 @@ package cut.the.crap.shared.database
 
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSUserDomainMask
@@ -16,6 +17,7 @@ fun getDatabaseBuilder(): RoomDatabase.Builder<AppDatabase> {
     )
 }
 
+@OptIn(ExperimentalForeignApi::class)
 private fun documentDirectory(): String {
     val documentDirectory = NSFileManager.defaultManager.URLForDirectory(
         directory = NSDocumentDirectory,

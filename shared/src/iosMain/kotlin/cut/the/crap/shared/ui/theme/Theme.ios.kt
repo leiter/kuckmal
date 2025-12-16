@@ -3,7 +3,7 @@ package cut.the.crap.shared.ui.theme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import platform.UIKit.UITraitCollection
+import platform.UIKit.UIScreen
 import platform.UIKit.UIUserInterfaceStyle
 
 /**
@@ -24,7 +24,7 @@ actual fun getPlatformColorScheme(darkTheme: Boolean, dynamicColor: Boolean): Co
 @Composable
 actual fun isSystemInDarkTheme(): Boolean {
     return remember {
-        val currentTraitCollection = UITraitCollection.currentTraitCollection
-        currentTraitCollection.userInterfaceStyle == UIUserInterfaceStyle.UIUserInterfaceStyleDark
+        val traitCollection = UIScreen.mainScreen.traitCollection
+        traitCollection.userInterfaceStyle == UIUserInterfaceStyle.UIUserInterfaceStyleDark
     }
 }

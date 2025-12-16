@@ -1,0 +1,19 @@
+appId: cut.the.crap.kuckmal
+---
+# Test: App Launch and Initial State
+# Verifies the app launches successfully and shows the initial UI
+# Note: Compose Multiplatform has limited accessibility exposure on iOS,
+# so we use accessibilityText matching for the main container
+
+- launchApp:
+    clearState: true
+
+# The Compose screen exposes "Kuckmal" as the main accessibilityText
+- assertVisible:
+    text: "Kuckmal"
+
+# Wait for UI to stabilize
+- waitForAnimationToEnd
+
+# Take a screenshot for visual verification
+- takeScreenshot: 001_app_launch

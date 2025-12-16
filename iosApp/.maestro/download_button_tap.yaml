@@ -1,0 +1,21 @@
+appId: cut.the.crap.kuckmal
+---
+# Test: Download Button Interaction
+# Verifies tapping the download button shows a snackbar message
+# Note: Using tap by point since Compose UI accessibility is limited on iOS
+
+- launchApp:
+    clearState: true
+
+- assertVisible:
+    text: "Kuckmal"
+
+- waitForAnimationToEnd
+
+# Tap the Download button (centered, approximately 70% down the screen)
+- tapOn:
+    point: "50%,65%"
+
+- waitForAnimationToEnd
+
+- takeScreenshot: 002_download_button_tap

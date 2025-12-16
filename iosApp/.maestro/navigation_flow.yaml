@@ -1,0 +1,47 @@
+appId: cut.the.crap.kuckmal
+---
+# Test: Navigation Flow (requires film data)
+# Tests the complete navigation cycle: Channel -> Theme -> Title -> Detail -> Back
+
+- launchApp
+
+# Only run navigation tests if data is available
+- runFlow:
+    when:
+      visible: "Alle Themen"
+    commands:
+      # Step 1: Initial state - all themes visible
+      - assertVisible:
+          text: "Alle Themen"
+      - takeScreenshot: nav_01_initial
+
+      # Step 2: Select a channel
+      - tapOn:
+          text: "ZDF"
+      - takeScreenshot: nav_02_channel_selected
+
+      # Step 3: Select first theme in list
+      - tapOn:
+          index: 0
+          childOf:
+            id: ".*contentList.*"
+      - takeScreenshot: nav_03_theme_selected
+
+      # Step 4: Select first title
+      - tapOn:
+          index: 0
+          childOf:
+            id: ".*contentList.*"
+      - takeScreenshot: nav_04_detail_view
+
+      # Step 5: Navigate back
+      - tapOn:
+          accessibilityLabel: "Back"
+      - takeScreenshot: nav_05_back_to_titles
+
+# If no data, skip navigation tests
+- runFlow:
+    when:
+      visible: "No film list found"
+    commands:
+      - takeScreenshot: nav_skip_no_data
