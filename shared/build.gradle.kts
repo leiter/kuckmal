@@ -1,5 +1,6 @@
 plugins {
     kotlin("multiplatform")
+    kotlin("plugin.serialization") version "2.1.0"
     id("com.android.library")
     id("org.jetbrains.compose")
     id("org.jetbrains.kotlin.plugin.compose")
@@ -67,6 +68,14 @@ kotlin {
 
                 // Koin for KMP
                 implementation("io.insert-koin:koin-core:4.0.1")
+
+                // Ktor for HTTP client (KMP)
+                implementation("io.ktor:ktor-client-core:3.0.3")
+                implementation("io.ktor:ktor-client-content-negotiation:3.0.3")
+                implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.3")
+
+                // kotlinx.serialization
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
             }
         }
 
@@ -79,6 +88,10 @@ kotlin {
         val androidMain by getting {
             dependencies {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+                // Ktor Android engine
+                implementation("io.ktor:ktor-client-okhttp:3.0.3")
+                // XZ decompression
+                implementation("org.tukaani:xz:1.10")
             }
         }
 
@@ -86,6 +99,10 @@ kotlin {
             dependencies {
                 implementation(compose.desktop.currentOs)
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.9.0")
+                // Ktor JVM engine
+                implementation("io.ktor:ktor-client-okhttp:3.0.3")
+                // XZ decompression
+                implementation("org.tukaani:xz:1.10")
             }
         }
 
@@ -97,6 +114,10 @@ kotlin {
             iosX64Main.dependsOn(this)
             iosArm64Main.dependsOn(this)
             iosSimulatorArm64Main.dependsOn(this)
+            dependencies {
+                // Ktor iOS engine
+                implementation("io.ktor:ktor-client-darwin:3.0.3")
+            }
         }
     }
 }

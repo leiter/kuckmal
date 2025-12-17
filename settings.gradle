@@ -20,4 +20,5 @@ rootProject.name = "Kuckmal"
 include ':androidApp'
 include ':desktopApp'
 include ':shared'
+include ':shared-tvos'
 include ':webApp'
