@@ -10,12 +10,16 @@ interface VideoPlayer {
      * @param url The video URL to play
      * @param title The title to display in the player
      * @param quality The quality setting for playback
+     * @param subtitleUrl Optional URL for subtitles (VTT/SRT format)
+     * @param videoId Unique identifier for position tracking (typically the URL or a hash)
      * @return Result indicating success or failure
      */
     suspend fun play(
         url: String,
         title: String,
-        quality: VideoQuality = VideoQuality.AUTO
+        quality: VideoQuality = VideoQuality.AUTO,
+        subtitleUrl: String? = null,
+        videoId: String? = null
     ): Result<Unit>
 
     /**

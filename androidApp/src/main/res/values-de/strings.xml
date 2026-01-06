@@ -77,6 +77,9 @@
     <string name="error_playback_failed">Wiedergabe konnte nicht gestartet werden</string>
     <string name="error_format">Fehler: %1$s</string>
 
+    <!-- Video Player -->
+    <string name="resuming_playback">Wiedergabe wird fortgesetzt</string>
+
     <!-- Dialog Titles -->
     <string name="dialog_title_please_wait">Bitte warten</string>
     <string name="dialog_title_no_internet">Keine Internetverbindung</string>

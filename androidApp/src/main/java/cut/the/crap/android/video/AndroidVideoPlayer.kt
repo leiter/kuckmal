@@ -40,10 +40,14 @@ class AndroidVideoPlayer(
     override suspend fun play(
         url: String,
         title: String,
-        quality: VideoQuality
+        quality: VideoQuality,
+        subtitleUrl: String?,
+        videoId: String?
     ): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             Log.d(TAG, "Starting video playback - URL: $url, Title: $title, Quality: $quality")
+            Log.d(TAG, "Subtitle URL: ${subtitleUrl ?: "none"}")
+            Log.d(TAG, "Video ID: ${videoId ?: "none"}")
 
             // Validate URL
             if (!isPlayable(url)) {
@@ -62,9 +66,9 @@ class AndroidVideoPlayer(
 
             // Determine which player to use based on configuration or URL
             val intent = when {
-                shouldUseExoPlayer(cleanUrl) -> createExoPlayerIntent(cleanUrl, title)
+                shouldUseExoPlayer(cleanUrl) -> createExoPlayerIntent(cleanUrl, title, subtitleUrl, videoId)
                 shouldUseSystemPlayer(cleanUrl) -> createSystemPlayerIntent(cleanUrl, title)
-                else -> createDefaultPlayerIntent(cleanUrl, title)
+                else -> createDefaultPlayerIntent(cleanUrl, title, subtitleUrl, videoId)
             }
 
             // Apply configuration to intent
@@ -130,15 +134,25 @@ class AndroidVideoPlayer(
     /**
      * Create intent for ExoPlayer (internal player activity)
      */
-    private fun createExoPlayerIntent(url: String, title: String): Intent {
+    private fun createExoPlayerIntent(url: String, title: String, subtitleUrl: String?, videoId: String?): Intent {
         return Intent().apply {
             setClassName(
                 context.packageName,
-                "cut.the.crap.android.android.ui.VideoPlayerActivity"
+                "cut.the.crap.android.ui.VideoPlayerActivity"
             )
             putExtra("video_url", url)
             putExtra("video_title", title)
             putExtra("quality", getQualityExtra())
+            // Add subtitle URL if available
+            subtitleUrl?.takeIf { it.isNotBlank() }?.let {
+                putExtra("subtitle_url", it)
+                Log.d(TAG, "Added subtitle URL to intent: $it")
+            }
+            // Add video ID for position tracking
+            videoId?.takeIf { it.isNotBlank() }?.let {
+                putExtra("video_id", it)
+                Log.d(TAG, "Added video ID to intent: $it")
+            }
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)  // Clear existing instances to avoid duplicates
             addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP) // Reuse existing instance if at top
@@ -160,8 +174,8 @@ class AndroidVideoPlayer(
     /**
      * Create default player intent (uses ExoPlayer by default)
      */
-    private fun createDefaultPlayerIntent(url: String, title: String): Intent {
-        return createExoPlayerIntent(url, title)
+    private fun createDefaultPlayerIntent(url: String, title: String, subtitleUrl: String?, videoId: String?): Intent {
+        return createExoPlayerIntent(url, title, subtitleUrl, videoId)
     }
 
     /**

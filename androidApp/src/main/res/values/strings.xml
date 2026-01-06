@@ -78,6 +78,9 @@
     <string name="error_playback_failed">Failed to start video playback</string>
     <string name="error_format">Error: %1$s</string>
 
+    <!-- Video Player -->
+    <string name="resuming_playback">Resuming from where you left off</string>
+
     <!-- Dialog Titles -->
     <string name="dialog_title_please_wait">Please Wait</string>
     <string name="dialog_title_no_internet">No Internet Connection</string>

@@ -22,7 +22,7 @@
 		23FB705F09121DAFA01B5F707D862947 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 384DDA2CB25005BD6479B5987C619DD4 /* Foundation.framework */; };
 		274D7F7E782035A98A905BE2C0FE590B /* TarExtendedHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43D1915957588BB7F429C0CCF11D87D7 /* TarExtendedHeader.swift */; };
 		28B757D409C70254A9A1180D2F0D6B36 /* 7zContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02DC5CFD02280A1B886C5EA3C5E166DE /* 7zContainer.swift */; };
-		29439AFBF314388D4B12E95A53E8E4AF /* SWCompression-SWCompression in Resources */ = {isa = PBXBuildFile; fileRef = F224168EFC6524FCA5C4EB10A4F3DA86 /* SWCompression-SWCompression */; };
+		29439AFBF314388D4B12E95A53E8E4AF /* SWCompression.bundle in Resources */ = {isa = PBXBuildFile; fileRef = F224168EFC6524FCA5C4EB10A4F3DA86 /* SWCompression.bundle */; };
 		2946FF1C793AD3383DAA831A348A6152 /* XZArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60EF874B2C3FB87495DB4FC022E62A21 /* XZArchive.swift */; };
 		2A12695B4907F797ACB5AA77D9D469F3 /* Deflate+Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4628360583AE5A6D657ADCF2DFE44595 /* Deflate+Constants.swift */; };
 		2CFD58FC3718DA7D6F947A9C6399EFC8 /* 7zCoder+Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ADDF7D865A182BA42D1BEB740E10D6A /* 7zCoder+Equatable.swift */; };
@@ -71,7 +71,7 @@
 		929492AD83B7F751A56744B71B906522 /* ZipCentralDirectoryEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33BF85EB1423C275D722613C57DF647D /* ZipCentralDirectoryEntry.swift */; };
 		94AFE6A772806927B82A09E43382712A /* DosAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CFE8F0D46BF8CCC2FB906767A4B66AD /* DosAttributes.swift */; };
 		95B4EBA5D3A740A5BFB3A050A3465FCC /* 7zEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC706D4777E4AF7C111D252571E7C697 /* 7zEntry.swift */; };
-		99EA178023C29D753BF813BF6AF570C9 /* BitByteData-BitByteData in Resources */ = {isa = PBXBuildFile; fileRef = FFC213296F6D53BC97BD7E7412194AB1 /* BitByteData-BitByteData */; };
+		99EA178023C29D753BF813BF6AF570C9 /* BitByteData.bundle in Resources */ = {isa = PBXBuildFile; fileRef = FFC213296F6D53BC97BD7E7412194AB1 /* BitByteData.bundle */; };
 		9BD6C32713A6B2970942995A65290724 /* BitWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67498372E1CD1142B9B6A0D361A812F1 /* BitWriter.swift */; };
 		9C491DEA6A11D977342F828962C5E814 /* Archive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51C047EB1B4CC15404904B04A424E017 /* Archive.swift */; };
 		9EB47BFD2EEDBDDEC685AAFBC02648B8 /* BurrowsWheeler.swift in Sources */ = {isa = PBXBuildFile; fileRef = F83A879D074CB463B21D2678776742A6 /* BurrowsWheeler.swift */; };
@@ -185,14 +185,14 @@
 		0ABA4916DA3A520E4FFBA15E2046F9B9 /* SWCompression-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "SWCompression-dummy.m"; sourceTree = "<group>"; };
 		0AD0AFDD39CD10C7FA58D79ED056195D /* TarContainer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TarContainer.swift; path = Sources/TAR/TarContainer.swift; sourceTree = "<group>"; };
 		1046A531A221443186FE65F0F2AAF390 /* ContainerEntryType.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ContainerEntryType.swift; path = Sources/Common/Container/ContainerEntryType.swift; sourceTree = "<group>"; };
-		109393BACCD4D7990918F888094D8B6A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = Sources/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		109393BACCD4D7990918F888094D8B6A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = Sources/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		14271896D50B07DA1291E5EAAC125925 /* 7zEntryInfo.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = 7zEntryInfo.swift; path = "Sources/7-Zip/7zEntryInfo.swift"; sourceTree = "<group>"; };
 		187891506BB128B982D08E6AB8A09CC2 /* MsbBitReader+7z.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "MsbBitReader+7z.swift"; path = "Sources/7-Zip/MsbBitReader+7z.swift"; sourceTree = "<group>"; };
 		192E6536BFFAE813101376DA35DA7D92 /* LZ4.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LZ4.swift; path = Sources/LZ4/LZ4.swift; sourceTree = "<group>"; };
 		1CD287D55BBEF3CE3F68BF423C825598 /* LZMABitTreeDecoder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LZMABitTreeDecoder.swift; path = Sources/LZMA/LZMABitTreeDecoder.swift; sourceTree = "<group>"; };
 		1E51AC2BA211E9A0C4BA90FD35131B4D /* FileSystemType+Gzip.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "FileSystemType+Gzip.swift"; path = "Sources/GZip/FileSystemType+Gzip.swift"; sourceTree = "<group>"; };
 		1F4EAB428F21CD42371F4B68E6C1A67B /* LZMAConstants.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LZMAConstants.swift; path = Sources/LZMA/LZMAConstants.swift; sourceTree = "<group>"; };
-		2064A332DB332957CEC78FD28EA02AA8 /* SWCompression */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = SWCompression; path = SWCompression.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		2064A332DB332957CEC78FD28EA02AA8 /* SWCompression.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SWCompression.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		22D9A49ABA3AF8E07A7A14B46DA196DF /* 7zCoder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = 7zCoder.swift; path = "Sources/7-Zip/7zCoder.swift"; sourceTree = "<group>"; };
 		2312C73104B01D073C708251D46BD8B8 /* CompressionMethod.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CompressionMethod.swift; path = Sources/Common/CompressionMethod.swift; sourceTree = "<group>"; };
 		25EAE96BE7642B2D1F8E9AB236F084A7 /* GzipHeader+ExtraField.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "GzipHeader+ExtraField.swift"; path = "Sources/GZip/GzipHeader+ExtraField.swift"; sourceTree = "<group>"; };
@@ -200,7 +200,7 @@
 		3040CB88BD559DE9219F7A703290FD18 /* TarWriter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TarWriter.swift; path = Sources/TAR/TarWriter.swift; sourceTree = "<group>"; };
 		33BF85EB1423C275D722613C57DF647D /* ZipCentralDirectoryEntry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ZipCentralDirectoryEntry.swift; path = Sources/ZIP/ZipCentralDirectoryEntry.swift; sourceTree = "<group>"; };
 		3605860E95DB75293827EA9652183D03 /* TarCreateError.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TarCreateError.swift; path = Sources/TAR/TarCreateError.swift; sourceTree = "<group>"; };
-		36133CDE65D56568BD5C659F8A245E32 /* BitByteData */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = BitByteData; path = BitByteData.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		36133CDE65D56568BD5C659F8A245E32 /* BitByteData.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = BitByteData.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		384DDA2CB25005BD6479B5987C619DD4 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		391310963330953152ACBE594BB0A7B4 /* CodeLength.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CodeLength.swift; path = Sources/Common/CodingTree/CodeLength.swift; sourceTree = "<group>"; };
 		3ADDF7D865A182BA42D1BEB740E10D6A /* 7zCoder+Equatable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "7zCoder+Equatable.swift"; path = "Sources/7-Zip/7zCoder+Equatable.swift"; sourceTree = "<group>"; };
@@ -264,7 +264,7 @@
 		974DFEE56F71D800A6E6BFEB9F2DB6E2 /* XZStreamHeader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = XZStreamHeader.swift; path = Sources/XZ/XZStreamHeader.swift; sourceTree = "<group>"; };
 		98C893454C921C46CBEB85941167B572 /* ZlibError.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ZlibError.swift; path = Sources/Zlib/ZlibError.swift; sourceTree = "<group>"; };
 		9BB0B8B698D4C35D4F9A07EF70910170 /* Pods-iosApp-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-iosApp-acknowledgements.plist"; sourceTree = "<group>"; };
-		9D940727FF8FB9C785EB98E56350EF41 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		9D940727FF8FB9C785EB98E56350EF41 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		9EF31558470A73786E0CDFA046AEB43B /* BuiltinExtraFields.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = BuiltinExtraFields.swift; path = Sources/ZIP/BuiltinExtraFields.swift; sourceTree = "<group>"; };
 		9F1FFC8B10F4D7D4F37606E8959B3F29 /* Pods-iosApp-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-iosApp-acknowledgements.markdown"; sourceTree = "<group>"; };
 		9FECCB5AFF87D121F15BA01E683C7932 /* Pods-iosApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-iosApp.release.xcconfig"; sourceTree = "<group>"; };
@@ -277,7 +277,7 @@
 		AA7717217043F9ADA2F629D3AC69762D /* BitByteData-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "BitByteData-Info.plist"; sourceTree = "<group>"; };
 		ABF74398F2409D768C249E3C4427487F /* Deflate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Deflate.swift; path = Sources/Deflate/Deflate.swift; sourceTree = "<group>"; };
 		ACBD385C6170DA344F972ECDA832854E /* MsbBitReader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MsbBitReader.swift; path = Sources/MsbBitReader.swift; sourceTree = "<group>"; };
-		B097DD7534E741D5C41838011D755842 /* Pods-iosApp */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "Pods-iosApp"; path = Pods_iosApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B097DD7534E741D5C41838011D755842 /* Pods_iosApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_iosApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2C2E72ACA75FAE2622EDE81F9E43C6F /* XxHash32.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = XxHash32.swift; path = Sources/LZ4/XxHash32.swift; sourceTree = "<group>"; };
 		B52A3C15646D776968298EECC1290F10 /* CompressionAlgorithm.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CompressionAlgorithm.swift; path = Sources/Common/CompressionAlgorithm.swift; sourceTree = "<group>"; };
 		B5D7462E9CFC5E08F91144406A9D249E /* FileSystemType.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = FileSystemType.swift; path = Sources/Common/FileSystemType.swift; sourceTree = "<group>"; };
@@ -307,17 +307,18 @@
 		E40E974ADF39DEF65499588347958DF3 /* ResourceBundle-SWCompression-SWCompression-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "ResourceBundle-SWCompression-SWCompression-Info.plist"; sourceTree = "<group>"; };
 		E4492B8AB3D56E533BD20B2ABFFC3147 /* LZMA2.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LZMA2.swift; path = Sources/LZMA2/LZMA2.swift; sourceTree = "<group>"; };
 		EDCE97055A54073D8BB8A2766CF3D6C0 /* BitByteData-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "BitByteData-dummy.m"; sourceTree = "<group>"; };
-		F224168EFC6524FCA5C4EB10A4F3DA86 /* SWCompression-SWCompression */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = "SWCompression-SWCompression"; path = SWCompression.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		F224168EFC6524FCA5C4EB10A4F3DA86 /* SWCompression.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SWCompression.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		F257A26D8B333A02A6DE676165F47902 /* ZipContainer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ZipContainer.swift; path = Sources/ZIP/ZipContainer.swift; sourceTree = "<group>"; };
 		F2BEE6A43E04AD2702DECAFDF64E01F8 /* BZip2.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = BZip2.swift; path = Sources/BZip2/BZip2.swift; sourceTree = "<group>"; };
 		F3EB0C4207FEE0F25A18AD78EDE3400D /* SWCompression-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "SWCompression-Info.plist"; sourceTree = "<group>"; };
-		F5C31C3E61168F236E89E49D687013A2 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = Sources/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		F5C31C3E61168F236E89E49D687013A2 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = Sources/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		F7DDCB722F0DA321004072E2 /* KuckMal.mobileprovision */ = {isa = PBXFileReference; lastKnownFileType = file; name = KuckMal.mobileprovision; path = /Users/user289697/Downloads/KuckMal.mobileprovision; sourceTree = "<absolute>"; };
 		F7E76F3860BCC0BB36C7D26C396FCBE4 /* Container.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Container.swift; path = Sources/Common/Container/Container.swift; sourceTree = "<group>"; };
 		F83A879D074CB463B21D2678776742A6 /* BurrowsWheeler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = BurrowsWheeler.swift; path = Sources/BZip2/BurrowsWheeler.swift; sourceTree = "<group>"; };
 		F87A626222A8D9B26448A9FEB04FD0DF /* Pods-iosApp-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-iosApp-umbrella.h"; sourceTree = "<group>"; };
 		FA04C54E65DD4EE861FD731C0758690E /* SWCompression-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SWCompression-umbrella.h"; sourceTree = "<group>"; };
 		FD53AFBD30D832A2DF0F4784F4565438 /* Data+Tar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "Data+Tar.swift"; path = "Sources/TAR/Data+Tar.swift"; sourceTree = "<group>"; };
-		FFC213296F6D53BC97BD7E7412194AB1 /* BitByteData-BitByteData */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = "BitByteData-BitByteData"; path = BitByteData.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		FFC213296F6D53BC97BD7E7412194AB1 /* BitByteData.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BitByteData.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		FFDC4BBF0D1D1BF6B71428C37BD37876 /* TarEntry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TarEntry.swift; path = Sources/TAR/TarEntry.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -483,11 +484,11 @@
 		905CC6323C45D9E692EC1CDB8402429B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				36133CDE65D56568BD5C659F8A245E32 /* BitByteData */,
-				FFC213296F6D53BC97BD7E7412194AB1 /* BitByteData-BitByteData */,
-				B097DD7534E741D5C41838011D755842 /* Pods-iosApp */,
-				2064A332DB332957CEC78FD28EA02AA8 /* SWCompression */,
-				F224168EFC6524FCA5C4EB10A4F3DA86 /* SWCompression-SWCompression */,
+				36133CDE65D56568BD5C659F8A245E32 /* BitByteData.framework */,
+				FFC213296F6D53BC97BD7E7412194AB1 /* BitByteData.bundle */,
+				B097DD7534E741D5C41838011D755842 /* Pods_iosApp.framework */,
+				2064A332DB332957CEC78FD28EA02AA8 /* SWCompression.framework */,
+				F224168EFC6524FCA5C4EB10A4F3DA86 /* SWCompression.bundle */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -593,6 +594,7 @@
 		CF1408CF629C7361332E53B88F7BD30C = {
 			isa = PBXGroup;
 			children = (
+				F7DDCB722F0DA321004072E2 /* KuckMal.mobileprovision */,
 				9D940727FF8FB9C785EB98E56350EF41 /* Podfile */,
 				D210D550F4EA176C3123ED886F8F87F5 /* Frameworks */,
 				5CACFE8195F859C8599ED3308B5843B5 /* Pods */,
@@ -658,7 +660,6 @@
 				BD0B85FA878E55B07D89A257A06FA8CF /* ZIP */,
 				0D0A997732BD128C3345A00DC724808D /* Zlib */,
 			);
-			name = SWCompression;
 			path = SWCompression;
 			sourceTree = "<group>";
 		};
@@ -687,7 +688,6 @@
 				F14F7F197D38A8E7BC930C7C7A78B8E0 /* Resources */,
 				6BF2D104BFE87D75E97E209D03F46786 /* Support Files */,
 			);
-			name = BitByteData;
 			path = BitByteData;
 			sourceTree = "<group>";
 		};
@@ -751,7 +751,7 @@
 			);
 			name = SWCompression;
 			productName = SWCompression;
-			productReference = 2064A332DB332957CEC78FD28EA02AA8 /* SWCompression */;
+			productReference = 2064A332DB332957CEC78FD28EA02AA8 /* SWCompression.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		1CD9DF30686725DE9BC3CDAC78C94618 /* BitByteData */ = {
@@ -770,7 +770,7 @@
 			);
 			name = BitByteData;
 			productName = BitByteData;
-			productReference = 36133CDE65D56568BD5C659F8A245E32 /* BitByteData */;
+			productReference = 36133CDE65D56568BD5C659F8A245E32 /* BitByteData.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		AA2572CF91ADC691E2681C4D65C0E895 /* SWCompression-SWCompression */ = {
@@ -787,7 +787,7 @@
 			);
 			name = "SWCompression-SWCompression";
 			productName = SWCompression;
-			productReference = F224168EFC6524FCA5C4EB10A4F3DA86 /* SWCompression-SWCompression */;
+			productReference = F224168EFC6524FCA5C4EB10A4F3DA86 /* SWCompression.bundle */;
 			productType = "com.apple.product-type.bundle";
 		};
 		D0F57D007C44EFB9DCC2E98A11C22C41 /* BitByteData-BitByteData */ = {
@@ -804,7 +804,7 @@
 			);
 			name = "BitByteData-BitByteData";
 			productName = BitByteData;
-			productReference = FFC213296F6D53BC97BD7E7412194AB1 /* BitByteData-BitByteData */;
+			productReference = FFC213296F6D53BC97BD7E7412194AB1 /* BitByteData.bundle */;
 			productType = "com.apple.product-type.bundle";
 		};
 		ED39C638569286489CD697A6C8964146 /* Pods-iosApp */ = {
@@ -824,7 +824,7 @@
 			);
 			name = "Pods-iosApp";
 			productName = Pods_iosApp;
-			productReference = B097DD7534E741D5C41838011D755842 /* Pods-iosApp */;
+			productReference = B097DD7534E741D5C41838011D755842 /* Pods_iosApp.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
@@ -845,8 +845,6 @@
 				en,
 			);
 			mainGroup = CF1408CF629C7361332E53B88F7BD30C;
-			minimizedProjectReferenceProxies = 0;
-			preferredProjectObjectVersion = 77;
 			productRefGroup = 905CC6323C45D9E692EC1CDB8402429B /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -872,7 +870,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				29439AFBF314388D4B12E95A53E8E4AF /* SWCompression-SWCompression in Resources */,
+				29439AFBF314388D4B12E95A53E8E4AF /* SWCompression.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -888,7 +886,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				99EA178023C29D753BF813BF6AF570C9 /* BitByteData-BitByteData in Resources */,
+				99EA178023C29D753BF813BF6AF570C9 /* BitByteData.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

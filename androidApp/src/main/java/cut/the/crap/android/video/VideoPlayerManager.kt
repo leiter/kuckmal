@@ -39,7 +39,7 @@ class VideoPlayerManager(
         VideoPlayerConfig(
             enableSubtitles = true,
             autoPlay = true,
-            rememberPosition = false,
+            rememberPosition = true,  // Enable position saving/restoring
             userAgent = "Kuckmal-Android/1.0"
         )
     ).also { player ->
@@ -77,6 +77,14 @@ class VideoPlayerManager(
         }
 
         Log.d(TAG, "Selected video URL: $videoUrl")
+
+        // Get subtitle URL if available
+        val subtitleUrl = mediaEntry.subtitleUrl.takeIf { it.isNotBlank() }
+        Log.d(TAG, "Subtitle URL: ${subtitleUrl ?: "none"}")
+
+        // Generate video ID for position tracking (use URL hash for uniqueness)
+        val videoId = generateVideoId(mediaEntry)
+        Log.d(TAG, "Video ID: $videoId")
         Log.d(TAG, "=".repeat(80))
 
         // Determine quality setting for player
@@ -90,7 +98,9 @@ class VideoPlayerManager(
         val result = videoPlayer.play(
             url = videoUrl,
             title = mediaEntry.title,
-            quality = quality
+            quality = quality,
+            subtitleUrl = subtitleUrl,
+            videoId = videoId
         )
 
         result.fold(
@@ -103,6 +113,15 @@ class VideoPlayerManager(
                 showToast(R.string.error_playback_failed)
             }
         )
+    }
+
+    /**
+     * Generate a unique video ID for position tracking
+     * Uses a combination of channel, theme, and title to create stable identifier
+     */
+    private fun generateVideoId(mediaEntry: MediaEntry): String {
+        val identifier = "${mediaEntry.channel}|${mediaEntry.theme}|${mediaEntry.title}"
+        return identifier.hashCode().toString()
     }
 
     /**
