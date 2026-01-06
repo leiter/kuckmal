@@ -149,10 +149,10 @@ The VideoPlayerConfig provides various options:
 ## Future Enhancements
 
 ### Short-term
-1. **Subtitle Support**: Add subtitle URL handling
+1. **Subtitle Support**: Config exists (`enableSubtitles = true`), MediaEntry has `subtitleUrl` field - needs player integration
 2. **Quality Detection**: Auto-detect available qualities
 3. **Playback History**: Track watched videos
-4. **Resume Support**: Continue from last position
+4. **Resume Support**: Config ready (`rememberPosition`), needs implementation
 
 ### Long-term
 1. **Kotlin Multiplatform**: Add iOS/Desktop implementations

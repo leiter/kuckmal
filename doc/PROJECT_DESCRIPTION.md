@@ -15,9 +15,9 @@ The application runs on 5 platforms from a shared codebase:
 | Android | Native Android + Compose | Full implementation |
 | Android TV | Leanback launcher | Full implementation |
 | Desktop | JVM (Windows, macOS, Linux) | Full implementation |
-| iOS | Swift wrapper over shared Kotlin | Framework ready |
+| iOS | Swift + Compose Multiplatform | UI complete, download pending |
 | Web | Kotlin/JS + Compose HTML | Mock data implementation |
-| webOS TV | Custom Gradle tasks | In development |
+| webOS TV | Custom Gradle tasks | Icons ready, deployment tested |
 
 ## Core Features
 
@@ -233,10 +233,14 @@ The app uses publicly available media metadata from German public broadcasters:
 ## Future Development Areas
 
 Based on codebase analysis:
-- Complete webOS TV integration
-- iOS app polishing
-- Web app database integration (currently using mock data)
-- Additional broadcaster support
+- ~~Search functionality~~ ✅ Implemented across all platforms
+- ~~Broadcaster logos~~ ✅ All 20+ logos available in drawable resources
+- ~~webOS TV icons~~ ✅ Icons ready (icon.png, largeIcon.png)
+- iOS: Film list download feature (UI complete)
+- Web app: Database integration (currently using mock data)
+- Favorites/Watch Later functionality
+- Playback history and resume position
+- Deep linking support
 - Enhanced offline capabilities
 
 ## Related Documentation

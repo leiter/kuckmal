@@ -323,25 +323,19 @@ The Compose implementation now closely matches the original design. The remainin
 ## Next Steps
 
 ### Potential Future Enhancements
-1. Add actual broadcaster logo images from drawable resources
-2. Implement logo image loading with Coil or similar
+1. ~~Add actual broadcaster logo images~~ ✅ Already available in `androidApp/src/main/res/drawable/`
+2. Implement logo image loading with Coil or similar (logos exist, need integration in Compose)
 3. Add smooth animations for selection changes
 4. Implement theme switching (light/dark)
 5. Add accessibility improvements (content descriptions, contrast)
 6. Optimize performance for long channel lists
 7. Add unit tests for UI components
 
-### Design Assets Needed
-- 3sat logo (PNG/SVG)
-- ARD logo
-- arte logo
-- BR logo
-- hr logo
-- KIKA logo
-- mdr logo
-- NDR logo
-- ORF logo
-- phoenix logo
+### Design Assets Status ✅
+All broadcaster logos are available in `androidApp/src/main/res/drawable/`:
+- _3sat.png, ard.png, arte_de.png, arte_fr.png, br.png, hr.png
+- kika.png, mdr.png, ndr.png, orf.png, phoenix.png, rbb.png
+- sr.png, srf.png, swr.png, wdr.png, zdf.png, zdf_tivi.png
 
 ---
 

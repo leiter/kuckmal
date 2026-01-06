@@ -251,6 +251,19 @@ class AndroidComposeViewModel(application: Application) : AndroidViewModel(appli
 - **Phase 4 (Theme)**: Low effort - expect/actual pattern
 - **Phase 5 (ViewModel)**: High effort - architectural change
 
+## Current Status (Updated)
+
+### Already Shared ✅
+- `shared/src/commonMain/kotlin/cut/the/crap/shared/ui/screens/BrowseView.kt` - Shared across platforms
+- `shared/src/commonMain/kotlin/cut/the/crap/shared/viewmodel/SharedViewModel.kt` - Shared ViewModel
+- `shared/src/commonMain/kotlin/cut/the/crap/shared/ui/Channel.kt` - Channel models
+- iOS uses shared Compose UI via `AppContent.kt`
+- Desktop uses shared UI components
+
+### Remaining Android-Specific
+- `androidApp/src/main/java/cut/the/crap/android/compose/` - Android-specific Compose implementation
+- Can be gradually migrated to use shared components
+
 ## Conclusion
 
-Approximately **20-30%** of the Compose UI code can be moved to shared with minimal changes (data models, typography). Another **40-50%** (screen composables, dialogs, data mapper) can be shared after refactoring to remove Android dependencies. The remaining **20-30%** (Activity, ViewModel, Theme) must stay Android-specific but can delegate to shared logic through abstractions.
+Significant progress has been made - shared UI components now exist in `shared/src/commonMain/kotlin/cut/the/crap/shared/ui/`. iOS and Desktop platforms successfully use these shared components. The Android Compose implementation in `androidApp/` can be further migrated to leverage more shared code.

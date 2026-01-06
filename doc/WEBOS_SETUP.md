@@ -70,11 +70,12 @@ ares-launch -d <device-name> cut.the.crap.webos
 
 ## Icon Requirements
 
-### Required Icons for webOS
-- `icon.png`: 80x80 pixels PNG
-- `largeIcon.png`: 130x130 pixels PNG (recommended)
+### Required Icons for webOS ✅ READY
+- `icon.png`: 80x80 pixels PNG ✅ Available
+- `largeIcon.png`: 130x130 pixels PNG ✅ Available
+- `appinfo.json`: App manifest ✅ Configured
 
-Place these in: `webApp/src/jsMain/resources/webos/`
+Location: `webApp/src/jsMain/resources/webos/`
 
 ## Development Server
 
