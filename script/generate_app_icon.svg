@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 200 200">
+  <defs>
+    <!-- Background gradient (dark teal) -->
+    <linearGradient id="bgGradient" x1="20" y1="20" x2="180" y2="180" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#006686"/>
+      <stop offset="1" stop-color="#004B61"/>
+    </linearGradient>
+    <!-- Screen gradient (light blue) -->
+    <linearGradient id="screenGradient" x1="50" y1="55" x2="50" y2="125" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#C2E7FF"/>
+      <stop offset="1" stop-color="#A8D4F0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background rounded rectangle -->
+  <rect x="20" y="20" width="160" height="160" rx="35" ry="35" fill="url(#bgGradient)"/>
+
+  <!-- TV Screen -->
+  <rect x="50" y="55" width="100" height="70" rx="8" ry="8" fill="url(#screenGradient)"/>
+
+  <!-- Play button circle -->
+  <circle cx="100" cy="90" r="18" fill="white" fill-opacity="0.95"/>
+
+  <!-- Play triangle -->
+  <polygon points="97,82 97,98 110,90" fill="#006686"/>
+
+  <!-- Stand line 1 (thin) -->
+  <rect x="85" y="130" width="30" height="4" rx="2" ry="2" fill="white" fill-opacity="0.8"/>
+
+  <!-- Stand line 2 (wider) -->
+  <rect x="75" y="138" width="50" height="8" rx="4" ry="4" fill="white" fill-opacity="0.6"/>
+</svg>
