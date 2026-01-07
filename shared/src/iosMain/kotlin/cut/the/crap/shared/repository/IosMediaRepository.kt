@@ -1,14 +1,41 @@
 package cut.the.crap.shared.repository
 
+import cut.the.crap.shared.data.MediaListParser
 import cut.the.crap.shared.database.MediaDao
 import cut.the.crap.shared.database.MediaEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import cut.the.crap.shared.model.MediaEntry as ModelMediaEntry
+
+/**
+ * Convert parser MediaEntry to database MediaEntry
+ */
+private fun ModelMediaEntry.toDatabaseEntry() = MediaEntry(
+    channel = channel,
+    theme = theme,
+    title = title,
+    date = date,
+    time = time,
+    duration = duration,
+    sizeMB = sizeMB,
+    description = description,
+    url = url,
+    website = website,
+    subtitleUrl = subtitleUrl,
+    smallUrl = urlSmall,
+    hdUrl = urlHd,
+    timestamp = dateL,
+    geo = geo,
+    isNew = isNew
+)
 
 /**
  * iOS implementation of MediaRepository
@@ -144,13 +171,37 @@ class IosMediaRepository(
         }
     }
 
-    override fun loadMediaListFromFile(filePath: String): Flow<MediaRepository.LoadingResult> = flow {
-        // iOS file loading will be implemented separately
-        // For now, emit an error indicating this needs platform-specific implementation
-        emit(MediaRepository.LoadingResult.Error(
-            Exception("iOS file loading not yet implemented - use importMediaEntries() instead"),
-            0
-        ))
+    override fun loadMediaListFromFile(filePath: String): Flow<MediaRepository.LoadingResult> = callbackFlow {
+        trySend(MediaRepository.LoadingResult.Progress(0))
+
+        // Clear existing data before import
+        mediaDao.deleteAll()
+
+        val parser = MediaListParser()
+        parser.parseFileChunked(
+            filePath = filePath,
+            callback = object : MediaListParser.ChunkCallback {
+                override fun onChunk(entries: List<ModelMediaEntry>, totalParsed: Int) {
+                    val dbEntries = entries.map { it.toDatabaseEntry() }
+                    runBlocking {
+                        mediaDao.insertInBatches(dbEntries, 1000)
+                    }
+                    trySend(MediaRepository.LoadingResult.Progress(totalParsed))
+                }
+
+                override fun onComplete(totalEntries: Int) {
+                    trySend(MediaRepository.LoadingResult.Complete(totalEntries))
+                    close()
+                }
+
+                override fun onError(error: Exception, entriesParsed: Int) {
+                    trySend(MediaRepository.LoadingResult.Error(error, entriesParsed))
+                    close()
+                }
+            }
+        )
+
+        awaitClose { }
     }.flowOn(Dispatchers.IO)
 
     override fun applyDiffToDatabase(filePath: String): Flow<MediaRepository.LoadingResult> = flow {

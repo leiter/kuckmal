@@ -2,6 +2,7 @@ package cut.the.crap.shared.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import cut.the.crap.shared.data.FilmListDownloader
 import cut.the.crap.shared.database.MediaEntry
 import cut.the.crap.shared.repository.MediaRepository
 import cut.the.crap.shared.ui.Channel
@@ -51,6 +52,13 @@ class SharedViewModel(
 
     private val _errorMessage = MutableStateFlow<String>("")
     val errorMessage: StateFlow<String> = _errorMessage.asStateFlow()
+
+    // ===========================================================================================
+    // STATE: Film List Download
+    // ===========================================================================================
+
+    private val _downloadState = MutableStateFlow<DownloadState>(DownloadState.Idle)
+    val downloadState: StateFlow<DownloadState> = _downloadState.asStateFlow()
 
     // ===========================================================================================
     // STATE: Compose UI Data
@@ -432,4 +440,99 @@ class SharedViewModel(
             _loadingState.value = LoadingState.NOT_LOADED
         }
     }
+
+    // ===========================================================================================
+    // FILM LIST DOWNLOAD
+    // ===========================================================================================
+
+    /**
+     * Download and import the film list from the remote server.
+     * Shows progress through downloadState StateFlow.
+     */
+    fun downloadAndImportFilmList(targetDir: String) {
+        viewModelScope.launch {
+            _downloadState.value = DownloadState.Downloading(0)
+
+            val downloader = FilmListDownloader()
+            try {
+                val filePath = downloader.downloadFilmList(
+                    targetDir = targetDir,
+                    callback = object : FilmListDownloader.DownloadCallback {
+                        override fun onProgress(bytesDownloaded: Long, totalBytes: Long) {
+                            val percent = if (totalBytes > 0) {
+                                ((bytesDownloaded * 100) / totalBytes).toInt()
+                            } else 0
+                            _downloadState.value = DownloadState.Downloading(percent)
+                        }
+
+                        override fun onDecompressing() {
+                            _downloadState.value = DownloadState.Decompressing
+                        }
+
+                        override fun onComplete(filePath: String) {
+                            // Will be handled after downloadFilmList returns
+                        }
+
+                        override fun onError(error: Exception) {
+                            _downloadState.value = DownloadState.Error(error.message ?: "Download failed")
+                        }
+                    }
+                )
+
+                if (filePath != null) {
+                    _downloadState.value = DownloadState.Parsing(0)
+
+                    repository.loadMediaListFromFile(filePath).collect { result ->
+                        when (result) {
+                            is MediaRepository.LoadingResult.Progress -> {
+                                _downloadState.value = DownloadState.Parsing(result.entriesLoaded)
+                            }
+                            is MediaRepository.LoadingResult.Complete -> {
+                                _downloadState.value = DownloadState.Complete
+                                _hasDataInDatabase.value = true
+                                _loadingState.value = LoadingState.LOADED
+                            }
+                            is MediaRepository.LoadingResult.Error -> {
+                                _downloadState.value = DownloadState.Error(result.exception.message ?: "Parse failed")
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                _downloadState.value = DownloadState.Error(e.message ?: "Download failed")
+            } finally {
+                downloader.close()
+            }
+        }
+    }
+
+    /**
+     * Reset download state to idle (for retry after error).
+     */
+    fun resetDownloadState() {
+        _downloadState.value = DownloadState.Idle
+    }
+}
+
+/**
+ * Represents the state of the film list download process.
+ */
+sealed class DownloadState {
+    /** No download in progress */
+    object Idle : DownloadState()
+
+    /** Downloading file from server */
+    data class Downloading(val progressPercent: Int) : DownloadState()
+
+    /** Decompressing XZ file */
+    object Decompressing : DownloadState()
+
+    /** Parsing JSON and inserting into database */
+    data class Parsing(val entriesCount: Int) : DownloadState()
+
+    /** Download and import completed successfully */
+    object Complete : DownloadState()
+
+    /** An error occurred */
+    data class Error(val message: String) : DownloadState()
 }

@@ -15,6 +15,8 @@ import cut.the.crap.shared.ui.Channel
 import cut.the.crap.shared.ui.screens.BrowseView
 import cut.the.crap.shared.ui.screens.DetailView
 import cut.the.crap.shared.ui.toMediaItem
+import cut.the.crap.shared.data.FileSystem
+import cut.the.crap.shared.viewmodel.DownloadState
 import cut.the.crap.shared.viewmodel.LoadingState
 import cut.the.crap.shared.viewmodel.SharedViewModel
 import cut.the.crap.shared.viewmodel.ViewState
@@ -49,6 +51,9 @@ fun AppContent() {
     // Search state
     var searchResults by remember { mutableStateOf<List<String>>(emptyList()) }
     var isSearching by remember { mutableStateOf(false) }
+
+    // Download state
+    val downloadState by viewModel.downloadState.collectAsState()
 
     // Set up message callback
     LaunchedEffect(Unit) {
@@ -125,7 +130,7 @@ fun AppContent() {
                     }
                 }
                 dbCount == 0 -> {
-                    // No data - show info screen
+                    // No data - show download screen
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
@@ -140,31 +145,106 @@ fun AppContent() {
                                 color = MaterialTheme.colorScheme.primary
                             )
                             Spacer(modifier = Modifier.height(24.dp))
-                            Text(
-                                text = "No film list found",
-                                style = MaterialTheme.typography.headlineSmall
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "The film list needs to be downloaded.\nThis feature is coming soon for iOS.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(modifier = Modifier.height(32.dp))
-                            Button(
-                                onClick = {
-                                    coroutineScope.launch {
-                                        snackbarHostState.showSnackbar(
-                                            "Film list download coming soon",
-                                            duration = SnackbarDuration.Short
-                                        )
+
+                            when (val state = downloadState) {
+                                is DownloadState.Idle -> {
+                                    Text(
+                                        text = "No film list found",
+                                        style = MaterialTheme.typography.headlineSmall
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = "Download the film list to browse available media.",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Spacer(modifier = Modifier.height(32.dp))
+                                    Button(
+                                        onClick = {
+                                            val docsDir = FileSystem.getDocumentsDirectory()
+                                            viewModel.downloadAndImportFilmList(docsDir)
+                                        },
+                                        modifier = Modifier.height(56.dp)
+                                    ) {
+                                        Icon(Icons.Default.Download, contentDescription = null)
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text("Download Film List")
                                     }
-                                },
-                                modifier = Modifier.height(56.dp)
-                            ) {
-                                Icon(Icons.Default.Download, contentDescription = null)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Download Film List")
+                                }
+
+                                is DownloadState.Downloading -> {
+                                    CircularProgressIndicator()
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        text = "Downloading: ${state.progressPercent}%",
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    LinearProgressIndicator(
+                                        progress = { state.progressPercent / 100f },
+                                        modifier = Modifier.width(200.dp)
+                                    )
+                                }
+
+                                is DownloadState.Decompressing -> {
+                                    CircularProgressIndicator()
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        text = "Decompressing...",
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                }
+
+                                is DownloadState.Parsing -> {
+                                    CircularProgressIndicator()
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        text = "Importing entries...",
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = "${state.entriesCount} entries imported",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+
+                                is DownloadState.Complete -> {
+                                    // Refresh dbCount to show browse view
+                                    LaunchedEffect(Unit) {
+                                        dbCount = viewModel.repository.getCount()
+                                        viewModel.resetDownloadState()
+                                    }
+                                    CircularProgressIndicator()
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        text = "Import complete!",
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
+                                }
+
+                                is DownloadState.Error -> {
+                                    Text(
+                                        text = "Download failed",
+                                        style = MaterialTheme.typography.headlineSmall,
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = state.message,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Spacer(modifier = Modifier.height(32.dp))
+                                    Button(
+                                        onClick = {
+                                            viewModel.resetDownloadState()
+                                        }
+                                    ) {
+                                        Text("Retry")
+                                    }
+                                }
                             }
                         }
                     }
@@ -288,17 +368,23 @@ fun AppContent() {
                             }
                         },
                         onCheckUpdateClick = {
+                            // Start download (will replace existing data)
+                            val docsDir = FileSystem.getDocumentsDirectory()
+                            viewModel.downloadAndImportFilmList(docsDir)
                             coroutineScope.launch {
                                 snackbarHostState.showSnackbar(
-                                    "Update check coming soon",
+                                    "Checking for updates...",
                                     duration = SnackbarDuration.Short
                                 )
                             }
                         },
                         onReinstallClick = {
+                            // Re-download the film list
+                            val docsDir = FileSystem.getDocumentsDirectory()
+                            viewModel.downloadAndImportFilmList(docsDir)
                             coroutineScope.launch {
                                 snackbarHostState.showSnackbar(
-                                    "Reload film list coming soon",
+                                    "Re-downloading film list...",
                                     duration = SnackbarDuration.Short
                                 )
                             }
