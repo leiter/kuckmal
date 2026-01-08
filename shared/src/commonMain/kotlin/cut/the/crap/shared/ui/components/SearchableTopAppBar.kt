@@ -7,7 +7,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -91,6 +90,9 @@ fun SearchableTopAppBar(
                         tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
+            } else {
+                // Placeholder to keep title alignment consistent
+                Spacer(modifier = Modifier.width(48.dp))
             }
         },
         title = {
@@ -113,13 +115,6 @@ fun SearchableTopAppBar(
                         searchQuery = searchQuery,
                         isSearching = isSearching,
                         onSearchQueryChanged = onSearchQueryChanged,
-                        onCloseSearch = {
-                            if (searchQuery.isNotEmpty()) {
-                                onSearchQueryChanged("")
-                            } else {
-                                onSearchVisibilityChanged(false)
-                            }
-                        },
                         focusRequester = searchFocusRequester
                     )
                 } else {
@@ -128,14 +123,25 @@ fun SearchableTopAppBar(
             }
         },
         actions = {
-            if (!isSearchVisible) {
-                IconButton(onClick = { onSearchVisibilityChanged(true) }) {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+            // Search/Close button - always present, icon morphs based on state
+            IconButton(
+                onClick = {
+                    if (isSearchVisible) {
+                        if (searchQuery.isNotEmpty()) {
+                            onSearchQueryChanged("")
+                        } else {
+                            onSearchVisibilityChanged(false)
+                        }
+                    } else {
+                        onSearchVisibilityChanged(true)
+                    }
                 }
+            ) {
+                Icon(
+                    imageVector = if (isSearchVisible) Icons.Default.Close else Icons.Default.Search,
+                    contentDescription = if (isSearchVisible) "Close search" else "Search",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
 
             Box {
@@ -182,7 +188,7 @@ fun SearchableTopAppBar(
 
 @Composable
 private fun NormalTitleContent(title: String) {
-    // Disabled TextInputLayout-style: title as hint in outlined container
+    // Title as hint in container (no outline)
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -191,11 +197,7 @@ private fun NormalTitleContent(title: String) {
         Surface(
             modifier = Modifier.fillMaxSize(),
             shape = RoundedCornerShape(8.dp),
-            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.2f),
-            border = BorderStroke(
-                1.dp,
-                TitleColor.copy(alpha = 0.4f)
-            )
+            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.2f)
         ) {
             Box(
                 modifier = Modifier
@@ -221,10 +223,9 @@ private fun SearchActiveTitleContent(
     searchQuery: String,
     isSearching: Boolean,
     onSearchQueryChanged: (String) -> Unit,
-    onCloseSearch: () -> Unit,
     focusRequester: FocusRequester
 ) {
-    // TextInputLayout-style: floating label above input in one outlined container
+    // TextInputLayout-style: floating label above input (no outline)
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -233,16 +234,12 @@ private fun SearchActiveTitleContent(
         Surface(
             modifier = Modifier.fillMaxSize(),
             shape = RoundedCornerShape(8.dp),
-            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.4f),
-            border = BorderStroke(
-                1.dp,
-                MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-            )
+            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.4f)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(start = 12.dp, end = 4.dp, top = 4.dp, bottom = 4.dp)
+                    .padding(horizontal = 12.dp, vertical = 4.dp)
             ) {
                 // Floating label (small title)
                 Text(
@@ -296,17 +293,6 @@ private fun SearchActiveTitleContent(
                             }
                         }
                     )
-
-                    IconButton(
-                        onClick = onCloseSearch,
-                        modifier = Modifier.size(40.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Close search",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
                 }
             }
         }
