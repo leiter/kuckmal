@@ -1,17 +1,16 @@
 package cut.the.crap.shared.repository
 
-import cut.the.crap.shared.data.MediaListParser
+import cut.the.crap.shared.data.IosStreamingMediaListParser
+import cut.the.crap.shared.data.PlatformLogger
 import cut.the.crap.shared.database.MediaDao
 import cut.the.crap.shared.database.MediaEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
-import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import cut.the.crap.shared.model.MediaEntry as ModelMediaEntry
 
@@ -171,37 +170,97 @@ class IosMediaRepository(
         }
     }
 
-    override fun loadMediaListFromFile(filePath: String): Flow<MediaRepository.LoadingResult> = callbackFlow {
-        trySend(MediaRepository.LoadingResult.Progress(0))
+    override fun loadMediaListFromFile(filePath: String): Flow<MediaRepository.LoadingResult> = flow {
+        val TAG = "IosMediaRepository"
 
-        // Clear existing data before import
-        mediaDao.deleteAll()
+        PlatformLogger.info(TAG, "=== STARTING loadMediaListFromFile ===")
+        PlatformLogger.info(TAG, "File path: $filePath")
 
-        val parser = MediaListParser()
-        parser.parseFileChunked(
-            filePath = filePath,
-            callback = object : MediaListParser.ChunkCallback {
-                override fun onChunk(entries: List<ModelMediaEntry>, totalParsed: Int) {
-                    val dbEntries = entries.map { it.toDatabaseEntry() }
-                    runBlocking {
-                        mediaDao.insertInBatches(dbEntries, 1000)
+        emit(MediaRepository.LoadingResult.Progress(0))
+
+        try {
+            // Clear existing data before import
+            PlatformLogger.info(TAG, "Step 1: About to delete all existing entries...")
+            try {
+                mediaDao.deleteAll()
+                PlatformLogger.info(TAG, "Step 1: Delete completed successfully")
+            } catch (deleteError: Exception) {
+                PlatformLogger.error(TAG, "Step 1: FAILED to delete entries", deleteError)
+                throw deleteError
+            }
+
+            // Small delay after delete
+            delay(50)
+            PlatformLogger.info(TAG, "Step 2: Creating streaming parser...")
+
+            // Use iOS streaming parser - true streaming with NSInputStream
+            val parser = IosStreamingMediaListParser()
+            val chunkSize = 1000
+            val chunk = mutableListOf<MediaEntry>()
+            var totalCount = 0
+            var chunkNumber = 0
+
+            PlatformLogger.info(TAG, "Step 3: Starting to parse file with callback method...")
+
+            // Parse entries using callback (avoids sequence/coroutine issues on iOS)
+            parser.parseFileWithCallback(
+                filePath = filePath,
+                onEntry = { modelEntry ->
+                    try {
+                        val dbEntry = modelEntry.toDatabaseEntry()
+                        chunk.add(dbEntry)
+                        totalCount++
+                    } catch (conversionError: Exception) {
+                        PlatformLogger.error(TAG, "Error converting entry $totalCount: ${modelEntry.title}", conversionError)
+                        return@parseFileWithCallback
                     }
-                    trySend(MediaRepository.LoadingResult.Progress(totalParsed))
-                }
 
-                override fun onComplete(totalEntries: Int) {
-                    trySend(MediaRepository.LoadingResult.Complete(totalEntries))
-                    close()
-                }
+                    // Insert in batches
+                    if (chunk.size >= chunkSize) {
+                        chunkNumber++
+                        PlatformLogger.info(TAG, "Step 4.$chunkNumber: Inserting chunk $chunkNumber (${chunk.size} entries, total: $totalCount)")
 
-                override fun onError(error: Exception, entriesParsed: Int) {
-                    trySend(MediaRepository.LoadingResult.Error(error, entriesParsed))
-                    close()
+                        try {
+                            kotlinx.coroutines.runBlocking {
+                                mediaDao.insertAll(chunk)
+                            }
+                            PlatformLogger.info(TAG, "Step 4.$chunkNumber: Chunk $chunkNumber inserted successfully")
+                        } catch (insertError: Exception) {
+                            PlatformLogger.error(TAG, "Step 4.$chunkNumber: FAILED to insert chunk $chunkNumber", insertError)
+                            if (chunk.isNotEmpty()) {
+                                PlatformLogger.error(TAG, "First entry: channel=${chunk[0].channel}, title=${chunk[0].title?.take(50)}")
+                            }
+                        }
+
+                        chunk.clear()
+                    }
+                },
+                onProgress = { count ->
+                    PlatformLogger.info(TAG, "Parse progress: $count entries parsed")
+                }
+            )
+
+            // Insert remaining entries
+            if (chunk.isNotEmpty()) {
+                chunkNumber++
+                PlatformLogger.info(TAG, "Step 5: Inserting final chunk $chunkNumber (${chunk.size} entries, total: $totalCount)")
+
+                try {
+                    mediaDao.insertAll(chunk)
+                    PlatformLogger.info(TAG, "Step 5: Final chunk inserted successfully")
+                } catch (finalInsertError: Exception) {
+                    PlatformLogger.error(TAG, "Step 5: FAILED to insert final chunk", finalInsertError)
+                    throw finalInsertError
                 }
             }
-        )
 
-        awaitClose { }
+            PlatformLogger.info(TAG, "=== IMPORT COMPLETE: $totalCount entries ===")
+            emit(MediaRepository.LoadingResult.Complete(totalCount))
+
+        } catch (e: Exception) {
+            PlatformLogger.error(TAG, "=== IMPORT FAILED ===", e)
+            emit(MediaRepository.LoadingResult.Error(e, 0))
+        }
     }.flowOn(Dispatchers.IO)
 
     override fun applyDiffToDatabase(filePath: String): Flow<MediaRepository.LoadingResult> = flow {
