@@ -1,10 +1,5 @@
 package cut.the.crap.android.compose.screens
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,41 +12,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.Modifier
+import cut.the.crap.shared.ui.components.SearchableTopAppBar
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -62,203 +37,75 @@ import cut.the.crap.shared.ui.SampleData
 import cut.the.crap.android.compose.ui.theme.KuckmalTheme
 import cut.the.crap.android.model.Broadcaster
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BrowseView(
     channels: List<Channel> = SampleData.sampleChannels,
     titles: List<String> = SampleData.sampleTitles,
     selectedChannel: Channel? = SampleData.sampleChannels.find { it.name == "PHOENIX" },
-    selectedTitle: String? = null, // currently selected title/theme in the right pane
+    selectedTitle: String? = null,
     currentTheme: String = "1000 Inseln im Sankt-Lorenz-Strom",
-    isShowingTitles: Boolean = false, // true when showing titles within a theme, false when showing themes
-    hasMoreItems: Boolean = true, // whether there are more items to load
-    searchQuery: String = "", // current search query
-    isSearching: Boolean = false, // whether search is in progress
-    isSearchVisible: Boolean = false, // whether search field is visible
-    onSearchQueryChanged: (String) -> Unit = {}, // callback for search query changes
-    onSearchVisibilityChanged: (Boolean) -> Unit = {}, // callback for search visibility toggle
+    isShowingTitles: Boolean = false,
+    hasMoreItems: Boolean = true,
+    searchQuery: String = "",
+    isSearching: Boolean = false,
+    isSearchVisible: Boolean = false,
+    onSearchQueryChanged: (String) -> Unit = {},
+    onSearchVisibilityChanged: (Boolean) -> Unit = {},
     onChannelSelected: (Channel) -> Unit = {},
     onTitleSelected: (String) -> Unit = {},
-    onLoadMore: () -> Unit = {}, // callback to load more items
+    onLoadMore: () -> Unit = {},
     onMenuClick: () -> Unit = {},
-    // Menu action callbacks
     onTimePeriodClick: () -> Unit = {},
     onCheckUpdateClick: () -> Unit = {},
     onReinstallClick: () -> Unit = {}
 ) {
-    // Menu state
-    var showOverflowMenu by remember { mutableStateOf(false) }
-    // Focus requester for search input
-    val searchFocusRequester = remember { FocusRequester() }
-
-    // Auto-focus search input when it becomes visible
-    LaunchedEffect(isSearchVisible) {
-        if (isSearchVisible) {
-            searchFocusRequester.requestFocus()
-        }
-    }
-
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // Left side: Channel list
-        ChannelList(
-            channels = channels,
-            selectedChannel = selectedChannel,
-            onChannelSelected = onChannelSelected,
-            modifier = Modifier
-                .width(160.dp)
-                .fillMaxHeight()
+        // Full-width top bar
+        SearchableTopAppBar(
+            title = if (isShowingTitles) stringResource(R.string.titles_for_theme, currentTheme) else currentTheme,
+            searchQuery = searchQuery,
+            isSearching = isSearching,
+            isSearchVisible = isSearchVisible,
+            onSearchQueryChanged = onSearchQueryChanged,
+            onSearchVisibilityChanged = onSearchVisibilityChanged,
+            onTimePeriodClick = onTimePeriodClick,
+            onCheckUpdateClick = onCheckUpdateClick,
+            onReinstallClick = onReinstallClick,
+            modifier = Modifier.fillMaxWidth()
         )
 
-        // Right side: Titles list with search - no end padding for menu alignment
-        Column(
+        // Content area: Channel list and titles side by side
+        Row(
             modifier = Modifier
                 .weight(1f)
-                .fillMaxHeight()
-                .padding(start = 12.dp, top = 8.dp, bottom = 8.dp, end = 0.dp)
+                .fillMaxWidth()
         ) {
-            // Title header with menu - compact styling
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)
-                ),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        // Show "Titles: theme name" when showing titles, otherwise just the label
-                        text = if (isShowingTitles) stringResource(R.string.titles_for_theme, currentTheme) else currentTheme,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = Color(0xFF81B4D2), // Cyan/blue matching theme
-                        modifier = Modifier.weight(1f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    // Search toggle button - only visible when search is hidden
-                    if (!isSearchVisible) {
-                        IconButton(onClick = { onSearchVisibilityChanged(true) }) {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = "Search",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                    Box {
-                        IconButton(onClick = { showOverflowMenu = true }) {
-                            Icon(
-                                imageVector = Icons.Default.MoreVert,
-                                contentDescription = "Menu",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        DropdownMenu(
-                            expanded = showOverflowMenu,
-                            onDismissRequest = { showOverflowMenu = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.menu_time_period)) },
-                                onClick = {
-                                    showOverflowMenu = false
-                                    onTimePeriodClick()
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.menu_check_update)) },
-                                onClick = {
-                                    showOverflowMenu = false
-                                    onCheckUpdateClick()
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.menu_reinstall_filmlist)) },
-                                onClick = {
-                                    showOverflowMenu = false
-                                    onReinstallClick()
-                                }
-                            )
-                        }
-                    }
-                }
-            }
+            // Left side: Channel list
+            ChannelList(
+                channels = channels,
+                selectedChannel = selectedChannel,
+                onChannelSelected = onChannelSelected,
+                modifier = Modifier
+                    .width(160.dp)
+                    .fillMaxHeight()
+            )
 
-            // Search bar with slide animation - hidden by default
-            AnimatedVisibility(
-                visible = isSearchVisible,
-                enter = expandVertically() + fadeIn(),
-                exit = shrinkVertically() + fadeOut()
-            ) {
-                Column {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = onSearchQueryChanged,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(end = 12.dp)
-                            .focusRequester(searchFocusRequester),
-                        placeholder = { Text("Titel suchen...") },
-                        leadingIcon = {
-                            if (isSearching) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(24.dp),
-                                    strokeWidth = 2.dp
-                                )
-                            } else {
-                                Icon(
-                                    imageVector = Icons.Default.Search,
-                                    contentDescription = "Search"
-                                )
-                            }
-                        },
-                        trailingIcon = {
-                            IconButton(onClick = {
-                                if (searchQuery.isNotEmpty()) {
-                                    onSearchQueryChanged("")
-                                } else {
-                                    onSearchVisibilityChanged(false)
-                                }
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = "Close search",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        },
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.4f),
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.4f),
-                            focusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-                        ),
-                        shape = RoundedCornerShape(8.dp),
-                        singleLine = true
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Titles list
+            // Right side: Titles list
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .padding(start = 12.dp, top = 8.dp, bottom = 8.dp, end = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(
                     items = titles,
                     key = { it.hashCode() }
-                    ) { title ->
+                ) { title ->
                     TitleItem(
                         title = title,
                         isSelected = title == selectedTitle,
