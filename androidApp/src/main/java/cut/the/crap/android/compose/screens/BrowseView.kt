@@ -55,6 +55,7 @@ fun BrowseView(
     onTitleSelected: (String) -> Unit = {},
     onLoadMore: () -> Unit = {},
     onMenuClick: () -> Unit = {},
+    onBackClick: () -> Unit = {},
     onTimePeriodClick: () -> Unit = {},
     onCheckUpdateClick: () -> Unit = {},
     onReinstallClick: () -> Unit = {}
@@ -72,6 +73,8 @@ fun BrowseView(
             isSearchVisible = isSearchVisible,
             onSearchQueryChanged = onSearchQueryChanged,
             onSearchVisibilityChanged = onSearchVisibilityChanged,
+            showBackButton = isShowingTitles,
+            onBackClick = onBackClick,
             onTimePeriodClick = onTimePeriodClick,
             onCheckUpdateClick = onCheckUpdateClick,
             onReinstallClick = onReinstallClick,

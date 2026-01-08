@@ -407,6 +407,22 @@ fun KuckmalNavHost(
                         }
                     }
                 },
+                onBackClick = {
+                    // Navigate back from titles to themes
+                    when (val state = overviewState) {
+                        is OverviewState.ThemeTitles -> {
+                            selectedTheme = null
+                            selectedTitle = null
+                            val channelName = state.channelName
+                            if (channelName != null) {
+                                updateOverviewState(OverviewState.ChannelThemes(channelName))
+                            } else {
+                                updateOverviewState(OverviewState.AllThemes)
+                            }
+                        }
+                        else -> { /* Back button not shown in other states */ }
+                    }
+                },
                 onTimePeriodClick = onTimePeriodClick,
                 onCheckUpdateClick = onCheckUpdateClick,
                 onReinstallClick = onReinstallClick
