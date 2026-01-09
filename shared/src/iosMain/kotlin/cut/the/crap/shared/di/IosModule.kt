@@ -7,6 +7,7 @@ import cut.the.crap.shared.database.AppDatabase
 import cut.the.crap.shared.database.MediaDao
 import cut.the.crap.shared.database.MediaEntry
 import cut.the.crap.shared.database.getDatabaseBuilder
+import cut.the.crap.shared.data.VideoDownloader
 import cut.the.crap.shared.model.Broadcaster
 import cut.the.crap.shared.repository.IosMediaRepository
 import cut.the.crap.shared.repository.MediaRepository
@@ -27,6 +28,40 @@ var downloadCallback: ((MediaEntry, String, String) -> Unit)? = null
  * Callback for showing messages to user
  */
 var showMessageCallback: ((String) -> Unit)? = null
+
+/**
+ * Callback for download progress updates (title, progress percentage)
+ * Set to (null, -1) to clear the progress bar
+ */
+var downloadProgressCallback: ((String?, Int) -> Unit)? = null
+
+/**
+ * Initialize video downloader callbacks.
+ * Call this during app initialization.
+ */
+fun initializeVideoDownloader() {
+    var lastProgress = -1
+
+    // Set up progress update callback with throttling
+    VideoDownloader.onProgressUpdate = { title, progress ->
+        // Only update if progress percentage changed
+        if (progress != lastProgress) {
+            lastProgress = progress
+            downloadProgressCallback?.invoke(title, progress)
+        }
+    }
+
+    // Set up completion callback
+    VideoDownloader.onDownloadComplete = { title, path, success, error ->
+        lastProgress = -1
+        downloadProgressCallback?.invoke(null, -1)  // Clear progress bar
+        if (success) {
+            showMessageCallback?.invoke("Download complete: $title\nSaved to Downloads folder")
+        } else {
+            showMessageCallback?.invoke("Download failed: ${error ?: "Unknown error"}")
+        }
+    }
+}
 
 /**
  * Koin DI module for iOS application
@@ -66,9 +101,24 @@ val iosModule = module {
                 val resolvedUrl = resolveUrl(entry.url, targetUrl)
                 println("Playing: $resolvedUrl")
 
-                // Open URL in system player (Safari/AVPlayer)
+                if (resolvedUrl.isEmpty()) {
+                    showMessageCallback?.invoke("No video URL available")
+                    return@SharedViewModel
+                }
+
+                // Open URL in system player using modern API
                 NSURL.URLWithString(resolvedUrl)?.let { url ->
-                    UIApplication.sharedApplication.openURL(url)
+                    UIApplication.sharedApplication.openURL(
+                        url,
+                        options = emptyMap<Any?, Any>(),
+                        completionHandler = { success ->
+                            if (!success) {
+                                showMessageCallback?.invoke("Could not open video player")
+                            }
+                        }
+                    )
+                } ?: run {
+                    showMessageCallback?.invoke("Invalid video URL")
                 }
             },
             onDownloadVideo = { entry, url, quality ->
@@ -76,8 +126,11 @@ val iosModule = module {
                 val resolvedUrl = resolveUrl(entry.url, url)
                 println("Downloading: $resolvedUrl")
 
-                // Trigger download via UI callback
-                downloadCallback?.invoke(entry, resolvedUrl, quality)
+                // Show start message
+                showMessageCallback?.invoke("Starting download: ${entry.title}")
+
+                // Start the download using VideoDownloader
+                VideoDownloader.downloadVideoWithProgress(entry, resolvedUrl, quality)
             },
             onShowToast = { message ->
                 showMessageCallback?.invoke(message)

@@ -13,6 +13,8 @@ fun doInitKoin() {
     startKoin {
         modules(iosModule)
     }
+    // Initialize video downloader callbacks
+    initializeVideoDownloader()
 }
 
 /**

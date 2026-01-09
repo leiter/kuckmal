@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cut.the.crap.shared.di.KoinHelper
+import cut.the.crap.shared.di.downloadProgressCallback
 import cut.the.crap.shared.di.showMessageCallback
 import cut.the.crap.shared.ui.Channel
 import cut.the.crap.shared.ui.screens.BrowseView
@@ -55,11 +56,23 @@ fun AppContent() {
     // Download state
     val downloadState by viewModel.downloadState.collectAsState()
 
+    // Video download progress state (title, percentage)
+    var videoDownloadProgress by remember { mutableStateOf<Pair<String, Int>?>(null) }
+
     // Set up message callback
     LaunchedEffect(Unit) {
         showMessageCallback = { message ->
             coroutineScope.launch {
                 snackbarHostState.showSnackbar(message, duration = SnackbarDuration.Short)
+            }
+        }
+
+        // Set up download progress callback
+        downloadProgressCallback = { title, progress ->
+            videoDownloadProgress = if (title != null && progress >= 0) {
+                title to progress
+            } else {
+                null
             }
         }
     }
@@ -92,7 +105,40 @@ fun AppContent() {
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        bottomBar = {
+            // Video download progress bar
+            videoDownloadProgress?.let { (title, progress) ->
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    tonalElevation = 4.dp
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 12.dp)
+                    ) {
+                        Text(
+                            text = "Downloading: $title",
+                            style = MaterialTheme.typography.bodySmall,
+                            maxLines = 1,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        LinearProgressIndicator(
+                            progress = { progress / 100f },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Text(
+                            text = "$progress%",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.align(Alignment.End)
+                        )
+                    }
+                }
+            }
+        }
     ) { paddingValues ->
         Surface(
             modifier = Modifier.fillMaxSize().padding(paddingValues),
