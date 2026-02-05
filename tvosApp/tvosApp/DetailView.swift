@@ -1,10 +1,12 @@
 import SwiftUI
 
 struct DetailView: View {
-    let mediaItem: MediaItem
+    let mediaEntry: MediaEntry
     let onDismiss: () -> Void
 
     @State private var isHighQuality = true
+    @State private var showingPlayer = false
+    @StateObject private var playerManager = VideoPlayerManager()
     @FocusState private var focusedButton: ButtonType?
 
     enum ButtonType {
@@ -16,15 +18,15 @@ struct DetailView: View {
             // Header
             HStack {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(mediaItem.channel)
+                    Text(mediaEntry.channel)
                         .font(.headline)
                         .foregroundColor(.blue)
 
-                    Text(mediaItem.theme)
+                    Text(mediaEntry.theme)
                         .font(.title2)
                         .foregroundColor(.secondary)
 
-                    Text(mediaItem.title)
+                    Text(mediaEntry.title)
                         .font(.largeTitle)
                         .fontWeight(.bold)
                 }
@@ -36,7 +38,7 @@ struct DetailView: View {
                     .fill(Color.gray.opacity(0.3))
                     .frame(width: 120, height: 80)
                     .overlay(
-                        Text(mediaItem.channel)
+                        Text(mediaEntry.channel)
                             .font(.caption)
                             .foregroundColor(.gray)
                     )
@@ -45,15 +47,15 @@ struct DetailView: View {
 
             // Metadata
             HStack(spacing: 40) {
-                MetadataItem(icon: "calendar", label: "Datum", value: mediaItem.date)
-                MetadataItem(icon: "clock", label: "Zeit", value: mediaItem.time)
-                MetadataItem(icon: "timer", label: "Dauer", value: mediaItem.duration)
-                MetadataItem(icon: "doc", label: "Groesse", value: mediaItem.size)
+                MetadataItem(icon: "calendar", label: "Datum", value: mediaEntry.date)
+                MetadataItem(icon: "clock", label: "Zeit", value: mediaEntry.time)
+                MetadataItem(icon: "timer", label: "Dauer", value: mediaEntry.duration)
+                MetadataItem(icon: "doc", label: "Groesse", value: mediaEntry.sizeMB)
             }
             .padding(.horizontal, 60)
 
             // Description
-            Text(mediaItem.description)
+            Text(mediaEntry.description)
                 .font(.body)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.leading)
@@ -94,8 +96,7 @@ struct DetailView: View {
             // Action buttons
             HStack(spacing: 30) {
                 Button(action: {
-                    // Play action - in real app would open video player
-                    print("Playing: \(mediaItem.title) in \(isHighQuality ? "HD" : "SD")")
+                    showingPlayer = true
                 }) {
                     HStack {
                         Image(systemName: "play.fill")
@@ -131,6 +132,20 @@ struct DetailView: View {
         .onAppear {
             focusedButton = .play
         }
+        .fullScreenCover(isPresented: $showingPlayer) {
+            if let videoURL = playerManager.selectVideoURL(
+                for: mediaEntry,
+                quality: isHighQuality ? .high : .low
+            ) {
+                VideoPlayerView(
+                    videoURL: videoURL,
+                    title: mediaEntry.title,
+                    subtitleURL: playerManager.getSubtitleURL(for: mediaEntry),
+                    isPresented: $showingPlayer
+                )
+                .ignoresSafeArea()
+            }
+        }
     }
 }
 
@@ -158,7 +173,7 @@ struct MetadataItem: View {
 
 #Preview {
     DetailView(
-        mediaItem: SampleData.createMediaItem(
+        mediaEntry: SampleData.createMediaEntry(
             channel: "ARD",
             theme: "Tatort",
             title: "Tatort - Folge 1"

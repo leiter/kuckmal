@@ -21,6 +21,35 @@ struct MediaItem: Identifiable {
     let description: String
 }
 
+struct MediaEntry: Identifiable {
+    let id: Int64
+    let channel: String
+    let theme: String
+    let title: String
+    let date: String
+    let time: String
+    let duration: String
+    let sizeMB: String
+    let description: String
+    let url: String
+    let smallUrl: String
+    let hdUrl: String
+    let subtitleUrl: String
+
+    var asMediaItem: MediaItem {
+        MediaItem(
+            channel: channel,
+            theme: theme,
+            title: title,
+            date: date,
+            time: time,
+            duration: duration,
+            size: sizeMB,
+            description: description
+        )
+    }
+}
+
 // MARK: - Sample Data
 
 struct SampleData {
@@ -88,6 +117,27 @@ struct SampleData {
             duration: "45 Min",
             size: "750 MB",
             description: "Eine spannende Sendung mit interessanten Inhalten und informativen Beitraegen zum Thema \(theme). Produziert von \(channel)."
+        )
+    }
+
+    static func createMediaEntry(channel: String, theme: String, title: String) -> MediaEntry {
+        // Generate a pseudo-unique ID based on title hash
+        let id = Int64(abs(title.hashValue % 1_000_000))
+
+        return MediaEntry(
+            id: id,
+            channel: channel,
+            theme: theme,
+            title: title,
+            date: "25.07.2024",
+            time: "20:15 Uhr",
+            duration: "45 Min",
+            sizeMB: "750 MB",
+            description: "Eine spannende Sendung mit interessanten Inhalten und informativen Beitraegen zum Thema \(theme). Produziert von \(channel).",
+            url: "https://example.com/video/\(channel.lowercased())/\(theme.lowercased().replacingOccurrences(of: " ", with: "_")).mp4",
+            smallUrl: "42|video_low.mp4",
+            hdUrl: "42|video_hd.mp4",
+            subtitleUrl: ""
         )
     }
 }

@@ -14,8 +14,13 @@
 		1100000000000005 /* ThemeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1200000000000005 /* ThemeListView.swift */; };
 		1100000000000006 /* TitleListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1200000000000006 /* TitleListView.swift */; };
 		1100000000000007 /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1200000000000007 /* DetailView.swift */; };
+		1100000000000008 /* MediaUrlUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1200000000000009 /* MediaUrlUtils.swift */; };
+		1100000000000009 /* VideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1200000000000010 /* VideoPlayerView.swift */; };
+		1100000000000010 /* VideoPlayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1200000000000011 /* VideoPlayerManager.swift */; };
 		3100000000000001 /* tvosAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3200000000000001 /* tvosAppUITests.swift */; };
 		3100000000000002 /* tvosAppUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3200000000000002 /* tvosAppUITestsLaunchTests.swift */; };
+		5100000000000001 /* ContentProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5200000000000001 /* ContentProvider.swift */; };
+		5100000000000002 /* KuckmalTopShelf.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 5300000000000002 /* KuckmalTopShelf.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -25,6 +30,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 1600000000000001;
 			remoteInfo = tvosApp;
+		};
+		5300000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1900000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5600000000000001;
+			remoteInfo = KuckmalTopShelf;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -37,10 +49,16 @@
 		1200000000000006 /* TitleListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleListView.swift; sourceTree = "<group>"; };
 		1200000000000007 /* DetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
 		1200000000000008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1200000000000009 /* MediaUrlUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaUrlUtils.swift; sourceTree = "<group>"; };
+		1200000000000010 /* VideoPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerView.swift; sourceTree = "<group>"; };
+		1200000000000011 /* VideoPlayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerManager.swift; sourceTree = "<group>"; };
 		1300000000000001 /* tvosApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = tvosApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3200000000000001 /* tvosAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tvosAppUITests.swift; sourceTree = "<group>"; };
 		3200000000000002 /* tvosAppUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tvosAppUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		3300000000000002 /* tvosAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = tvosAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5200000000000001 /* ContentProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentProvider.swift; sourceTree = "<group>"; };
+		5200000000000002 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		5300000000000002 /* KuckmalTopShelf.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = KuckmalTopShelf.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +76,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		5400000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -65,6 +90,7 @@
 			isa = PBXGroup;
 			children = (
 				1500000000000002 /* tvosApp */,
+				5500000000000001 /* KuckmalTopShelf */,
 				3500000000000001 /* tvosAppUITests */,
 				1500000000000003 /* Products */,
 			);
@@ -80,6 +106,9 @@
 				1200000000000005 /* ThemeListView.swift */,
 				1200000000000006 /* TitleListView.swift */,
 				1200000000000007 /* DetailView.swift */,
+				1200000000000009 /* MediaUrlUtils.swift */,
+				1200000000000010 /* VideoPlayerView.swift */,
+				1200000000000011 /* VideoPlayerManager.swift */,
 				1200000000000008 /* Info.plist */,
 			);
 			path = tvosApp;
@@ -90,6 +119,7 @@
 			children = (
 				1300000000000001 /* tvosApp.app */,
 				3300000000000002 /* tvosAppUITests.xctest */,
+				5300000000000002 /* KuckmalTopShelf.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -103,6 +133,15 @@
 			path = tvosAppUITests;
 			sourceTree = "<group>";
 		};
+		5500000000000001 /* KuckmalTopShelf */ = {
+			isa = PBXGroup;
+			children = (
+				5200000000000001 /* ContentProvider.swift */,
+				5200000000000002 /* Info.plist */,
+			);
+			path = KuckmalTopShelf;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -113,10 +152,12 @@
 				1700000000000001 /* Sources */,
 				1400000000000001 /* Frameworks */,
 				1700000000000002 /* Resources */,
+				5700000000000003 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				5600000000000002 /* PBXTargetDependency */,
 			);
 			name = tvosApp;
 			productName = tvosApp;
@@ -141,6 +182,23 @@
 			productReference = 3300000000000002 /* tvosAppUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		5600000000000001 /* KuckmalTopShelf */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5800000000000001 /* Build configuration list for PBXNativeTarget "KuckmalTopShelf" */;
+			buildPhases = (
+				5700000000000001 /* Sources */,
+				5400000000000001 /* Frameworks */,
+				5700000000000002 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = KuckmalTopShelf;
+			productName = KuckmalTopShelf;
+			productReference = 5300000000000002 /* KuckmalTopShelf.appex */;
+			productType = "com.apple.product-type.tv-app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -158,6 +216,9 @@
 						CreatedOnToolsVersion = 15.0;
 						TestTargetID = 1600000000000001;
 					};
+					5600000000000001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
 				};
 			};
 			buildConfigurationList = 1800000000000002 /* Build configuration list for PBXProject "tvosApp" */;
@@ -174,6 +235,7 @@
 			projectRoot = "";
 			targets = (
 				1600000000000001 /* tvosApp */,
+				5600000000000001 /* KuckmalTopShelf */,
 				3600000000000001 /* tvosAppUITests */,
 			);
 		};
@@ -194,7 +256,28 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		5700000000000002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		5700000000000003 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				5100000000000002 /* KuckmalTopShelf.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		1700000000000001 /* Sources */ = {
@@ -208,6 +291,9 @@
 				1100000000000005 /* ThemeListView.swift in Sources */,
 				1100000000000006 /* TitleListView.swift in Sources */,
 				1100000000000007 /* DetailView.swift in Sources */,
+				1100000000000008 /* MediaUrlUtils.swift in Sources */,
+				1100000000000009 /* VideoPlayerView.swift in Sources */,
+				1100000000000010 /* VideoPlayerManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -220,6 +306,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		5700000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5100000000000001 /* ContentProvider.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -227,6 +321,11 @@
 			isa = PBXTargetDependency;
 			target = 1600000000000001 /* tvosApp */;
 			targetProxy = 3300000000000001 /* PBXContainerItemProxy */;
+		};
+		5600000000000002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5600000000000001 /* KuckmalTopShelf */;
+			targetProxy = 5300000000000001 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -442,6 +541,56 @@
 			};
 			name = Release;
 		};
+		6100000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = KuckmalTopShelf/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = KuckmalTopShelf;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cut.the.crap.kuckmal.tv.topshelf;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 3;
+			};
+			name = Debug;
+		};
+		6100000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = KuckmalTopShelf/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = KuckmalTopShelf;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = cut.the.crap.kuckmal.tv.topshelf;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 3;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -468,6 +617,15 @@
 			buildConfigurations = (
 				4100000000000001 /* Debug */,
 				4100000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5800000000000001 /* Build configuration list for PBXNativeTarget "KuckmalTopShelf" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6100000000000001 /* Debug */,
+				6100000000000002 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

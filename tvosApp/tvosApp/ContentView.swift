@@ -55,7 +55,7 @@ struct ContentView: View {
             .sheet(isPresented: $showingDetail) {
                 if let title = selectedTitle {
                     DetailView(
-                        mediaItem: SampleData.createMediaItem(
+                        mediaEntry: SampleData.createMediaEntry(
                             channel: selectedChannel?.name ?? "ARD",
                             theme: selectedTheme ?? "Allgemein",
                             title: title
