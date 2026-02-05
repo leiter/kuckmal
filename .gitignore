@@ -130,3 +130,22 @@ sc/
 .idea/
 .kotlin/
 downloaded_logos/
+
+# =========================
+# Python / Flask API
+# =========================
+
+# Virtual environment
+venv/
+api/venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# SQLite database
+api/data/*.db
+
+# Environment variables
+.env
+.env.local
