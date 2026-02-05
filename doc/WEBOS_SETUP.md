@@ -77,9 +77,48 @@ ares-launch -d <device-name> cut.the.crap.webos
 
 Location: `webApp/src/jsMain/resources/webos/`
 
+## Backend API Server
+
+The web app connects to the Flask API for media data.
+
+### Starting the API Server
+```bash
+cd api
+source venv/bin/activate  # or create with: python3 -m venv venv && pip install -r requirements.txt
+python run.py --port 5000
+```
+
+### API Configuration
+The API URL is configured in `index.html`:
+```html
+<script>
+    window.KUCKMAL_API_URL = "http://localhost:5000";
+</script>
+```
+
+For webOS deployment, update this to your server's IP address:
+```html
+<script>
+    window.KUCKMAL_API_URL = "http://192.168.1.100:5000";
+</script>
+```
+
+### Downloading Media Data
+On first run, download the film list (681K+ entries):
+```bash
+curl -X POST http://localhost:5000/api/filmlist/download
+```
+
 ## Development Server
 
-Run a local development server:
+Run both servers for development:
+
+### Terminal 1 - API Server
+```bash
+cd api && source venv/bin/activate && python run.py --port 5000
+```
+
+### Terminal 2 - Web App
 ```bash
 ./gradlew :webApp:jsBrowserDevelopmentRun
 ```

@@ -17,6 +17,19 @@ def create_app(load_sample: bool = False):
     """Create and configure the Flask application."""
     app = Flask(__name__)
 
+    # Enable CORS for all routes (required for webOS/web app)
+    @app.after_request
+    def add_cors_headers(response):
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, DELETE, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        return response
+
+    # Handle OPTIONS preflight requests
+    @app.route('/<path:path>', methods=['OPTIONS'])
+    def options_handler(path):
+        return '', 204
+
     # Initialize database
     init_db()
 

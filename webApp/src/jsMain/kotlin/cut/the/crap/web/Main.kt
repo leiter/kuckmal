@@ -29,9 +29,13 @@ sealed class NavigationState {
 }
 
 /**
- * Global repository instance
+ * Global repository instance.
+ * Uses API repository by default, falls back to mock if API unavailable.
+ *
+ * To configure the API URL, set window.KUCKMAL_API_URL before loading the app:
+ * <script>window.KUCKMAL_API_URL = "http://your-server:5000";</script>
  */
-private val repository: MediaRepository = MockMediaRepository()
+private val repository: MediaRepository = ApiMediaRepository()
 
 fun main() {
     renderComposable(rootElementId = "root") {
