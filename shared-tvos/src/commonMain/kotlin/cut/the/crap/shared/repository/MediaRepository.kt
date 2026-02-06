@@ -24,12 +24,22 @@ interface MediaRepository {
     fun getAllChannelsFlow(): Flow<List<String>>
 
     /**
+     * Get all unique channels sorted alphabetically (suspend version for Swift interop)
+     */
+    suspend fun getAllChannels(): List<String>
+
+    /**
      * Get all unique themes with optional date filter as Flow
      * @param minTimestamp Filter entries newer than this timestamp (0 = no filter)
      * @param limit Maximum number of themes to return
      * @param offset Pagination offset
      */
     fun getAllThemesFlow(minTimestamp: Long = 0, limit: Int = 1200, offset: Int = 0): Flow<List<String>>
+
+    /**
+     * Get all unique themes (suspend version for Swift interop)
+     */
+    suspend fun getAllThemes(minTimestamp: Long = 0, limit: Int = 1200, offset: Int = 0): List<String>
 
     /**
      * Get themes for a specific channel as Flow
@@ -46,12 +56,30 @@ interface MediaRepository {
     ): Flow<List<String>>
 
     /**
+     * Get themes for a specific channel (suspend version for Swift interop)
+     */
+    suspend fun getThemesForChannel(
+        channel: String,
+        minTimestamp: Long = 0,
+        limit: Int = 1200,
+        offset: Int = 0
+    ): List<String>
+
+    /**
      * Get titles for a specific theme across all channels as Flow
      */
     fun getTitlesForThemeFlow(
         theme: String,
         minTimestamp: Long = 0
     ): Flow<List<String>>
+
+    /**
+     * Get titles for a specific theme (suspend version for Swift interop)
+     */
+    suspend fun getTitlesForTheme(
+        theme: String,
+        minTimestamp: Long = 0
+    ): List<String>
 
     /**
      * Get titles for a specific channel and theme as Flow
@@ -63,6 +91,17 @@ interface MediaRepository {
         limit: Int = 1200,
         offset: Int = 0
     ): Flow<List<String>>
+
+    /**
+     * Get titles for a specific channel and theme (suspend version for Swift interop)
+     */
+    suspend fun getTitlesForChannelAndTheme(
+        channel: String,
+        theme: String,
+        minTimestamp: Long = 0,
+        limit: Int = 1200,
+        offset: Int = 0
+    ): List<String>
 
     /**
      * Get a specific media entry as Flow

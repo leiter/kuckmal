@@ -31,6 +31,36 @@ struct ContentView: View {
                             .foregroundColor(.secondary)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if viewModel.isOffline {
+                    // Offline error view
+                    VStack(spacing: 30) {
+                        Image(systemName: "wifi.slash")
+                            .font(.system(size: 80))
+                            .foregroundColor(.orange)
+
+                        Text("Keine Internetverbindung")
+                            .font(.title)
+                            .fontWeight(.semibold)
+
+                        Text("Bitte pruefen Sie Ihre Netzwerkeinstellungen und versuchen Sie es erneut.")
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 60)
+
+                        Button(action: {
+                            viewModel.retry()
+                        }) {
+                            HStack {
+                                Image(systemName: "arrow.clockwise")
+                                Text("Erneut versuchen")
+                            }
+                            .padding(.horizontal, 40)
+                            .padding(.vertical, 16)
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     // Normal browse view
                     HStack(spacing: 0) {
@@ -58,10 +88,17 @@ struct ContentView: View {
                                 ProgressView()
                                     .progressViewStyle(.circular)
                                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            } else if let error = viewModel.errorMessage {
-                                Text(error)
-                                    .foregroundColor(.red)
-                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            } else if viewModel.channels.isEmpty && viewModel.themes.isEmpty {
+                                // No data (shouldn't happen if online)
+                                VStack {
+                                    Image(systemName: "exclamationmark.triangle")
+                                        .font(.system(size: 50))
+                                        .foregroundColor(.orange)
+                                    Text("Keine Daten verfuegbar")
+                                        .font(.title3)
+                                        .foregroundColor(.secondary)
+                                }
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
                             } else {
                                 // Content list
                                 if viewModel.selectedTheme != nil {

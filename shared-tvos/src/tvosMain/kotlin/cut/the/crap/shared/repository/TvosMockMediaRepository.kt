@@ -63,6 +63,10 @@ class TvosMockMediaRepository : MediaRepository {
         }
     }
 
+    override suspend fun getAllChannels(): List<String> {
+        return mockEntries.value.map { it.channel }.distinct().sorted()
+    }
+
     override fun getAllThemesFlow(minTimestamp: Long, limit: Int, offset: Int): Flow<List<String>> {
         return mockEntries.map { entries ->
             entries
@@ -72,6 +76,15 @@ class TvosMockMediaRepository : MediaRepository {
                 .drop(offset)
                 .take(limit)
         }
+    }
+
+    override suspend fun getAllThemes(minTimestamp: Long, limit: Int, offset: Int): List<String> {
+        return mockEntries.value
+            .filter { it.timestamp >= minTimestamp }
+            .map { it.theme }
+            .distinct()
+            .drop(offset)
+            .take(limit)
     }
 
     override fun getThemesForChannelFlow(
@@ -90,6 +103,20 @@ class TvosMockMediaRepository : MediaRepository {
         }
     }
 
+    override suspend fun getThemesForChannel(
+        channel: String,
+        minTimestamp: Long,
+        limit: Int,
+        offset: Int
+    ): List<String> {
+        return mockEntries.value
+            .filter { it.channel == channel && it.timestamp >= minTimestamp }
+            .map { it.theme }
+            .distinct()
+            .drop(offset)
+            .take(limit)
+    }
+
     override fun getTitlesForThemeFlow(theme: String, minTimestamp: Long): Flow<List<String>> {
         return mockEntries.map { entries ->
             entries
@@ -97,6 +124,13 @@ class TvosMockMediaRepository : MediaRepository {
                 .map { it.title }
                 .distinct()
         }
+    }
+
+    override suspend fun getTitlesForTheme(theme: String, minTimestamp: Long): List<String> {
+        return mockEntries.value
+            .filter { it.theme == theme && it.timestamp >= minTimestamp }
+            .map { it.title }
+            .distinct()
     }
 
     override fun getTitlesForChannelAndThemeFlow(
@@ -112,6 +146,19 @@ class TvosMockMediaRepository : MediaRepository {
                 .map { it.title }
                 .distinct()
         }
+    }
+
+    override suspend fun getTitlesForChannelAndTheme(
+        channel: String,
+        theme: String,
+        minTimestamp: Long,
+        limit: Int,
+        offset: Int
+    ): List<String> {
+        return mockEntries.value
+            .filter { it.channel == channel && it.theme == theme && it.timestamp >= minTimestamp }
+            .map { it.title }
+            .distinct()
     }
 
     override fun getMediaEntryFlow(channel: String, theme: String, title: String): Flow<MediaEntry?> {

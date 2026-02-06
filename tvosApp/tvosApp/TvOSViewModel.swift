@@ -13,143 +13,212 @@ class TvOSViewModel: ObservableObject {
     @Published var selectedTheme: String?
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
+    @Published var isOffline: Bool = false
 
     // Search state
     @Published var searchQuery: String = ""
     @Published var searchResults: [SearchResult] = []
     @Published var isSearching: Bool = false
 
-    private var useKotlin = true
     private let repository: MediaRepository
 
     init() {
         print("[TvOSViewModel] init starting")
         self.repository = KoinHelperKt.getMediaRepository()
-        loadChannels()
-        print("[TvOSViewModel] init complete - channels: \(channels.count), themes: \(themes.count)")
+
+        // Load initial data asynchronously
+        Task {
+            await loadChannels()
+        }
+        print("[TvOSViewModel] init complete")
     }
 
     // MARK: - Channel Loading
 
-    func loadChannels() {
+    func loadChannels() async {
         print("[TvOSViewModel] loadChannels called")
+        isLoading = true
+        isOffline = false
+        errorMessage = nil
 
         do {
-            // Try Kotlin SampleData
-            let kotlinChannels = SampleData.shared.sampleChannels
-            print("[TvOSViewModel] Got \(kotlinChannels.count) kotlin channels")
+            // Fetch channels from repository (API)
+            let channelNames = try await repository.getAllChannels()
 
-            channels = kotlinChannels.map { kotlinChannel in
+            if channelNames.isEmpty {
+                // Empty response likely means API issue
+                throw NSError(domain: "TvOSViewModel", code: -1, userInfo: [NSLocalizedDescriptionKey: "Keine Verbindung zum Server"])
+            }
+
+            channels = channelNames.map { name in
                 Channel(
-                    name: kotlinChannel.name,
-                    displayName: kotlinChannel.displayName,
-                    brandColor: ChannelColors.brandColor(for: kotlinChannel.name)
+                    name: name,
+                    displayName: getDisplayName(for: name),
+                    brandColor: ChannelColors.brandColor(for: name)
                 )
             }
-            print("[TvOSViewModel] Mapped to \(channels.count) Swift channels")
+            print("[TvOSViewModel] Loaded \(channels.count) channels from API")
+            isOffline = false
+
         } catch {
-            print("[TvOSViewModel] Kotlin error: \(error)")
-            useKotlin = false
-            loadFallbackChannels()
+            print("[TvOSViewModel] loadChannels error: \(error)")
+            isOffline = true
+            errorMessage = "Keine Internetverbindung. Bitte pruefen Sie Ihre Netzwerkeinstellungen."
+            channels = []
+            themes = []
         }
 
-        // Load themes
-        loadAllThemes()
+        isLoading = false
+
+        // Only load themes if we have channels (online)
+        if !isOffline {
+            await loadAllThemes()
+        }
     }
 
-    private func loadFallbackChannels() {
-        print("[TvOSViewModel] Using fallback channels")
-        channels = [
-            Channel(name: "ARD", displayName: "ARD", brandColor: ChannelColors.brandColor(for: "ARD")),
-            Channel(name: "ZDF", displayName: "ZDF", brandColor: ChannelColors.brandColor(for: "ZDF")),
-            Channel(name: "3Sat", displayName: "3sat", brandColor: ChannelColors.brandColor(for: "3Sat")),
-            Channel(name: "ARTE.DE", displayName: "ARTE", brandColor: ChannelColors.brandColor(for: "ARTE.DE")),
-            Channel(name: "BR", displayName: "BR", brandColor: ChannelColors.brandColor(for: "BR")),
-            Channel(name: "NDR", displayName: "NDR", brandColor: ChannelColors.brandColor(for: "NDR")),
-            Channel(name: "WDR", displayName: "WDR", brandColor: ChannelColors.brandColor(for: "WDR")),
-            Channel(name: "SWR", displayName: "SWR", brandColor: ChannelColors.brandColor(for: "SWR")),
-            Channel(name: "PHOENIX", displayName: "phoenix", brandColor: ChannelColors.brandColor(for: "PHOENIX")),
-        ]
+    private func getDisplayName(for channelName: String) -> String {
+        // Map channel names to display names
+        switch channelName {
+        case "3Sat": return "3sat"
+        case "ARTE.DE": return "ARTE"
+        case "PHOENIX": return "phoenix"
+        case "ZDF-tivi": return "ZDF tivi"
+        default: return channelName
+        }
+    }
+
+    func retry() {
+        print("[TvOSViewModel] retry called")
+        Task {
+            await loadChannels()
+        }
     }
 
     // MARK: - Theme Loading
 
-    func loadAllThemes() {
+    func loadAllThemes() async {
         print("[TvOSViewModel] loadAllThemes called")
         isLoading = true
         selectedTheme = nil
         titles = []
 
-        if useKotlin {
-            var allThemes: Set<String> = []
-            for kotlinChannel in SampleData.shared.sampleChannels {
-                let channelThemes = SampleData.shared.getThemesForChannel(channel: kotlinChannel.name)
-                for theme in channelThemes {
-                    allThemes.insert(theme)
-                }
-            }
-            themes = Array(allThemes).sorted()
-        } else {
-            themes = ["Tagesschau", "Tatort", "Terra X", "Dokumentation", "Nachrichten", "Sport", "Kultur"]
+        do {
+            // Fetch all themes from repository
+            let themeList = try await repository.getAllThemes(minTimestamp: 0, limit: 500, offset: 0)
+            themes = themeList.sorted()
+            print("[TvOSViewModel] Loaded \(themes.count) themes from API")
+            isOffline = false
+        } catch {
+            print("[TvOSViewModel] loadAllThemes error: \(error)")
+            isOffline = true
+            errorMessage = "Keine Internetverbindung. Bitte pruefen Sie Ihre Netzwerkeinstellungen."
+            themes = []
         }
 
-        print("[TvOSViewModel] Loaded \(themes.count) themes")
         isLoading = false
     }
 
-    func loadThemes(for channelName: String) {
+    func loadThemes(for channelName: String) async {
         print("[TvOSViewModel] loadThemes called for: \(channelName)")
         isLoading = true
         selectedTheme = nil
         titles = []
 
-        if useKotlin {
-            let kotlinThemes = SampleData.shared.getThemesForChannel(channel: channelName)
-            themes = Array(kotlinThemes)
-        } else {
-            themes = ["\(channelName) Nachrichten", "\(channelName) Dokumentation", "\(channelName) Sport", "\(channelName) Kultur"]
+        do {
+            // Fetch themes for specific channel from repository
+            let themeList = try await repository.getThemesForChannel(channel: channelName, minTimestamp: 0, limit: 500, offset: 0)
+            themes = themeList.sorted()
+            print("[TvOSViewModel] Loaded \(themes.count) themes for \(channelName) from API")
+            isOffline = false
+        } catch {
+            print("[TvOSViewModel] loadThemes error: \(error)")
+            isOffline = true
+            errorMessage = "Keine Internetverbindung. Bitte pruefen Sie Ihre Netzwerkeinstellungen."
+            themes = []
         }
 
-        print("[TvOSViewModel] Loaded \(themes.count) themes for \(channelName)")
         isLoading = false
     }
 
     // MARK: - Title Loading
 
-    func loadTitles(for theme: String) {
+    func loadTitles(for theme: String) async {
         print("[TvOSViewModel] loadTitles called for: \(theme)")
         isLoading = true
 
-        if useKotlin {
-            let kotlinTitles = SampleData.shared.getTitlesForTheme(theme: theme)
-            titles = Array(kotlinTitles)
-        } else {
-            titles = ["\(theme) - Folge 1", "\(theme) - Folge 2", "\(theme) - Spezial", "\(theme) - Best of"]
+        do {
+            let titleList: [String]
+            if let channel = selectedChannel {
+                // Fetch titles for specific channel and theme
+                titleList = try await repository.getTitlesForChannelAndTheme(
+                    channel: channel.name,
+                    theme: theme,
+                    minTimestamp: 0,
+                    limit: 200,
+                    offset: 0
+                )
+            } else {
+                // Fetch titles for theme across all channels
+                titleList = try await repository.getTitlesForTheme(theme: theme, minTimestamp: 0)
+            }
+            titles = titleList
+            print("[TvOSViewModel] Loaded \(titles.count) titles for \(theme) from API")
+            isOffline = false
+        } catch {
+            print("[TvOSViewModel] loadTitles error: \(error)")
+            isOffline = true
+            errorMessage = "Keine Internetverbindung. Bitte pruefen Sie Ihre Netzwerkeinstellungen."
+            titles = []
         }
 
-        print("[TvOSViewModel] Loaded \(titles.count) titles for \(theme)")
         isLoading = false
     }
 
     // MARK: - Media Entry Loading
 
     func loadMediaEntry(title: String) async -> SharedTvos.MediaEntry? {
-        let channel = selectedChannel?.name ?? "ARD"
-        let theme = selectedTheme ?? "Allgemein"
+        let channel = selectedChannel?.name ?? ""
+        let theme = selectedTheme ?? ""
+
+        // Try to fetch from repository using search
+        do {
+            let results: [SharedTvos.MediaEntry]
+            if !channel.isEmpty {
+                results = try await repository.searchEntriesByChannel(channel: channel, query: title, limit: 10)
+            } else {
+                results = try await repository.searchEntries(query: title, limit: 10)
+            }
+
+            // Find exact title match (or close match)
+            if let entry = results.first(where: { $0.title == title }) {
+                print("[TvOSViewModel] loadMediaEntry: fetched '\(title)' from repository (exact match)")
+                return entry
+            } else if let entry = results.first {
+                print("[TvOSViewModel] loadMediaEntry: fetched '\(title)' from repository (first result)")
+                return entry
+            }
+        } catch {
+            print("[TvOSViewModel] loadMediaEntry error: \(error)")
+        }
+
+        // Fallback: create placeholder entry if repository fails
+        print("[TvOSViewModel] loadMediaEntry: using fallback for '\(title)'")
+        let fallbackChannel = channel.isEmpty ? "ARD" : channel
+        let fallbackTheme = theme.isEmpty ? "Allgemein" : theme
         let id = Int64(abs(title.hashValue % 1_000_000))
 
         return SharedTvos.MediaEntry(
             id: id,
-            channel: channel,
-            theme: theme,
+            channel: fallbackChannel,
+            theme: fallbackTheme,
             title: title,
             date: "25.07.2024",
             time: "20:15",
             duration: "45 Min",
             sizeMB: "750",
-            description: "Beschreibung fuer \(title) im Thema \(theme) von \(channel). Eine spannende Sendung mit interessanten Inhalten.",
+            description: "Beschreibung fuer \(title) im Thema \(fallbackTheme) von \(fallbackChannel). Eine spannende Sendung mit interessanten Inhalten.",
             url: "https://example.com/video/\(id).mp4",
-            website: "https://www.\(channel.lowercased()).de",
+            website: "https://www.\(fallbackChannel.lowercased()).de",
             subtitleUrl: "",
             smallUrl: "https://example.com/video/\(id)_small.mp4",
             hdUrl: "https://example.com/video/\(id)_hd.mp4",
@@ -164,17 +233,21 @@ class TvOSViewModel: ObservableObject {
     func selectChannel(_ channel: Channel?) {
         print("[TvOSViewModel] selectChannel: \(channel?.name ?? "nil")")
         selectedChannel = channel
-        if let channel = channel {
-            loadThemes(for: channel.name)
-        } else {
-            loadAllThemes()
+        Task {
+            if let channel = channel {
+                await loadThemes(for: channel.name)
+            } else {
+                await loadAllThemes()
+            }
         }
     }
 
     func selectTheme(_ theme: String) {
         print("[TvOSViewModel] selectTheme: \(theme)")
         selectedTheme = theme
-        loadTitles(for: theme)
+        Task {
+            await loadTitles(for: theme)
+        }
     }
 
     func goBack() {
@@ -186,7 +259,9 @@ class TvOSViewModel: ObservableObject {
             titles = []
         } else if selectedChannel != nil {
             selectedChannel = nil
-            loadAllThemes()
+            Task {
+                await loadAllThemes()
+            }
         }
     }
 
@@ -250,7 +325,9 @@ class TvOSViewModel: ObservableObject {
             selectedChannel = channel
         }
         selectedTheme = result.theme
-        loadTitles(for: result.theme)
+        Task {
+            await loadTitles(for: result.theme)
+        }
         clearSearch()
     }
 }
