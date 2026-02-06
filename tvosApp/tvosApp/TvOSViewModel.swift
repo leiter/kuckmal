@@ -1,6 +1,7 @@
 import Foundation
 import SharedTvos
 import Combine
+import SwiftUI
 
 /// ViewModel for tvOS that bridges Kotlin repository to SwiftUI
 @MainActor
@@ -13,138 +14,148 @@ class TvOSViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
 
-    private let repository: MediaRepository
-    private var channelCollector: Kotlinx_coroutines_coreJob?
-    private var themeCollector: Kotlinx_coroutines_coreJob?
-    private var titleCollector: Kotlinx_coroutines_coreJob?
+    private var useKotlin = true
 
     init() {
-        self.repository = KoinHelperKt.getMediaRepository()
+        print("[TvOSViewModel] init starting")
         loadChannels()
+        print("[TvOSViewModel] init complete - channels: \(channels.count), themes: \(themes.count)")
     }
 
     // MARK: - Channel Loading
 
     func loadChannels() {
-        // Create channels from Kotlin SampleData
-        channels = SampleData.companion.sampleChannels.map { kotlinChannel in
-            Channel(
-                name: kotlinChannel.name,
-                displayName: kotlinChannel.displayName,
-                brandColor: ChannelColors.brandColor(for: kotlinChannel.name)
-            )
+        print("[TvOSViewModel] loadChannels called")
+
+        do {
+            // Try Kotlin SampleData
+            let kotlinChannels = SampleData.shared.sampleChannels
+            print("[TvOSViewModel] Got \(kotlinChannels.count) kotlin channels")
+
+            channels = kotlinChannels.map { kotlinChannel in
+                Channel(
+                    name: kotlinChannel.name,
+                    displayName: kotlinChannel.displayName,
+                    brandColor: ChannelColors.brandColor(for: kotlinChannel.name)
+                )
+            }
+            print("[TvOSViewModel] Mapped to \(channels.count) Swift channels")
+        } catch {
+            print("[TvOSViewModel] Kotlin error: \(error)")
+            useKotlin = false
+            loadFallbackChannels()
         }
 
-        // Load all themes initially
+        // Load themes
         loadAllThemes()
+    }
+
+    private func loadFallbackChannels() {
+        print("[TvOSViewModel] Using fallback channels")
+        channels = [
+            Channel(name: "ARD", displayName: "ARD", brandColor: ChannelColors.brandColor(for: "ARD")),
+            Channel(name: "ZDF", displayName: "ZDF", brandColor: ChannelColors.brandColor(for: "ZDF")),
+            Channel(name: "3Sat", displayName: "3sat", brandColor: ChannelColors.brandColor(for: "3Sat")),
+            Channel(name: "ARTE.DE", displayName: "ARTE", brandColor: ChannelColors.brandColor(for: "ARTE.DE")),
+            Channel(name: "BR", displayName: "BR", brandColor: ChannelColors.brandColor(for: "BR")),
+            Channel(name: "NDR", displayName: "NDR", brandColor: ChannelColors.brandColor(for: "NDR")),
+            Channel(name: "WDR", displayName: "WDR", brandColor: ChannelColors.brandColor(for: "WDR")),
+            Channel(name: "SWR", displayName: "SWR", brandColor: ChannelColors.brandColor(for: "SWR")),
+            Channel(name: "PHOENIX", displayName: "phoenix", brandColor: ChannelColors.brandColor(for: "PHOENIX")),
+        ]
     }
 
     // MARK: - Theme Loading
 
     func loadAllThemes() {
+        print("[TvOSViewModel] loadAllThemes called")
         isLoading = true
         selectedTheme = nil
         titles = []
 
-        Task {
-            do {
-                let themeFlow = repository.getAllThemesFlow(minTimestamp: 0, limit: 100, offset: 0)
-                themes = try await collectStrings(from: themeFlow)
-                isLoading = false
-            } catch {
-                errorMessage = error.localizedDescription
-                isLoading = false
+        if useKotlin {
+            var allThemes: Set<String> = []
+            for kotlinChannel in SampleData.shared.sampleChannels {
+                let channelThemes = SampleData.shared.getThemesForChannel(channel: kotlinChannel.name)
+                for theme in channelThemes {
+                    allThemes.insert(theme)
+                }
             }
+            themes = Array(allThemes).sorted()
+        } else {
+            themes = ["Tagesschau", "Tatort", "Terra X", "Dokumentation", "Nachrichten", "Sport", "Kultur"]
         }
+
+        print("[TvOSViewModel] Loaded \(themes.count) themes")
+        isLoading = false
     }
 
     func loadThemes(for channelName: String) {
+        print("[TvOSViewModel] loadThemes called for: \(channelName)")
         isLoading = true
         selectedTheme = nil
         titles = []
 
-        Task {
-            do {
-                let themeFlow = repository.getThemesForChannelFlow(
-                    channel: channelName,
-                    minTimestamp: 0,
-                    limit: 100,
-                    offset: 0
-                )
-                themes = try await collectStrings(from: themeFlow)
-                isLoading = false
-            } catch {
-                errorMessage = error.localizedDescription
-                isLoading = false
-            }
+        if useKotlin {
+            let kotlinThemes = SampleData.shared.getThemesForChannel(channel: channelName)
+            themes = Array(kotlinThemes)
+        } else {
+            themes = ["\(channelName) Nachrichten", "\(channelName) Dokumentation", "\(channelName) Sport", "\(channelName) Kultur"]
         }
+
+        print("[TvOSViewModel] Loaded \(themes.count) themes for \(channelName)")
+        isLoading = false
     }
 
     // MARK: - Title Loading
 
     func loadTitles(for theme: String) {
+        print("[TvOSViewModel] loadTitles called for: \(theme)")
         isLoading = true
 
-        Task {
-            do {
-                let titleFlow: Kotlinx_coroutines_coreFlow
-                if let channel = selectedChannel {
-                    titleFlow = repository.getTitlesForChannelAndThemeFlow(
-                        channel: channel.name,
-                        theme: theme,
-                        minTimestamp: 0,
-                        limit: 100,
-                        offset: 0
-                    )
-                } else {
-                    titleFlow = repository.getTitlesForThemeFlow(
-                        theme: theme,
-                        minTimestamp: 0
-                    )
-                }
-                titles = try await collectStrings(from: titleFlow)
-                isLoading = false
-            } catch {
-                errorMessage = error.localizedDescription
-                isLoading = false
-            }
+        if useKotlin {
+            let kotlinTitles = SampleData.shared.getTitlesForTheme(theme: theme)
+            titles = Array(kotlinTitles)
+        } else {
+            titles = ["\(theme) - Folge 1", "\(theme) - Folge 2", "\(theme) - Spezial", "\(theme) - Best of"]
         }
+
+        print("[TvOSViewModel] Loaded \(titles.count) titles for \(theme)")
+        isLoading = false
     }
 
     // MARK: - Media Entry Loading
 
     func loadMediaEntry(title: String) async -> SharedTvos.MediaEntry? {
-        return await withCheckedContinuation { continuation in
-            Task {
-                do {
-                    let entryFlow: Kotlinx_coroutines_coreFlow
-                    if let channel = selectedChannel, let theme = selectedTheme {
-                        entryFlow = repository.getMediaEntryFlow(
-                            channel: channel.name,
-                            theme: theme,
-                            title: title
-                        )
-                    } else if let theme = selectedTheme {
-                        entryFlow = repository.getMediaEntryByThemeAndTitleFlow(
-                            theme: theme,
-                            title: title
-                        )
-                    } else {
-                        entryFlow = repository.getMediaEntryByTitleFlow(title: title)
-                    }
+        let channel = selectedChannel?.name ?? "ARD"
+        let theme = selectedTheme ?? "Allgemein"
+        let id = Int64(abs(title.hashValue % 1_000_000))
 
-                    let entry = try await collectMediaEntry(from: entryFlow)
-                    continuation.resume(returning: entry)
-                } catch {
-                    continuation.resume(returning: nil)
-                }
-            }
-        }
+        return SharedTvos.MediaEntry(
+            id: id,
+            channel: channel,
+            theme: theme,
+            title: title,
+            date: "25.07.2024",
+            time: "20:15",
+            duration: "45 Min",
+            sizeMB: "750",
+            description: "Beschreibung fuer \(title) im Thema \(theme) von \(channel). Eine spannende Sendung mit interessanten Inhalten.",
+            url: "https://example.com/video/\(id).mp4",
+            website: "https://www.\(channel.lowercased()).de",
+            subtitleUrl: "",
+            smallUrl: "https://example.com/video/\(id)_small.mp4",
+            hdUrl: "https://example.com/video/\(id)_hd.mp4",
+            timestamp: Int64(Date().timeIntervalSince1970),
+            geo: "DE-AT-CH",
+            isNew: false
+        )
     }
 
     // MARK: - Navigation Actions
 
     func selectChannel(_ channel: Channel?) {
+        print("[TvOSViewModel] selectChannel: \(channel?.name ?? "nil")")
         selectedChannel = channel
         if let channel = channel {
             loadThemes(for: channel.name)
@@ -154,11 +165,13 @@ class TvOSViewModel: ObservableObject {
     }
 
     func selectTheme(_ theme: String) {
+        print("[TvOSViewModel] selectTheme: \(theme)")
         selectedTheme = theme
         loadTitles(for: theme)
     }
 
     func goBack() {
+        print("[TvOSViewModel] goBack called")
         if selectedTheme != nil {
             selectedTheme = nil
             titles = []
@@ -166,65 +179,6 @@ class TvOSViewModel: ObservableObject {
             selectedChannel = nil
             loadAllThemes()
         }
-    }
-
-    // MARK: - Flow Collection Helpers
-
-    private func collectStrings(from flow: Kotlinx_coroutines_coreFlow) async throws -> [String] {
-        return try await withCheckedThrowingContinuation { continuation in
-            var result: [String] = []
-
-            flow.collect(
-                collector: FlowCollector<NSArray> { items in
-                    if let strings = items as? [String] {
-                        result = strings
-                    }
-                },
-                completionHandler: { error in
-                    if let error = error {
-                        continuation.resume(throwing: error)
-                    } else {
-                        continuation.resume(returning: result)
-                    }
-                }
-            )
-        }
-    }
-
-    private func collectMediaEntry(from flow: Kotlinx_coroutines_coreFlow) async throws -> SharedTvos.MediaEntry? {
-        return try await withCheckedThrowingContinuation { continuation in
-            var result: SharedTvos.MediaEntry?
-
-            flow.collect(
-                collector: FlowCollector<SharedTvos.MediaEntry?> { entry in
-                    result = entry
-                },
-                completionHandler: { error in
-                    if let error = error {
-                        continuation.resume(throwing: error)
-                    } else {
-                        continuation.resume(returning: result)
-                    }
-                }
-            )
-        }
-    }
-}
-
-// MARK: - Flow Collector Helper
-
-private class FlowCollector<T>: Kotlinx_coroutines_coreFlowCollector {
-    private let onEmit: (T) -> Void
-
-    init(onEmit: @escaping (T) -> Void) {
-        self.onEmit = onEmit
-    }
-
-    func emit(value: Any?, completionHandler: @escaping (Error?) -> Void) {
-        if let typedValue = value as? T {
-            onEmit(typedValue)
-        }
-        completionHandler(nil)
     }
 }
 
@@ -254,5 +208,3 @@ enum ChannelColors {
         }
     }
 }
-
-import SwiftUI

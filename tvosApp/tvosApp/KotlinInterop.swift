@@ -61,23 +61,3 @@ extension SharedTvos.Channel {
         )
     }
 }
-
-// MARK: - Sample Data Bridge
-
-/// Bridge to Kotlin SampleData for convenience
-enum KotlinSampleData {
-    /// Get all sample channels as Swift Channel objects
-    static var channels: [Channel] {
-        return SampleData.companion.sampleChannels.map { $0.toSwiftChannel() }
-    }
-
-    /// Get themes for a specific channel
-    static func themes(for channel: String) -> [String] {
-        return SampleData.companion.getThemesForChannel(channel: channel)
-    }
-
-    /// Get titles for a specific theme
-    static func titles(for theme: String) -> [String] {
-        return SampleData.companion.getTitlesForTheme(theme: theme)
-    }
-}

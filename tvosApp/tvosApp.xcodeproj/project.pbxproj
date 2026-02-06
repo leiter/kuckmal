@@ -17,6 +17,10 @@
 		1100000000000008 /* MediaUrlUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1200000000000009 /* MediaUrlUtils.swift */; };
 		1100000000000009 /* VideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1200000000000010 /* VideoPlayerView.swift */; };
 		1100000000000010 /* VideoPlayerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1200000000000011 /* VideoPlayerManager.swift */; };
+		1100000000000011 /* SharedTvos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1200000000000012 /* SharedTvos.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1100000000000012 /* SharedTvos.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1200000000000012 /* SharedTvos.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		1100000000000013 /* KotlinInterop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1200000000000013 /* KotlinInterop.swift */; };
+		1100000000000014 /* TvOSViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1200000000000014 /* TvOSViewModel.swift */; };
 		3100000000000001 /* tvosAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3200000000000001 /* tvosAppUITests.swift */; };
 		3100000000000002 /* tvosAppUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3200000000000002 /* tvosAppUITestsLaunchTests.swift */; };
 		5100000000000001 /* ContentProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5200000000000001 /* ContentProvider.swift */; };
@@ -52,6 +56,9 @@
 		1200000000000009 /* MediaUrlUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaUrlUtils.swift; sourceTree = "<group>"; };
 		1200000000000010 /* VideoPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerView.swift; sourceTree = "<group>"; };
 		1200000000000011 /* VideoPlayerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerManager.swift; sourceTree = "<group>"; };
+		1200000000000012 /* SharedTvos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SharedTvos.framework; path = "../shared-tvos/build/bin/tvosSimulatorArm64/debugFramework/SharedTvos.framework"; sourceTree = "<group>"; };
+		1200000000000013 /* KotlinInterop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KotlinInterop.swift; sourceTree = "<group>"; };
+		1200000000000014 /* TvOSViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TvOSViewModel.swift; sourceTree = "<group>"; };
 		1300000000000001 /* tvosApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = tvosApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3200000000000001 /* tvosAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tvosAppUITests.swift; sourceTree = "<group>"; };
 		3200000000000002 /* tvosAppUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tvosAppUITestsLaunchTests.swift; sourceTree = "<group>"; };
@@ -66,6 +73,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1100000000000011 /* SharedTvos.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -93,7 +101,16 @@
 				5500000000000001 /* KuckmalTopShelf */,
 				3500000000000001 /* tvosAppUITests */,
 				1500000000000003 /* Products */,
+				1500000000000004 /* Frameworks */,
 			);
+			sourceTree = "<group>";
+		};
+		1500000000000004 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1200000000000012 /* SharedTvos.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		1500000000000002 /* tvosApp */ = {
@@ -109,6 +126,8 @@
 				1200000000000009 /* MediaUrlUtils.swift */,
 				1200000000000010 /* VideoPlayerView.swift */,
 				1200000000000011 /* VideoPlayerManager.swift */,
+				1200000000000013 /* KotlinInterop.swift */,
+				1200000000000014 /* TvOSViewModel.swift */,
 				1200000000000008 /* Info.plist */,
 			);
 			path = tvosApp;
@@ -153,6 +172,7 @@
 				1400000000000001 /* Frameworks */,
 				1700000000000002 /* Resources */,
 				5700000000000003 /* Embed App Extensions */,
+				5700000000000004 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -277,6 +297,17 @@
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		5700000000000004 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				1100000000000012 /* SharedTvos.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -294,6 +325,8 @@
 				1100000000000008 /* MediaUrlUtils.swift in Sources */,
 				1100000000000009 /* VideoPlayerView.swift in Sources */,
 				1100000000000010 /* VideoPlayerManager.swift in Sources */,
+				1100000000000013 /* KotlinInterop.swift in Sources */,
+				1100000000000014 /* TvOSViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -455,6 +488,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../shared-tvos/build/bin/tvosSimulatorArm64/debugFramework",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = tvosApp/Info.plist;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -480,6 +517,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../shared-tvos/build/bin/tvosArm64/releaseFramework",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = tvosApp/Info.plist;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

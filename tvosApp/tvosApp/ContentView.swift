@@ -18,6 +18,7 @@ struct ContentView: View {
                     }
                 )
                 .frame(width: 300)
+                .focusSection()
 
                 // Right panel: Themes or Titles
                 VStack(alignment: .leading, spacing: 20) {
@@ -59,6 +60,7 @@ struct ContentView: View {
                     }
                 }
                 .frame(maxWidth: .infinity)
+                .focusSection()
             }
             .navigationTitle("Kuckmal")
             .sheet(isPresented: $showingDetail) {

@@ -38,6 +38,15 @@ fun initKoin() {
     KoinHelper.initKoin()
 }
 
+/**
+ * Alias for initKoin() to match Swift's expected naming convention
+ * Swift calls KoinHelperKt.doInitKoin()
+ */
+@Suppress("unused")
+fun doInitKoin() {
+    KoinHelper.initKoin()
+}
+
 @Suppress("unused")
 fun getMediaRepository(): MediaRepository {
     return KoinHelper.getMediaRepository()
