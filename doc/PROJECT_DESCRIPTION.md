@@ -8,17 +8,17 @@ The name "Kuckmal" is German for "look/check this out" - fitting for a media dis
 
 ## Target Platforms
 
-The application runs on 5 platforms from a shared codebase:
+The application runs on 7 platforms from a shared codebase:
 
 | Platform | Technology | Status |
 |----------|------------|--------|
-| Android | Native Android + Compose | Full implementation |
-| Android TV | Leanback launcher | Full implementation |
-| Desktop | JVM (Windows, macOS, Linux) | Full implementation (time period dialog and update checker pending) |
-| iOS | Swift + Compose Multiplatform | Full implementation |
-| Web | Kotlin/JS + Compose HTML | Full implementation with API backend |
-| webOS TV | Kotlin/JS + Compose HTML | Play/Download buttons not working |
-| tvOS | SwiftUI (native) | Basic UI with sample data (not integrated with shared code) |
+| Android | Native Android + Compose | ✅ Full implementation |
+| Android TV | Leanback launcher | ✅ Full implementation |
+| Desktop | JVM (Windows, macOS, Linux) | ✅ Full implementation (all features complete) |
+| iOS | Swift + Compose Multiplatform | ✅ Full implementation |
+| Web | Kotlin/JS + Compose HTML | ✅ Full implementation with API backend |
+| webOS TV | Kotlin/JS + Compose HTML | ⚠️ Play/Download buttons not working (needs platform API) |
+| tvOS | SwiftUI + Kotlin KMP | ⚠️ UI complete, uses mock data (API integration pending) |
 
 ## Core Features
 
@@ -105,27 +105,49 @@ The application runs on 5 platforms from a shared codebase:
 ### Module Structure
 
 ```
-kuckmal-apps/
-├── shared/                    # KMP shared code (26 Kotlin files)
-│   ├── model/                 # Data models (MediaEntry, Broadcaster, etc.)
-│   ├── data/                  # Database, DAO, Repository interfaces
-│   ├── viewmodel/             # SharedViewModel
-│   └── ui/                    # Shared Compose UI components
+kuckmal/
+├── shared/                    # KMP shared code (25 Kotlin files)
+│   ├── model/                 # Data models (MediaEntry, Broadcaster)
+│   ├── data/                  # FilmListDownloader, MediaListParser, HttpClientFactory
+│   ├── database/              # Room database (AppDatabase, MediaDao, MediaEntry)
+│   ├── repository/            # MediaRepository interface
+│   ├── viewmodel/             # SharedViewModel, ViewState
+│   └── ui/                    # Shared Compose UI (BrowseView, DetailView, theme)
 │
-├── androidApp/                # Android implementation (37 Kotlin files)
-│   ├── ui/                    # Android-specific UI
+├── shared-tvos/               # tvOS-specific KMP module (14 Kotlin files)
+│   ├── di/                    # Koin setup (TvosModule, KoinHelper)
+│   ├── data/                  # tvOS-specific implementations
+│   └── repository/            # TvosMockMediaRepository
+│
+├── androidApp/                # Android implementation (40 Kotlin files)
+│   ├── ui/                    # Android-specific UI (Activities, Compose screens)
+│   ├── compose/               # Compose UI and navigation
 │   ├── service/               # Download service
-│   └── player/                # ExoPlayer integration
+│   ├── video/                 # VideoPlayer abstraction, ExoPlayer integration
+│   └── di/                    # Koin dependency injection
 │
-├── desktopApp/                # Desktop JVM application (8 Kotlin files)
-│   ├── repository/            # Desktop file handling
-│   └── download/              # Desktop download manager
+├── desktopApp/                # Desktop JVM application (9 Kotlin files)
+│   ├── data/                  # FilmListDownloader, MediaListParser
+│   ├── repository/            # DesktopMediaRepository
+│   ├── download/              # DesktopDownloadManager
+│   ├── player/                # DesktopVideoPlayer (VLC, MPV, system)
+│   └── util/                  # DesktopUpdateChecker, MediaUrlUtils
 │
-├── webApp/                    # Web application (4 Kotlin files)
-│   └── mock/                  # Mock data repository
+├── webApp/                    # Web/webOS application (5 Kotlin files)
+│   └── repository/            # ApiMediaRepository, MockMediaRepository
 │
-└── iosApp/                    # iOS Swift wrapper
-    └── shared.framework       # Compiled Kotlin framework
+├── iosApp/                    # iOS Swift wrapper
+│   └── iosApp/                # Swift source with Compose Multiplatform
+│
+├── tvosApp/                   # tvOS SwiftUI application (13 Swift files)
+│   ├── Views/                 # ContentView, DetailView, VideoPlayerView
+│   ├── ViewModels/            # TvOSViewModel
+│   └── KotlinInterop/         # Swift-Kotlin bridge
+│
+└── api/                       # Python Flask backend (9 Python files)
+    ├── routes/                # browse, search, detail, filmlist endpoints
+    ├── services/              # media_service, search_service, parser_service
+    └── models/                # SQLAlchemy ORM models
 ```
 
 ### Data Flow Architecture
@@ -233,20 +255,31 @@ The app uses publicly available media metadata from German public broadcasters:
 
 ## Future Development Areas
 
-Based on codebase analysis:
+Based on codebase analysis (January 2026):
+
+### Completed Features ✅
 - ~~Search functionality~~ ✅ Implemented across all platforms
 - ~~Broadcaster logos~~ ✅ All 20+ logos available in drawable resources
 - ~~webOS TV icons~~ ✅ Icons ready (icon.png, largeIcon.png)
 - ~~iOS: Film list download feature~~ ✅ Fully implemented
 - ~~Web app: Database integration~~ ✅ API backend implemented (ApiMediaRepository)
-- webOS: Fix Play/Download button functionality
-- Desktop: Time period filter dialog
-- Desktop: Update checker functionality
-- tvOS: Integration with shared Kotlin code (currently uses SwiftUI with sample data)
+- ~~Desktop: Time period filter dialog~~ ✅ Fully implemented with 5 options
+- ~~Desktop: Update checker functionality~~ ✅ Implemented with HTTP HEAD checks
+
+### In Progress / Known Issues
+- webOS: Fix Play/Download button functionality (needs platform-specific video API)
+- tvOS: Connect to real API (Kotlin interop framework complete, mock data in use)
+- Desktop: Update checker size comparison fix (always shows "update available")
+- Desktop: Diff application for incremental updates
+
+### Planned Features
 - Favorites/Watch Later functionality
 - Playback history and resume position
-- Deep linking support
+- Deep linking support (partially in tvOS)
 - Enhanced offline capabilities
+- User preferences synchronization
+- Subtitle integration in video player
+- Parental controls / content rating
 
 ## Related Documentation
 
