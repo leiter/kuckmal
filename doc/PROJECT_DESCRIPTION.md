@@ -14,10 +14,11 @@ The application runs on 5 platforms from a shared codebase:
 |----------|------------|--------|
 | Android | Native Android + Compose | Full implementation |
 | Android TV | Leanback launcher | Full implementation |
-| Desktop | JVM (Windows, macOS, Linux) | Full implementation |
-| iOS | Swift + Compose Multiplatform | UI complete, download pending |
-| Web | Kotlin/JS + Compose HTML | Mock data implementation |
-| webOS TV | Custom Gradle tasks | Icons ready, deployment tested |
+| Desktop | JVM (Windows, macOS, Linux) | Full implementation (time period dialog and update checker pending) |
+| iOS | Swift + Compose Multiplatform | Full implementation |
+| Web | Kotlin/JS + Compose HTML | Full implementation with API backend |
+| webOS TV | Kotlin/JS + Compose HTML | Play/Download buttons not working |
+| tvOS | SwiftUI (native) | Basic UI with sample data (not integrated with shared code) |
 
 ## Core Features
 
@@ -236,8 +237,12 @@ Based on codebase analysis:
 - ~~Search functionality~~ ✅ Implemented across all platforms
 - ~~Broadcaster logos~~ ✅ All 20+ logos available in drawable resources
 - ~~webOS TV icons~~ ✅ Icons ready (icon.png, largeIcon.png)
-- iOS: Film list download feature (UI complete)
-- Web app: Database integration (currently using mock data)
+- ~~iOS: Film list download feature~~ ✅ Fully implemented
+- ~~Web app: Database integration~~ ✅ API backend implemented (ApiMediaRepository)
+- webOS: Fix Play/Download button functionality
+- Desktop: Time period filter dialog
+- Desktop: Update checker functionality
+- tvOS: Integration with shared Kotlin code (currently uses SwiftUI with sample data)
 - Favorites/Watch Later functionality
 - Playback history and resume position
 - Deep linking support

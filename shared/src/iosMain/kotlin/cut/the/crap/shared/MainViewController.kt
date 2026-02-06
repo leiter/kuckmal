@@ -10,8 +10,6 @@ import platform.UIKit.UIViewController
  */
 fun MainViewController(): UIViewController = ComposeUIViewController {
     KuckmalTheme {
-        // TODO: Add main app content here
-        // For now, show a placeholder
         AppContent()
     }
 }
