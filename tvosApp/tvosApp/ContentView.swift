@@ -5,64 +5,99 @@ struct ContentView: View {
     @State private var selectedTitle: String? = nil
     @State private var showingDetail = false
     @State private var detailEntry: MediaEntry? = nil
+    @State private var searchText: String = ""
 
     var body: some View {
         NavigationStack {
-            HStack(spacing: 0) {
-                // Left panel: Channels
-                ChannelListView(
-                    channels: viewModel.channels,
-                    selectedChannel: $viewModel.selectedChannel,
-                    onChannelSelected: { channel in
-                        viewModel.selectChannel(channel)
-                    }
-                )
-                .frame(width: 300)
-                .focusSection()
-
-                // Right panel: Themes or Titles
-                VStack(alignment: .leading, spacing: 20) {
-                    // Header
-                    Text(headerText)
-                        .font(.title2)
-                        .foregroundColor(.blue)
-                        .padding(.horizontal)
-
-                    // Loading indicator
-                    if viewModel.isLoading {
-                        ProgressView()
-                            .progressViewStyle(.circular)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    } else if let error = viewModel.errorMessage {
-                        Text(error)
-                            .foregroundColor(.red)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    } else {
-                        // Content list
-                        if viewModel.selectedTheme != nil {
-                            TitleListView(
-                                titles: viewModel.titles,
-                                selectedTitle: $selectedTitle,
-                                onTitleSelected: { title in
-                                    selectedTitle = title
-                                    loadDetailEntry(for: title)
-                                }
-                            )
-                        } else {
-                            ThemeListView(
-                                themes: viewModel.themes,
-                                selectedTheme: $viewModel.selectedTheme,
-                                onThemeSelected: { theme in
-                                    viewModel.selectTheme(theme)
-                                }
-                            )
+            Group {
+                if viewModel.isSearching && !viewModel.searchResults.isEmpty {
+                    // Show search results
+                    SearchResultsView(
+                        results: viewModel.searchResults,
+                        onResultSelected: { result in
+                            viewModel.selectSearchResult(result)
+                            searchText = ""
                         }
+                    )
+                } else if viewModel.isSearching && viewModel.searchResults.isEmpty && !viewModel.isLoading {
+                    // No results
+                    VStack {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 60))
+                            .foregroundColor(.gray)
+                            .padding(.bottom, 16)
+                        Text("Keine Ergebnisse fuer \"\(searchText)\"")
+                            .font(.title3)
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    // Normal browse view
+                    HStack(spacing: 0) {
+                        // Left panel: Channels
+                        ChannelListView(
+                            channels: viewModel.channels,
+                            selectedChannel: $viewModel.selectedChannel,
+                            onChannelSelected: { channel in
+                                viewModel.selectChannel(channel)
+                            }
+                        )
+                        .frame(width: 300)
+                        .focusSection()
+
+                        // Right panel: Themes or Titles
+                        VStack(alignment: .leading, spacing: 20) {
+                            // Header
+                            Text(headerText)
+                                .font(.title2)
+                                .foregroundColor(.blue)
+                                .padding(.horizontal)
+
+                            // Loading indicator
+                            if viewModel.isLoading {
+                                ProgressView()
+                                    .progressViewStyle(.circular)
+                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            } else if let error = viewModel.errorMessage {
+                                Text(error)
+                                    .foregroundColor(.red)
+                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            } else {
+                                // Content list
+                                if viewModel.selectedTheme != nil {
+                                    TitleListView(
+                                        titles: viewModel.titles,
+                                        selectedTitle: $selectedTitle,
+                                        onTitleSelected: { title in
+                                            selectedTitle = title
+                                            loadDetailEntry(for: title)
+                                        }
+                                    )
+                                } else {
+                                    ThemeListView(
+                                        themes: viewModel.themes,
+                                        selectedTheme: $viewModel.selectedTheme,
+                                        onThemeSelected: { theme in
+                                            viewModel.selectTheme(theme)
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .focusSection()
                     }
                 }
-                .frame(maxWidth: .infinity)
-                .focusSection()
             }
             .navigationTitle("Kuckmal")
+            .searchable(text: $searchText, prompt: "Suchen...")
+            .onChange(of: searchText) { _, newValue in
+                if newValue.count >= 2 {
+                    viewModel.search(query: newValue)
+                } else if newValue.isEmpty {
+                    viewModel.clearSearch()
+                }
+            }
             .sheet(isPresented: $showingDetail) {
                 if let entry = detailEntry {
                     DetailView(
@@ -75,6 +110,9 @@ struct ContentView: View {
                 // Handle Menu/Back button on Apple TV remote
                 if showingDetail {
                     showingDetail = false
+                } else if viewModel.isSearching {
+                    searchText = ""
+                    viewModel.clearSearch()
                 } else if viewModel.selectedTheme != nil {
                     viewModel.selectedTheme = nil
                     selectedTitle = nil

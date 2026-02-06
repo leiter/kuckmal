@@ -35,7 +35,6 @@ struct ChannelListView: View {
             }
             .padding()
         }
-        .background(Color.black.opacity(0.3))
     }
 }
 

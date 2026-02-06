@@ -14,10 +14,17 @@ class TvOSViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
 
+    // Search state
+    @Published var searchQuery: String = ""
+    @Published var searchResults: [SearchResult] = []
+    @Published var isSearching: Bool = false
+
     private var useKotlin = true
+    private let repository: MediaRepository
 
     init() {
         print("[TvOSViewModel] init starting")
+        self.repository = KoinHelperKt.getMediaRepository()
         loadChannels()
         print("[TvOSViewModel] init complete - channels: \(channels.count), themes: \(themes.count)")
     }
@@ -172,7 +179,9 @@ class TvOSViewModel: ObservableObject {
 
     func goBack() {
         print("[TvOSViewModel] goBack called")
-        if selectedTheme != nil {
+        if isSearching {
+            clearSearch()
+        } else if selectedTheme != nil {
             selectedTheme = nil
             titles = []
         } else if selectedChannel != nil {
@@ -180,6 +189,80 @@ class TvOSViewModel: ObservableObject {
             loadAllThemes()
         }
     }
+
+    // MARK: - Search
+
+    func search(query: String) {
+        searchQuery = query
+        guard query.count >= 2 else {
+            searchResults = []
+            isSearching = false
+            return
+        }
+
+        print("[TvOSViewModel] search: \(query)")
+        isSearching = true
+        isLoading = true
+
+        Task {
+            do {
+                let results: [SharedTvos.MediaEntry]
+                if let channel = selectedChannel {
+                    results = try await repository.searchEntriesByChannel(channel: channel.name, query: query, limit: 50)
+                } else {
+                    results = try await repository.searchEntries(query: query, limit: 50)
+                }
+
+                await MainActor.run {
+                    searchResults = results.map { entry in
+                        SearchResult(
+                            id: entry.id,
+                            title: entry.title,
+                            theme: entry.theme,
+                            channel: entry.channel,
+                            date: entry.date
+                        )
+                    }
+                    print("[TvOSViewModel] search found \(searchResults.count) results")
+                    isLoading = false
+                }
+            } catch {
+                await MainActor.run {
+                    print("[TvOSViewModel] search error: \(error)")
+                    errorMessage = error.localizedDescription
+                    isLoading = false
+                }
+            }
+        }
+    }
+
+    func clearSearch() {
+        print("[TvOSViewModel] clearSearch")
+        searchQuery = ""
+        searchResults = []
+        isSearching = false
+    }
+
+    func selectSearchResult(_ result: SearchResult) {
+        print("[TvOSViewModel] selectSearchResult: \(result.title)")
+        // Navigate to the result
+        if let channel = channels.first(where: { $0.name == result.channel }) {
+            selectedChannel = channel
+        }
+        selectedTheme = result.theme
+        loadTitles(for: result.theme)
+        clearSearch()
+    }
+}
+
+// MARK: - Search Result Model
+
+struct SearchResult: Identifiable {
+    let id: Int64
+    let title: String
+    let theme: String
+    let channel: String
+    let date: String
 }
 
 // MARK: - Channel Colors
