@@ -16,13 +16,13 @@ import kotlinx.coroutines.flow.asStateFlow
 class DownloadRepository(
     private val context: Context,
     private val downloadService: DownloadService
-) {
+) : DownloadRepositoryInterface {
     companion object {
         private const val TAG = "DownloadRepository"
     }
 
     private val _downloadState = MutableStateFlow<DownloadState>(DownloadState.Idle)
-    val downloadState: StateFlow<DownloadState> = _downloadState.asStateFlow()
+    override val downloadState: StateFlow<DownloadState> = _downloadState.asStateFlow()
 
     init {
         // Set up callback from DownloadService
@@ -48,7 +48,7 @@ class DownloadRepository(
      * @param filename Local filename to save to
      * @return true if download started, false if network unavailable
      */
-    fun startDownload(url: String, filename: String): Boolean {
+    override fun startDownload(url: String, filename: String): Boolean {
         // Check network connectivity
         if (!NetworkUtils.isNetworkAvailable(context)) {
             Log.w(TAG, "No network connection available")
@@ -68,7 +68,7 @@ class DownloadRepository(
     /**
      * Reset download state to idle
      */
-    fun resetState() {
+    override fun resetState() {
         _downloadState.value = DownloadState.Idle
     }
 }

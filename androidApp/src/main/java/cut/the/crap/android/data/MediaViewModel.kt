@@ -15,7 +15,9 @@ import cut.the.crap.android.ui.dialog.DialogModel
 import cut.the.crap.android.util.AppConfig
 import cut.the.crap.android.util.MediaUrlUtils
 import cut.the.crap.android.util.UpdateChecker
+import cut.the.crap.android.util.UpdateCheckerInterface
 import cut.the.crap.android.repository.DownloadRepository
+import cut.the.crap.android.repository.DownloadRepositoryInterface
 import cut.the.crap.android.repository.DownloadState
 import cut.the.crap.android.repository.MediaRepository
 import cut.the.crap.shared.repository.MediaRepository.LoadingResult
@@ -35,8 +37,8 @@ import java.io.File
 class MediaViewModel(
     application: Application,
     internal val repository: MediaRepository,
-    private val downloadRepository: DownloadRepository,
-    private val updateChecker: UpdateChecker
+    private val downloadRepository: DownloadRepositoryInterface,
+    private val updateChecker: UpdateCheckerInterface
 ) : AndroidViewModel(application) {
 
     companion object {

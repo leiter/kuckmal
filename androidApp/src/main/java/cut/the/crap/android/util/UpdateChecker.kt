@@ -18,7 +18,7 @@ import java.net.URL
  * This approach significantly reduces server load by avoiding unnecessary downloads
  * of the ~50MB film list file when no changes have occurred.
  */
-class UpdateChecker(private val context: Context) {
+class UpdateChecker(private val context: Context) : UpdateCheckerInterface {
 
     private val updatePrefs = UpdatePreferences(context)
 
@@ -72,7 +72,7 @@ class UpdateChecker(private val context: Context) {
      * @param useDiff If true, check diff file instead of full file
      * @return UpdateCheckResult indicating what action to take
      */
-    fun checkForUpdate(forceCheck: Boolean = false, useDiff: Boolean = false): UpdateCheckResult {
+    override fun checkForUpdate(forceCheck: Boolean, useDiff: Boolean): UpdateCheckResult {
         // Check if we should perform the update check based on interval
         if (!forceCheck && !updatePrefs.shouldCheckForUpdate()) {
             val nextCheckTime = updatePrefs.lastCheckTime +
@@ -234,7 +234,7 @@ class UpdateChecker(private val context: Context) {
     /**
      * Save metadata after a successful download
      */
-    fun saveDownloadMetadata(lastModified: String?, etag: String?, contentLength: Long) {
+    override fun saveDownloadMetadata(lastModified: String?, etag: String?, contentLength: Long) {
         updatePrefs.saveDownloadMetadata(lastModified, etag, contentLength)
         Log.d(TAG, "Saved download metadata - Last-Modified: $lastModified, ETag: $etag, Size: $contentLength")
     }
@@ -242,7 +242,7 @@ class UpdateChecker(private val context: Context) {
     /**
      * Get a human-readable description of when the next update check will occur
      */
-    fun getNextCheckDescription(): String {
+    override fun getNextCheckDescription(): String {
         if (!updatePrefs.autoUpdateEnabled) {
             return "Automatic updates disabled"
         }
