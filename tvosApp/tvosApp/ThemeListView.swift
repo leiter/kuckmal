@@ -62,7 +62,7 @@ struct ThemeButton: View {
 
 #Preview {
     ThemeListView(
-        themes: SampleData.allThemes,
+        themes: ["Tagesschau", "Tatort", "Terra X", "Dokumentation"],
         selectedTheme: .constant(nil),
         onThemeSelected: { _ in }
     )

@@ -173,10 +173,20 @@ struct MetadataItem: View {
 
 #Preview {
     DetailView(
-        mediaEntry: SampleData.createMediaEntry(
+        mediaEntry: MediaEntry(
+            id: 1,
             channel: "ARD",
             theme: "Tatort",
-            title: "Tatort - Folge 1"
+            title: "Tatort - Folge 1",
+            date: "25.07.2024",
+            time: "20:15 Uhr",
+            duration: "45 Min",
+            sizeMB: "750 MB",
+            description: "Ein spannender Tatort aus Hamburg.",
+            url: "https://example.com/video.mp4",
+            smallUrl: "https://example.com/video_small.mp4",
+            hdUrl: "https://example.com/video_hd.mp4",
+            subtitleUrl: ""
         ),
         onDismiss: {}
     )

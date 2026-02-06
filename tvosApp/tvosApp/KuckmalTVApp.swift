@@ -5,6 +5,11 @@ struct KuckmalTVApp: App {
     @State private var deepLinkEntry: MediaEntry?
     @State private var showDeepLinkDetail = false
 
+    init() {
+        // Initialize Kotlin dependency injection
+        KotlinDI.initialize()
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()
@@ -38,11 +43,7 @@ struct KuckmalTVApp: App {
             let title = queryItems.first(where: { $0.name == "title" })?.value ?? "Unbekannt"
 
             // Create entry and show detail view
-            deepLinkEntry = SampleData.createMediaEntry(
-                channel: channel,
-                theme: theme,
-                title: title
-            )
+            deepLinkEntry = createMediaEntry(channel: channel, theme: theme, title: title)
             showDeepLinkDetail = true
 
         case "browse":
@@ -52,5 +53,25 @@ struct KuckmalTVApp: App {
         default:
             print("Unknown deep link: \(url)")
         }
+    }
+
+    private func createMediaEntry(channel: String, theme: String, title: String) -> MediaEntry {
+        let id = Int64(abs(title.hashValue % 1_000_000))
+
+        return MediaEntry(
+            id: id,
+            channel: channel,
+            theme: theme,
+            title: title,
+            date: "25.07.2024",
+            time: "20:15 Uhr",
+            duration: "45 Min",
+            sizeMB: "750 MB",
+            description: "Eine spannende Sendung mit interessanten Inhalten zum Thema \(theme). Produziert von \(channel).",
+            url: "https://example.com/video/\(channel.lowercased())/\(theme.lowercased().replacingOccurrences(of: " ", with: "_")).mp4",
+            smallUrl: "42|video_low.mp4",
+            hdUrl: "42|video_hd.mp4",
+            subtitleUrl: ""
+        )
     }
 }

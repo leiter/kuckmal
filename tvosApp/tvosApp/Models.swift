@@ -50,8 +50,9 @@ struct MediaEntry: Identifiable {
     }
 }
 
-// MARK: - Sample Data
+// MARK: - Fallback Sample Data (used when SharedTvos framework is not available)
 
+#if !canImport(SharedTvos)
 struct SampleData {
     static let channels: [Channel] = [
         Channel(name: "3Sat", displayName: "3sat", brandColor: Color(red: 0.2, green: 0.2, blue: 0.2)),
@@ -141,3 +142,4 @@ struct SampleData {
         )
     }
 }
+#endif

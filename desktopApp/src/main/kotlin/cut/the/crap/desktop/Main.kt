@@ -1,5 +1,6 @@
 package cut.the.crap.desktop
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -18,6 +19,7 @@ import cut.the.crap.desktop.di.desktopModule
 import cut.the.crap.desktop.di.downloadCallback
 import cut.the.crap.desktop.di.showMessageCallback
 import cut.the.crap.desktop.download.DesktopDownloadManager
+import cut.the.crap.desktop.util.DesktopUpdateChecker
 import cut.the.crap.shared.database.MediaEntry
 import cut.the.crap.shared.repository.MediaRepository
 import cut.the.crap.shared.ui.Channel
@@ -85,6 +87,21 @@ fun DesktopApp() {
     var videoDownloadProgress by remember { mutableStateOf(0f) }
     var videoDownloadSpeed by remember { mutableStateOf("") }
     var isVideoDownloading by remember { mutableStateOf(false) }
+
+    // Time period dialog state
+    var showTimePeriodDialog by remember { mutableStateOf(false) }
+    val currentTimePeriod by viewModel.timePeriodId.collectAsState()
+
+    // Time period options
+    val timePeriods = remember {
+        listOf(
+            0 to "All",
+            1 to "Today",
+            2 to "Last 3 Days",
+            3 to "Last 7 Days",
+            4 to "Last 30 Days"
+        )
+    }
 
     // Set up callbacks for ViewModel
     LaunchedEffect(Unit) {
@@ -228,6 +245,51 @@ fun DesktopApp() {
                 }
             })
         }
+    }
+
+    // Time period selection dialog
+    if (showTimePeriodDialog) {
+        AlertDialog(
+            onDismissRequest = { showTimePeriodDialog = false },
+            title = { Text("Time Period") },
+            text = {
+                Column {
+                    timePeriods.forEach { (id, label) ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    val now = System.currentTimeMillis() / 1000
+                                    val daySeconds = 24 * 60 * 60
+                                    val limitDate = when (id) {
+                                        1 -> now - daySeconds
+                                        2 -> now - (3 * daySeconds)
+                                        3 -> now - (7 * daySeconds)
+                                        4 -> now - (30 * daySeconds)
+                                        else -> 0L
+                                    }
+                                    viewModel.setDateFilter(limitDate, id)
+                                    showTimePeriodDialog = false
+                                }
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = currentTimePeriod == id,
+                                onClick = null
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(label)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showTimePeriodDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 
     // Download progress dialog
@@ -422,6 +484,7 @@ fun DesktopApp() {
                         else -> "Alle Themen"
                     },
                     isShowingTitles = viewState.theme != null,
+                    showBackButton = viewState.theme != null || selectedChannel != null,
                     hasMoreItems = contentList.size >= 1200,
                     searchQuery = searchQuery,
                     isSearching = isSearching,
@@ -460,13 +523,47 @@ fun DesktopApp() {
                     onLoadMore = {
                         viewModel.nextPart()
                     },
+                    onBackClick = {
+                        if (viewState.theme != null) {
+                            // Navigate back from titles to themes (keep channel)
+                            viewModel.navigateToThemes(
+                                channel = selectedChannel?.name,
+                                theme = null
+                            )
+                            selectedTitle = null
+                        } else if (selectedChannel != null) {
+                            // Navigate back from channel themes to all themes
+                            selectedChannel = null
+                            viewModel.navigateToThemes(
+                                channel = null,
+                                theme = null
+                            )
+                        }
+                    },
                     onTimePeriodClick = {
-                        // TODO: Show time period dialog
-                        println("Time period clicked")
+                        showTimePeriodDialog = true
                     },
                     onCheckUpdateClick = {
-                        // TODO: Check for updates
-                        println("Check update clicked")
+                        coroutineScope.launch(Dispatchers.IO) {
+                            val checker = DesktopUpdateChecker()
+                            // Get current file size from preferences or default to 0
+                            val result = checker.checkForUpdate(0L)
+
+                            when (result) {
+                                is DesktopUpdateChecker.UpdateCheckResult.UpdateAvailable -> {
+                                    snackbarHostState.showSnackbar(
+                                        "Update available (${result.contentLength / 1024 / 1024} MB). Use 'Reinstall' to download.",
+                                        duration = SnackbarDuration.Long
+                                    )
+                                }
+                                is DesktopUpdateChecker.UpdateCheckResult.NoUpdateNeeded -> {
+                                    snackbarHostState.showSnackbar("Film list is up to date")
+                                }
+                                is DesktopUpdateChecker.UpdateCheckResult.CheckFailed -> {
+                                    snackbarHostState.showSnackbar("Update check failed: ${result.error}")
+                                }
+                            }
+                        }
                     },
                     onReinstallClick = {
                         // Reload film list

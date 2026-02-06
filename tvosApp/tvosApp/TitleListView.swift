@@ -66,7 +66,7 @@ struct TitleButton: View {
 
 #Preview {
     TitleListView(
-        titles: SampleData.getTitlesForTheme("Tatort"),
+        titles: ["Tatort - Folge 1", "Tatort - Folge 2", "Tatort - Spezial"],
         selectedTitle: .constant(nil),
         onTitleSelected: { _ in }
     )

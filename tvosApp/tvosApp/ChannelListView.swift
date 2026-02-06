@@ -59,7 +59,10 @@ struct ChannelButton: View {
 
 #Preview {
     ChannelListView(
-        channels: SampleData.channels,
+        channels: [
+            Channel(name: "ARD", displayName: "ARD", brandColor: .blue),
+            Channel(name: "ZDF", displayName: "ZDF", brandColor: .orange)
+        ],
         selectedChannel: .constant(nil),
         onChannelSelected: { _ in }
     )
