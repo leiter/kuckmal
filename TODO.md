@@ -14,6 +14,8 @@
   - Added `geo` field to MediaItem models
   - Geo-restriction warning banner in detail views
   - Supports: AT, DE, CH, DE-AT, DE-CH, AT-CH, DE-AT-CH restrictions
+  - User geo detection using ip-api.com (free API)
+  - Smart warnings: orange for info, red if user is likely blocked
 
 ## tvOS (Complete)
 

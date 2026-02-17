@@ -34,6 +34,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,10 +50,12 @@ import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.stringResource
 import kuckmal.shared.generated.resources.*
 import kuckmal.shared.generated.resources.Res
+import cut.the.crap.shared.data.HttpClientFactory
 import cut.the.crap.shared.ui.MediaItem
 import cut.the.crap.shared.ui.SampleData
 import cut.the.crap.shared.ui.util.Orientation
 import cut.the.crap.shared.ui.util.rememberOrientation
+import cut.the.crap.shared.util.GeoDetector
 
 @Composable
 fun DetailView(
@@ -62,11 +65,25 @@ fun DetailView(
 ) {
     var selectedQuality by remember { mutableStateOf(QualityOption.LOW) }
     var isDescriptionExpanded by remember { mutableStateOf(false) }
+    var userCountry by remember { mutableStateOf<String?>(null) }
     val orientation = rememberOrientation()
+
+    // Detect user's country for geo-restriction warnings
+    LaunchedEffect(Unit) {
+        try {
+            val httpClient = HttpClientFactory.create()
+            userCountry = GeoDetector.getUserCountryCode(httpClient)
+            httpClient.close()
+        } catch (e: Exception) {
+            // Silently fail - geo detection is optional
+            println("[DetailView] Geo detection failed: ${e.message}")
+        }
+    }
 
     when (orientation) {
         Orientation.Portrait -> DetailViewPortrait(
             mediaItem = mediaItem,
+            userCountry = userCountry,
             selectedQuality = selectedQuality,
             onQualityChange = { selectedQuality = it },
             isDescriptionExpanded = isDescriptionExpanded,
@@ -76,6 +93,7 @@ fun DetailView(
         )
         Orientation.Landscape -> DetailViewLandscape(
             mediaItem = mediaItem,
+            userCountry = userCountry,
             selectedQuality = selectedQuality,
             onQualityChange = { selectedQuality = it },
             isDescriptionExpanded = isDescriptionExpanded,
@@ -89,6 +107,7 @@ fun DetailView(
 @Composable
 private fun DetailViewPortrait(
     mediaItem: MediaItem,
+    userCountry: String?,
     selectedQuality: QualityOption,
     onQualityChange: (QualityOption) -> Unit,
     isDescriptionExpanded: Boolean,
@@ -114,7 +133,7 @@ private fun DetailViewPortrait(
             Spacer(modifier = Modifier.height(20.dp))
             TitleSection(title = mediaItem.title)
             Spacer(modifier = Modifier.height(12.dp))
-            GeoRestrictionBanner(mediaItem = mediaItem)
+            GeoRestrictionBanner(mediaItem = mediaItem, userCountry = userCountry)
             Spacer(modifier = Modifier.height(20.dp))
             MetadataCard(mediaItem = mediaItem)
             Spacer(modifier = Modifier.height(20.dp))
@@ -143,6 +162,7 @@ private fun DetailViewPortrait(
 @Composable
 private fun DetailViewLandscape(
     mediaItem: MediaItem,
+    userCountry: String?,
     selectedQuality: QualityOption,
     onQualityChange: (QualityOption) -> Unit,
     isDescriptionExpanded: Boolean,
@@ -173,7 +193,7 @@ private fun DetailViewLandscape(
             Spacer(modifier = Modifier.height(16.dp))
             TitleSection(title = mediaItem.title)
             Spacer(modifier = Modifier.height(12.dp))
-            GeoRestrictionBanner(mediaItem = mediaItem)
+            GeoRestrictionBanner(mediaItem = mediaItem, userCountry = userCountry)
             Spacer(modifier = Modifier.height(16.dp))
             MetadataCard(mediaItem = mediaItem)
         }
@@ -277,12 +297,21 @@ private fun TitleSection(title: String) {
 }
 
 @Composable
-private fun GeoRestrictionBanner(mediaItem: MediaItem) {
+private fun GeoRestrictionBanner(mediaItem: MediaItem, userCountry: String?) {
     if (mediaItem.hasGeoRestriction()) {
+        // Determine warning level based on user's location
+        val isBlocked = mediaItem.isLikelyBlocked(userCountry)
+        val warningMessage = mediaItem.getGeoWarningMessage(userCountry)
+            ?: mediaItem.getGeoRestrictionText()
+
+        // Use red for blocked content, orange for info/unknown
+        val bannerColor = if (isBlocked) Color(0xFFCC3333) else Color(0xFFFFA500)
+        val backgroundColor = if (isBlocked) Color(0x33CC3333) else Color(0x33FFA500)
+
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
-                containerColor = Color(0x33FFA500)  // Orange with transparency
+                containerColor = backgroundColor
             ),
             shape = RoundedCornerShape(8.dp)
         ) {
@@ -293,15 +322,15 @@ private fun GeoRestrictionBanner(mediaItem: MediaItem) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "⚠",
+                    text = if (isBlocked) "⛔" else "⚠",
                     style = MaterialTheme.typography.titleMedium,
-                    color = Color(0xFFFFA500)
+                    color = bannerColor
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = mediaItem.getGeoRestrictionText(),
+                    text = warningMessage,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFFFFA500),
+                    color = bannerColor,
                     fontWeight = FontWeight.Bold
                 )
             }

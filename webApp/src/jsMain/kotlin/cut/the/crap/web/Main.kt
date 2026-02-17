@@ -65,7 +65,18 @@ fun KuckmalApp() {
     var searchQuery by remember { mutableStateOf("") }
     var selectedChannelIndex by remember { mutableStateOf(-1) }
     var videoPlayerState by remember { mutableStateOf(VideoPlayerState("", "", false)) }
+    var userCountry by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
+
+    // Detect user's country for geo-restriction warnings
+    LaunchedEffect(Unit) {
+        try {
+            userCountry = GeoDetector.getUserCountryCode()
+        } catch (e: Exception) {
+            // Silently fail - geo detection is optional
+            console.log("[KuckmalApp] Geo detection failed: ${e.message}")
+        }
+    }
 
     // Keyboard navigation
     DisposableEffect(Unit) {
@@ -189,6 +200,7 @@ fun KuckmalApp() {
                             channel = state.channel,
                             theme = state.theme,
                             title = state.title,
+                            userCountry = userCountry,
                             coroutineScope = coroutineScope,
                             onBack = {
                                 navigationState = NavigationState.TitleList(state.channel, state.theme)
@@ -950,6 +962,7 @@ fun DetailViewAsync(
     channel: String,
     theme: String,
     title: String,
+    userCountry: String?,
     coroutineScope: CoroutineScope,
     onBack: () -> Unit,
     onPlayVideo: (url: String, title: String) -> Unit = { _, _ -> }
@@ -966,7 +979,7 @@ fun DetailViewAsync(
     if (isLoading) {
         LoadingSpinner()
     } else if (mediaItem != null) {
-        DetailView(mediaItem!!, onBack, onPlayVideo)
+        DetailView(mediaItem!!, userCountry, onBack, onPlayVideo)
     } else {
         Div({ classes(AppStyleSheet.emptyState) }) {
             P { Text("Sendung nicht gefunden.") }
@@ -981,6 +994,7 @@ fun DetailViewAsync(
 @Composable
 fun DetailView(
     mediaItem: MediaItem,
+    userCountry: String?,
     onBack: () -> Unit,
     onPlayVideo: (url: String, title: String) -> Unit = { _, _ -> }
 ) {
@@ -1023,10 +1037,19 @@ fun DetailView(
             }
         }) { Text(mediaItem.title) }
 
-        // Geo-restriction warning
+        // Geo-restriction warning (smarter based on user location)
         if (mediaItem.hasGeoRestriction()) {
-            Div({ classes(AppStyleSheet.geoWarning) }) {
-                Text("⚠ ${mediaItem.getGeoRestrictionText()}")
+            val isBlocked = mediaItem.isLikelyBlocked(userCountry)
+            val warningMessage = mediaItem.getGeoWarningMessage(userCountry)
+                ?: mediaItem.getGeoRestrictionText()
+
+            Div({
+                classes(AppStyleSheet.geoWarning)
+                if (isBlocked) {
+                    classes(AppStyleSheet.geoWarningBlocked)
+                }
+            }) {
+                Text("${if (isBlocked) "⛔" else "⚠"} $warningMessage")
             }
         }
 
@@ -1507,6 +1530,13 @@ object AppStyleSheet : StyleSheet() {
         color(Color("#FFA500"))
         fontSize(14.px)
         fontWeight("bold")
+    }
+
+    // Blocked content - red warning style
+    val geoWarningBlocked by style {
+        backgroundColor(Color("rgba(204, 51, 51, 0.2)"))
+        border(1.px, LineStyle.Solid, Color("#CC3333"))
+        color(Color("#CC3333"))
     }
 
     val backButton by style {

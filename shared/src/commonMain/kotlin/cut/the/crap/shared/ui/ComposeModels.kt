@@ -23,7 +23,25 @@ data class MediaItem(
     fun hasGeoRestriction(): Boolean = geo.isNotEmpty()
 
     /**
-     * Get human-readable geo restriction text
+     * Check if user can access this content based on their country.
+     * @param userCountry User's country code (e.g., "DE", "AT")
+     * @return true if accessible, false if blocked, null if no restriction or unknown
+     */
+    fun canAccess(userCountry: String?): Boolean? {
+        if (geo.isEmpty()) return null
+        if (userCountry == null) return null
+        return userCountry in geo.split("-")
+    }
+
+    /**
+     * Check if content is likely blocked for the user.
+     */
+    fun isLikelyBlocked(userCountry: String?): Boolean {
+        return canAccess(userCountry) == false
+    }
+
+    /**
+     * Get human-readable geo restriction text (basic version without user location)
      */
     fun getGeoRestrictionText(): String {
         if (geo.isEmpty()) return ""
@@ -37,6 +55,57 @@ data class MediaItem(
             "DE-AT-CH" -> "Nur in Deutschland, Oesterreich und der Schweiz verfuegbar"
             else -> "Geografisch eingeschraenkt: $geo"
         }
+    }
+
+    /**
+     * Get geo warning message based on user's location.
+     * @param userCountry User's country code
+     * @return Warning message (stronger if blocked, info if accessible, null if no restriction)
+     */
+    fun getGeoWarningMessage(userCountry: String?): String? {
+        if (geo.isEmpty()) return null
+
+        val canAccess = canAccess(userCountry)
+        val regionName = getRegionName()
+
+        return when {
+            canAccess == true -> null  // User can access, no warning
+            canAccess == false -> {
+                // User likely blocked - strong warning
+                val countryName = getCountryName(userCountry)
+                "Dieser Inhalt ist nur in $regionName verfuegbar. " +
+                    "Wiedergabe in $countryName moeglicherweise nicht moeglich."
+            }
+            else -> {
+                // Unknown location - info only
+                "Nur in $regionName verfuegbar"
+            }
+        }
+    }
+
+    private fun getRegionName(): String = when (geo) {
+        "AT" -> "Oesterreich"
+        "DE" -> "Deutschland"
+        "CH" -> "der Schweiz"
+        "DE-AT" -> "Deutschland und Oesterreich"
+        "DE-CH" -> "Deutschland und der Schweiz"
+        "AT-CH" -> "Oesterreich und der Schweiz"
+        "DE-AT-CH" -> "Deutschland, Oesterreich und der Schweiz"
+        else -> geo
+    }
+
+    private fun getCountryName(code: String?): String = when (code) {
+        "AT" -> "Oesterreich"
+        "DE" -> "Deutschland"
+        "CH" -> "der Schweiz"
+        "FR" -> "Frankreich"
+        "IT" -> "Italien"
+        "NL" -> "den Niederlanden"
+        "BE" -> "Belgien"
+        "PL" -> "Polen"
+        "GB", "UK" -> "Grossbritannien"
+        "US" -> "den USA"
+        else -> "Ihrem Land"
     }
 }
 

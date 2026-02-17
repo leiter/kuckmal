@@ -210,6 +210,8 @@ shared/src/commonMain/kotlin/cut/the/crap/shared/
 | Browse titles | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Search | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Media details | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Geo detection | ✅ | ✅ | ✅ | ✅ | ✅ | - |
+| Geo warnings | ✅ | ✅ | ✅ | ✅ | ✅ | - |
 | Video playback | ✅ | ✅ | ✅ | ⚠️ | ❌ | ⚠️ |
 | Video download | ✅ | ✅ | - | ⚠️ | ❌ | - |
 | Film list download | ✅ | ✅ | ✅ | via API | via API | via API |
