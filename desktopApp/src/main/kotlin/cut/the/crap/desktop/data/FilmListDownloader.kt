@@ -24,7 +24,12 @@ class FilmListDownloader {
     interface DownloadCallback {
         fun onProgress(bytesDownloaded: Long, totalBytes: Long)
         fun onDecompressing()
-        fun onComplete(filePath: String)
+        /**
+         * Called when download and decompression completes.
+         * @param filePath Path to the decompressed file
+         * @param compressedSize Size of the downloaded compressed file in bytes
+         */
+        fun onComplete(filePath: String, compressedSize: Long)
         fun onError(error: Exception)
     }
 
@@ -84,7 +89,7 @@ class FilmListDownloader {
             tempFile.delete()
 
             println("Decompression complete: ${targetFile.length() / 1024 / 1024} MB")
-            callback.onComplete(targetFile.absolutePath)
+            callback.onComplete(targetFile.absolutePath, bytesDownloaded)
 
             targetFile.absolutePath
 

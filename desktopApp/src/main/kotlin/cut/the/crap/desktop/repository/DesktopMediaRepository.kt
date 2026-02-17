@@ -6,14 +6,17 @@ import cut.the.crap.shared.database.MediaEntry
 import cut.the.crap.shared.repository.MediaRepository
 import cut.the.crap.shared.repository.MediaRepository.LoadingResult
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Desktop implementation of MediaRepository
@@ -182,8 +185,63 @@ class DesktopMediaRepository(
         awaitClose { }
     }.flowOn(Dispatchers.IO)
 
-    override fun applyDiffToDatabase(filePath: String): Flow<LoadingResult> = flow {
-        emit(LoadingResult.Error(Exception("Diff application not yet implemented for desktop"), 0))
+    override fun applyDiffToDatabase(filePath: String): Flow<LoadingResult> = callbackFlow {
+        try {
+            val parser = DesktopMediaListParser()
+            val pendingInsertions = AtomicInteger(0)
+            var parsingComplete = false
+            var totalCount = 0
+
+            val callback = object : DesktopMediaListParser.ChunkCallback {
+                override fun onChunk(entries: List<MediaEntry>, totalParsed: Int) {
+                    pendingInsertions.incrementAndGet()
+
+                    GlobalScope.launch(Dispatchers.IO) {
+                        try {
+                            // Use INSERT OR REPLACE via insertInBatches
+                            mediaDao.insertInBatches(entries, 500)
+                            trySend(LoadingResult.Progress(totalParsed))
+                        } catch (e: Exception) {
+                            trySend(LoadingResult.Error(e, totalParsed))
+                        } finally {
+                            if (pendingInsertions.decrementAndGet() == 0 && parsingComplete) {
+                                trySend(LoadingResult.Complete(totalCount))
+                                close()
+                            }
+                        }
+                    }
+                }
+
+                override fun onComplete(count: Int) {
+                    parsingComplete = true
+                    totalCount = count
+                    if (pendingInsertions.get() == 0) {
+                        trySend(LoadingResult.Complete(count))
+                        close()
+                    }
+                }
+
+                override fun onError(error: Exception, entriesParsed: Int) {
+                    trySend(LoadingResult.Error(error, entriesParsed))
+                    close(error)
+                }
+            }
+
+            // Parse diff file with same parser (doesn't clear DB)
+            withContext(Dispatchers.IO) {
+                parser.parseFileChunked(
+                    filePath = filePath,
+                    callback = callback,
+                    maxEntries = -1,
+                    chunkSize = 5000
+                )
+            }
+
+            awaitClose { }
+        } catch (e: Exception) {
+            send(LoadingResult.Error(e, 0))
+            close(e)
+        }
     }.flowOn(Dispatchers.IO)
 
     override suspend fun checkAndLoadMediaList(privatePath: String): Boolean {

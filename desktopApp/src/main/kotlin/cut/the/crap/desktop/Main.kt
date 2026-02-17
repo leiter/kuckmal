@@ -16,6 +16,7 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import cut.the.crap.desktop.data.FilmListDownloader
 import cut.the.crap.desktop.di.desktopModule
+import cut.the.crap.desktop.util.DesktopPreferences
 import cut.the.crap.desktop.di.downloadCallback
 import cut.the.crap.desktop.di.showMessageCallback
 import cut.the.crap.desktop.download.DesktopDownloadManager
@@ -157,8 +158,9 @@ fun DesktopApp() {
         }
     }
 
-    // Check database on startup
+    // Initialize preferences and check database on startup
     LaunchedEffect(Unit) {
+        DesktopPreferences.initialize(getAppDataPath())
         dbCount = repository.getCount()
     }
 
@@ -214,8 +216,10 @@ fun DesktopApp() {
                     downloadProgress = "Decompressing..."
                 }
 
-                override fun onComplete(filePath: String) {
+                override fun onComplete(filePath: String, compressedSize: Long) {
                     downloadProgress = "Parsing film list..."
+                    // Save compressed file size for update checking
+                    DesktopPreferences.setLong("last_filmlist_size", compressedSize)
 
                     coroutineScope.launch(Dispatchers.IO) {
                         repository.loadMediaListFromFile(filePath).collect { result ->
@@ -546,8 +550,9 @@ fun DesktopApp() {
                     onCheckUpdateClick = {
                         coroutineScope.launch(Dispatchers.IO) {
                             val checker = DesktopUpdateChecker()
-                            // Get current file size from preferences or default to 0
-                            val result = checker.checkForUpdate(0L)
+                            // Get current file size from preferences
+                            val currentSize = DesktopPreferences.getLong("last_filmlist_size", 0L)
+                            val result = checker.checkForUpdate(currentSize)
 
                             when (result) {
                                 is DesktopUpdateChecker.UpdateCheckResult.UpdateAvailable -> {
