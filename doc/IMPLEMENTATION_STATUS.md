@@ -52,9 +52,8 @@ This document provides a comprehensive overview of the implementation status acr
 | Database | ✅ | Room KMP with SQLite |
 
 **Known Issues**:
-- Update checker always shows "update available" (size comparison bug)
-- Diff application not implemented (incremental updates)
 - No video download cancellation
+- Video player preference not configurable (hardcoded VLC → MPV → Browser)
 
 **Location**: `desktopApp/src/main/kotlin/cut/the/crap/desktop/`
 
@@ -227,9 +226,7 @@ Legend: ✅ Complete | ⚠️ Partial | ❌ Not working | - Not applicable
 1. **webOS Play/Download** - Blocking for webOS TV release
 
 ### Medium Priority
-2. Desktop update checker size comparison (WIP - DesktopPreferences being added)
-3. Desktop diff application for incremental updates
-4. tvOS production API URL configuration
+2. tvOS production API URL configuration
 
 ### Low Priority
 5. Android Compose broadcaster logo images

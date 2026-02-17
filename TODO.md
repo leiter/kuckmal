@@ -20,15 +20,16 @@
   - Location: `shared-tvos/src/tvosMain/kotlin/cut/the/crap/shared/repository/TvosApiMediaRepository.kt:27`
 - [ ] Verify video playback with real URLs from production API
 
-## Desktop (Mostly Complete - WIP)
+## Desktop (Complete)
 
-- [x] ~~Time period filter dialog~~ - IMPLEMENTED in `desktopApp/src/main/kotlin/cut/the/crap/desktop/Main.kt:91-293`
-- [x] ~~Update checker functionality~~ - IMPLEMENTED in `desktopApp/src/main/kotlin/cut/the/crap/desktop/util/DesktopUpdateChecker.kt`
-- [ ] Fix update checker to store/compare actual downloaded file size (currently always shows "update available")
-  - **WIP**: `DesktopPreferences.kt` being added for persistent storage
-  - **WIP**: `FilmListDownloader.kt` being updated to store compressed file size
-- [ ] Implement diff application for incremental updates
-  - Location: `desktopApp/src/main/kotlin/cut/the/crap/desktop/repository/DesktopMediaRepository.kt:185-187`
+- [x] ~~Time period filter dialog~~ - IMPLEMENTED
+- [x] ~~Update checker functionality~~ - IMPLEMENTED
+- [x] ~~Fix update checker to store/compare actual downloaded file size~~ - FIXED
+  - `DesktopPreferences.kt` added for persistent storage
+  - `FilmListDownloader.kt` passes compressed size to callback
+  - Size saved after download, compared when checking for updates
+- [x] ~~Implement diff application for incremental updates~~ - IMPLEMENTED
+  - Location: `desktopApp/src/main/kotlin/cut/the/crap/desktop/repository/DesktopMediaRepository.kt`
 - [ ] Add user preference for video player selection (currently hardcoded VLC → MPV → Browser)
 - [ ] Add video download cancellation support
 
