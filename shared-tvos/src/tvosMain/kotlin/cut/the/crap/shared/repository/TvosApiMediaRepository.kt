@@ -23,8 +23,8 @@ class TvosApiMediaRepository(
 ) : MediaRepository {
 
     companion object {
-        // Default API URL - can be overridden for testing or different environments
-        const val DEFAULT_API_URL = "http://localhost:5000"
+        // Production API URL
+        const val DEFAULT_API_URL = "https://api.kuckmal.cutthecrap.link"
     }
 
     private val httpClient: HttpClient = HttpClientFactory.create()

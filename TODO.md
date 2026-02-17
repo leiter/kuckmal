@@ -9,15 +9,14 @@
   - Needs webOS download API or file system access
 - [ ] Investigate ORF channel related issue (possibly geo-restricted content handling)
 
-## tvOS (Completed - Minor Config Remaining)
+## tvOS (Complete)
 
 - [x] ~~Connect tvOS app to real API instead of mock data~~ - DONE
   - `TvosApiMediaRepository` implemented in `shared-tvos/src/tvosMain/kotlin/cut/the/crap/shared/repository/TvosApiMediaRepository.kt`
   - Koin module updated to inject `TvosApiMediaRepository`
 - [x] ~~Fix `loadMediaEntry()` to use Kotlin repository~~ - DONE (uses `searchEntries` with fallback)
 - [x] ~~Add proper error handling for network requests~~ - DONE (offline state with retry)
-- [ ] Configure production API URL (currently defaults to `localhost:5000`)
-  - Location: `shared-tvos/src/tvosMain/kotlin/cut/the/crap/shared/repository/TvosApiMediaRepository.kt:27`
+- [x] ~~Configure production API URL~~ - DONE (`https://api.kuckmal.cutthecrap.link`)
 - [ ] Verify video playback with real URLs from production API
 
 ## Desktop (Complete)

@@ -131,7 +131,7 @@ This document provides a comprehensive overview of the implementation status acr
 | Real video playback | ⚠️ | Uses real URLs from API (needs server config) |
 
 **Notes**:
-- API URL defaults to `localhost:5000`, needs configuration for production
+- Configured for production API at `https://api.kuckmal.cutthecrap.link`
 - `TvosMockMediaRepository` still exists but is no longer used (replaced by `TvosApiMediaRepository`)
 - Offline state properly handled with retry functionality
 
@@ -225,12 +225,8 @@ Legend: ✅ Complete | ⚠️ Partial | ❌ Not working | - Not applicable
 ### High Priority
 1. **webOS Play/Download** - Blocking for webOS TV release
 
-### Medium Priority
-2. tvOS production API URL configuration
-
 ### Low Priority
-5. Android Compose broadcaster logo images
-6. Video download cancellation on desktop
+2. Android Compose broadcaster logo images
 
 ---
 
