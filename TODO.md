@@ -9,22 +9,24 @@
   - Needs webOS download API or file system access
 - [ ] Investigate ORF channel related issue (possibly geo-restricted content handling)
 
-## tvOS (Medium Priority)
+## tvOS (Completed - Minor Config Remaining)
 
-- [ ] Connect tvOS app to real API instead of mock data
-  - Kotlin interop framework is complete and working
-  - `TvosMockMediaRepository` needs to be replaced with API-based implementation
-  - Location: `shared-tvos/src/tvosMain/kotlin/cut/the/crap/shared/repository/TvosMockMediaRepository.kt`
-- [ ] Fix `loadMediaEntry()` to use Kotlin repository instead of creating fallback entries in Swift
-  - Location: `tvosApp/tvosApp/TvOSViewModel.swift:136-159`
-- [ ] Implement actual video playback (currently uses placeholder URLs)
-- [ ] Add proper error handling for network requests
+- [x] ~~Connect tvOS app to real API instead of mock data~~ - DONE
+  - `TvosApiMediaRepository` implemented in `shared-tvos/src/tvosMain/kotlin/cut/the/crap/shared/repository/TvosApiMediaRepository.kt`
+  - Koin module updated to inject `TvosApiMediaRepository`
+- [x] ~~Fix `loadMediaEntry()` to use Kotlin repository~~ - DONE (uses `searchEntries` with fallback)
+- [x] ~~Add proper error handling for network requests~~ - DONE (offline state with retry)
+- [ ] Configure production API URL (currently defaults to `localhost:5000`)
+  - Location: `shared-tvos/src/tvosMain/kotlin/cut/the/crap/shared/repository/TvosApiMediaRepository.kt:27`
+- [ ] Verify video playback with real URLs from production API
 
-## Desktop (Completed)
+## Desktop (Mostly Complete - WIP)
 
 - [x] ~~Time period filter dialog~~ - IMPLEMENTED in `desktopApp/src/main/kotlin/cut/the/crap/desktop/Main.kt:91-293`
 - [x] ~~Update checker functionality~~ - IMPLEMENTED in `desktopApp/src/main/kotlin/cut/the/crap/desktop/util/DesktopUpdateChecker.kt`
 - [ ] Fix update checker to store/compare actual downloaded file size (currently always shows "update available")
+  - **WIP**: `DesktopPreferences.kt` being added for persistent storage
+  - **WIP**: `FilmListDownloader.kt` being updated to store compressed file size
 - [ ] Implement diff application for incremental updates
   - Location: `desktopApp/src/main/kotlin/cut/the/crap/desktop/repository/DesktopMediaRepository.kt:185-187`
 - [ ] Add user preference for video player selection (currently hardcoded VLC → MPV → Browser)
@@ -35,9 +37,13 @@
 - [ ] Integrate broadcaster logo images in Compose BrowseView (logos exist in `res/drawable/`)
 - [ ] Add shared element transitions for detail view (requires Compose 1.7.0+)
 
-## iOS (Low Priority)
+## iOS (App Store Preparation - WIP)
 
-- [ ] No major issues identified - app is fully functional
+- [x] App is fully functional
+- [ ] App Store submission preparation (in progress)
+  - **WIP**: `appstore/` directory with privacy policies (EN/DE), review notes, screenshot guide
+  - **WIP**: Maestro automation for App Store screenshots (`iosApp/.maestro/appstore_screenshots.yaml`)
+  - **WIP**: App preparation flow (`iosApp/.maestro/prepare_app.yaml`)
 
 ## Future Enhancements (All Platforms)
 

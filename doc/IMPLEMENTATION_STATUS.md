@@ -1,6 +1,6 @@
 # Kuckmal Implementation Status
 
-**Last Updated**: February 6, 2026
+**Last Updated**: February 17, 2026
 
 This document provides a comprehensive overview of the implementation status across all platforms and features.
 
@@ -115,25 +115,26 @@ This document provides a comprehensive overview of the implementation status acr
 
 ---
 
-### tvOS ⚠️ PARTIAL
+### tvOS ✅ COMPLETE (API Connected)
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| Channel browsing | ✅ | 13 channels with brand colors |
-| Theme/Title browsing | ✅ | Working with mock data |
-| Search | ✅ | Working with mock data |
-| Media details | ✅ | Complete UI |
+| Channel browsing | ✅ | 17+ channels with brand colors |
+| Theme/Title browsing | ✅ | Working with real API data |
+| Search | ✅ | Working with real API data |
+| Media details | ✅ | Complete UI with real data |
 | Video player UI | ✅ | AVKit-based, quality selection |
 | Deep linking | ✅ | `kuckmal://play` and `kuckmal://browse` |
 | Top Shelf | ✅ | Extension scaffolded |
-| Kotlin interop | ⚠️ | Framework works, but bypassed for media loading |
-| Real API connection | ❌ | Uses mock data only |
-| Real video playback | ❌ | Uses placeholder URLs |
+| Kotlin interop | ✅ | TvosApiMediaRepository via Koin |
+| Real API connection | ✅ | Connected to Flask backend |
+| Offline error handling | ✅ | Shows offline message when no network |
+| Real video playback | ⚠️ | Uses real URLs from API (needs server config) |
 
-**Required Fixes**:
-1. Replace `TvosMockMediaRepository` with API-based implementation
-2. Fix `loadMediaEntry()` in `TvOSViewModel.swift` to use Kotlin repository
-3. Connect to real video URLs
+**Notes**:
+- API URL defaults to `localhost:5000`, needs configuration for production
+- `TvosMockMediaRepository` still exists but is no longer used (replaced by `TvosApiMediaRepository`)
+- Offline state properly handled with retry functionality
 
 **Location**:
 - Swift: `tvosApp/tvosApp/`
@@ -213,8 +214,8 @@ shared/src/commonMain/kotlin/cut/the/crap/shared/
 | Video download | ✅ | ✅ | - | ⚠️ | ❌ | - |
 | Film list download | ✅ | ✅ | ✅ | via API | via API | via API |
 | Time period filter | ✅ | ✅ | ✅ | ✅ | ✅ | - |
-| Real data | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Offline support | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
+| Real data | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Offline support | ✅ | ✅ | ✅ | ❌ | ❌ | ⚠️ |
 
 Legend: ✅ Complete | ⚠️ Partial | ❌ Not working | - Not applicable
 
@@ -224,11 +225,11 @@ Legend: ✅ Complete | ⚠️ Partial | ❌ Not working | - Not applicable
 
 ### High Priority
 1. **webOS Play/Download** - Blocking for webOS TV release
-2. **tvOS API Integration** - Blocking for tvOS with real content
 
 ### Medium Priority
-3. Desktop update checker size comparison
-4. Desktop diff application for incremental updates
+2. Desktop update checker size comparison (WIP - DesktopPreferences being added)
+3. Desktop diff application for incremental updates
+4. tvOS production API URL configuration
 
 ### Low Priority
 5. Android Compose broadcaster logo images
