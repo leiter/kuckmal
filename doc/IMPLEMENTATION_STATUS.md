@@ -92,7 +92,7 @@ This document provides a comprehensive overview of the implementation status acr
 
 ---
 
-### webOS TV ⚠️ PARTIAL
+### webOS TV ✅ COMPLETE
 
 | Feature | Status | Notes |
 |---------|--------|-------|
@@ -100,15 +100,16 @@ This document provides a comprehensive overview of the implementation status acr
 | Theme/Title browsing | ✅ | Working |
 | Search | ✅ | Working |
 | Media details | ✅ | Working |
-| Play button | ❌ | Uses `window.open()` - not supported on webOS |
-| Download button | ❌ | Uses `window.open()` - not supported on webOS |
+| Play button | ✅ | HTML5 fullscreen video player |
+| Download button | ✅ | Programmatic anchor click |
 | webOS manifest | ✅ | appinfo.json ready |
 | Icons | ✅ | 80x80 and 130x130 PNG |
+| Keyboard navigation | ✅ | Escape/Backspace to close player |
 
-**Required Fixes**:
-1. Implement webOS-specific video player (webOS Media API)
-2. Implement platform detection for webOS
-3. Handle geo-restricted content (ORF issue)
+**Notes**:
+- Video player uses HTML5 video element with fullscreen overlay
+- webOS detection available via `isWebOS()` function
+- ORF geo-restriction handling may still need investigation
 
 **Location**: `webApp/src/jsMain/resources/webos/`
 
@@ -222,8 +223,8 @@ Legend: ✅ Complete | ⚠️ Partial | ❌ Not working | - Not applicable
 
 ## Priority Fixes
 
-### High Priority
-1. **webOS Play/Download** - Blocking for webOS TV release
+### Medium Priority
+1. webOS ORF geo-restriction handling
 
 ### Low Priority
 2. Android Compose broadcaster logo images

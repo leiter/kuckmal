@@ -1,12 +1,15 @@
 # TODO
 
-## webOS Issues (High Priority)
+## webOS Issues (Medium Priority)
 
-- [ ] Fix "Abspielen" (Play) button - currently uses `window.open()` which doesn't work on webOS TVs
-  - Needs webOS-specific video player integration (webOS Media API or platform detection)
-  - Location: `webApp/src/jsMain/kotlin/cut/the/crap/web/Main.kt:989-1014`
-- [ ] Fix "Herunterladen" (Download) button - opening URL in `_blank` doesn't initiate download
-  - Needs webOS download API or file system access
+- [x] ~~Fix "Abspielen" (Play) button~~ - FIXED
+  - Implemented HTML5 fullscreen video player overlay
+  - Works on webOS TVs and standard browsers
+  - Supports Escape/Backspace to close player
+  - Location: `webApp/src/jsMain/kotlin/cut/the/crap/web/Main.kt`
+- [x] ~~Fix "Herunterladen" (Download) button~~ - IMPROVED
+  - Now uses programmatic anchor click with download attribute
+  - Better cross-platform compatibility
 - [ ] Investigate ORF channel related issue (possibly geo-restricted content handling)
 
 ## tvOS (Complete)

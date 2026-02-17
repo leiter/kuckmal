@@ -43,11 +43,28 @@ fun main() {
     }
 }
 
+/**
+ * Video player state for fullscreen playback
+ */
+data class VideoPlayerState(
+    val url: String,
+    val title: String,
+    val isVisible: Boolean = false
+)
+
+/**
+ * Detect if running on webOS TV
+ */
+private fun isWebOS(): Boolean {
+    return js("typeof window.webOS !== 'undefined'") as Boolean
+}
+
 @Composable
 fun KuckmalApp() {
     var navigationState by remember { mutableStateOf<NavigationState>(NavigationState.ChannelList) }
     var searchQuery by remember { mutableStateOf("") }
     var selectedChannelIndex by remember { mutableStateOf(-1) }
+    var videoPlayerState by remember { mutableStateOf(VideoPlayerState("", "", false)) }
     val coroutineScope = rememberCoroutineScope()
 
     // Keyboard navigation
@@ -175,6 +192,9 @@ fun KuckmalApp() {
                             coroutineScope = coroutineScope,
                             onBack = {
                                 navigationState = NavigationState.TitleList(state.channel, state.theme)
+                            },
+                            onPlayVideo = { url, videoTitle ->
+                                videoPlayerState = VideoPlayerState(url, videoTitle, true)
                             }
                         )
                     }
@@ -209,6 +229,64 @@ fun KuckmalApp() {
         Footer({ classes(AppStyleSheet.footer) }) {
             Text("Kuckmal Web - Powered by Kotlin/JS & Compose HTML")
         }
+
+        // Video player overlay
+        if (videoPlayerState.isVisible) {
+            VideoPlayerOverlay(
+                url = videoPlayerState.url,
+                title = videoPlayerState.title,
+                onClose = {
+                    videoPlayerState = videoPlayerState.copy(isVisible = false)
+                }
+            )
+        }
+    }
+}
+
+/**
+ * Fullscreen video player overlay using HTML5 video element.
+ * Works on webOS TVs and standard browsers.
+ */
+@Composable
+fun VideoPlayerOverlay(url: String, title: String, onClose: () -> Unit) {
+    // Handle Escape key to close
+    DisposableEffect(Unit) {
+        val handler: (org.w3c.dom.events.Event) -> Unit = { event ->
+            val keyEvent = event as KeyboardEvent
+            if (keyEvent.key == "Escape" || keyEvent.key == "Backspace") {
+                event.preventDefault()
+                event.stopPropagation()
+                onClose()
+            }
+        }
+        document.addEventListener("keydown", handler)
+        onDispose {
+            document.removeEventListener("keydown", handler)
+        }
+    }
+
+    Div({ classes(AppStyleSheet.videoOverlay) }) {
+        // Close button
+        Button({
+            classes(AppStyleSheet.videoCloseButton)
+            onClick { onClose() }
+        }) {
+            Text("X Schliessen")
+        }
+
+        // Video title
+        Div({ classes(AppStyleSheet.videoTitle) }) {
+            Text(title)
+        }
+
+        // HTML5 Video player
+        Video({
+            classes(AppStyleSheet.videoPlayer)
+            attr("src", url)
+            attr("controls", "true")
+            attr("autoplay", "true")
+            attr("playsinline", "true")
+        })
     }
 }
 
@@ -873,7 +951,8 @@ fun DetailViewAsync(
     theme: String,
     title: String,
     coroutineScope: CoroutineScope,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onPlayVideo: (url: String, title: String) -> Unit = { _, _ -> }
 ) {
     var mediaItem by remember { mutableStateOf<MediaItem?>(null) }
     var isLoading by remember { mutableStateOf(true) }
@@ -887,7 +966,7 @@ fun DetailViewAsync(
     if (isLoading) {
         LoadingSpinner()
     } else if (mediaItem != null) {
-        DetailView(mediaItem!!, onBack)
+        DetailView(mediaItem!!, onBack, onPlayVideo)
     } else {
         Div({ classes(AppStyleSheet.emptyState) }) {
             P { Text("Sendung nicht gefunden.") }
@@ -900,7 +979,11 @@ fun DetailViewAsync(
 }
 
 @Composable
-fun DetailView(mediaItem: MediaItem, onBack: () -> Unit) {
+fun DetailView(
+    mediaItem: MediaItem,
+    onBack: () -> Unit,
+    onPlayVideo: (url: String, title: String) -> Unit = { _, _ -> }
+) {
     val channelColor = Broadcaster.getBrandColorOfName(mediaItem.channel)
     val colorHex = "#${(channelColor and 0xFFFFFF).toString(16).padStart(6, '0')}"
 
@@ -990,8 +1073,14 @@ fun DetailView(mediaItem: MediaItem, onBack: () -> Unit) {
             Button({
                 classes(AppStyleSheet.playButton)
                 onClick {
-                    if (mediaItem.url.isNotEmpty()) {
-                        window.open(mediaItem.url, "_blank")
+                    // Prefer HD URL, then standard URL
+                    val videoUrl = when {
+                        mediaItem.hdUrl.isNotEmpty() -> mediaItem.hdUrl
+                        mediaItem.url.isNotEmpty() -> mediaItem.url
+                        else -> ""
+                    }
+                    if (videoUrl.isNotEmpty()) {
+                        onPlayVideo(videoUrl, mediaItem.title)
                     } else {
                         window.alert("Keine Video-URL verfuegbar")
                     }
@@ -1003,7 +1092,14 @@ fun DetailView(mediaItem: MediaItem, onBack: () -> Unit) {
                 classes(AppStyleSheet.downloadButton)
                 onClick {
                     if (mediaItem.url.isNotEmpty()) {
-                        window.open(mediaItem.url, "_blank")
+                        // For download, create a temporary anchor element with download attribute
+                        val link = document.createElement("a")
+                        link.setAttribute("href", mediaItem.url)
+                        link.setAttribute("download", "${mediaItem.title}.mp4")
+                        link.setAttribute("target", "_blank")
+                        document.body?.appendChild(link)
+                        js("link.click()")
+                        document.body?.removeChild(link)
                     } else {
                         window.alert("Keine Download-URL verfuegbar")
                     }
@@ -1513,6 +1609,65 @@ object AppStyleSheet : StyleSheet() {
         fontSize(12.px)
         color(Color("#666"))
         property("border-top", "1px solid #333")
+    }
+
+    // Video player overlay styles
+    val videoOverlay by style {
+        position(Position.Fixed)
+        property("top", "0")
+        property("left", "0")
+        property("right", "0")
+        property("bottom", "0")
+        backgroundColor(Color("#000000"))
+        property("z-index", "9999")
+        display(DisplayStyle.Flex)
+        flexDirection(FlexDirection.Column)
+        alignItems(AlignItems.Center)
+        justifyContent(JustifyContent.Center)
+    }
+
+    val videoCloseButton by style {
+        position(Position.Absolute)
+        property("top", "20px")
+        property("right", "20px")
+        backgroundColor(Color("rgba(255, 255, 255, 0.2)"))
+        color(Color.white)
+        border(0.px)
+        padding(12.px, 24.px)
+        borderRadius(8.px)
+        fontSize(16.px)
+        property("cursor", "pointer")
+        property("z-index", "10001")
+        self + hover style {
+            backgroundColor(Color("rgba(255, 255, 255, 0.3)"))
+        }
+        self + focus style {
+            property("outline", "3px solid #FFD700")
+            property("outline-offset", "2px")
+        }
+    }
+
+    val videoTitle by style {
+        position(Position.Absolute)
+        property("top", "20px")
+        property("left", "20px")
+        color(Color.white)
+        fontSize(18.px)
+        fontWeight("bold")
+        property("max-width", "60%")
+        property("overflow", "hidden")
+        property("text-overflow", "ellipsis")
+        property("white-space", "nowrap")
+        property("z-index", "10001")
+    }
+
+    val videoPlayer by style {
+        width(100.percent)
+        height(100.percent)
+        property("max-width", "100vw")
+        property("max-height", "100vh")
+        property("object-fit", "contain")
+        backgroundColor(Color.black)
     }
 
     // Keyframes injection via init block
