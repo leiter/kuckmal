@@ -30,8 +30,13 @@
   - Size saved after download, compared when checking for updates
 - [x] ~~Implement diff application for incremental updates~~ - IMPLEMENTED
   - Location: `desktopApp/src/main/kotlin/cut/the/crap/desktop/repository/DesktopMediaRepository.kt`
-- [ ] Add user preference for video player selection (currently hardcoded VLC → MPV → Browser)
-- [ ] Add video download cancellation support
+- [x] ~~Add user preference for video player selection~~ - IMPLEMENTED
+  - Settings dialog accessible via menu → "Einstellungen"
+  - Options: Auto, VLC, MPV, Browser (shows only available players)
+  - Preference persisted in `preferences.properties`
+- [x] ~~Add video download cancellation support~~ - IMPLEMENTED
+  - Cancel button in download progress dialog
+  - Cleans up partial files on cancellation
 
 ## Android (Low Priority)
 

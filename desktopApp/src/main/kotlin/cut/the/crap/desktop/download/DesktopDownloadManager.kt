@@ -4,15 +4,34 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.isActive
 import java.io.File
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.coroutines.coroutineContext
 
 /**
- * Desktop download manager for video files
+ * Desktop download manager for video files with cancellation support
  */
 class DesktopDownloadManager {
+
+    // Track cancellation state for active download
+    private val isCancelled = AtomicBoolean(false)
+    private var currentDownloadFile: File? = null
+
+    /**
+     * Cancel the current download
+     */
+    fun cancelDownload() {
+        isCancelled.set(true)
+    }
+
+    /**
+     * Check if a download is being cancelled
+     */
+    fun isCancelling(): Boolean = isCancelled.get()
 
     companion object {
         fun getDownloadsFolder(): File {
@@ -63,10 +82,11 @@ class DesktopDownloadManager {
         ) : DownloadState()
         data class Complete(val file: File) : DownloadState()
         data class Error(val message: String) : DownloadState()
+        object Cancelled : DownloadState()
     }
 
     /**
-     * Download a video file with progress updates
+     * Download a video file with progress updates and cancellation support
      */
     fun download(
         url: String,
@@ -74,6 +94,10 @@ class DesktopDownloadManager {
         channel: String,
         quality: String
     ): Flow<DownloadState> = flow {
+        // Reset cancellation state for new download
+        isCancelled.set(false)
+        currentDownloadFile = null
+
         emit(DownloadState.Starting)
 
         try {
@@ -108,6 +132,8 @@ class DesktopDownloadManager {
     }.flowOn(Dispatchers.IO)
 
     private fun downloadFile(url: String, targetFile: File): Flow<DownloadState> = flow {
+        currentDownloadFile = targetFile
+
         val connection = URL(url).openConnection() as HttpURLConnection
         connection.connectTimeout = 30000
         connection.readTimeout = 60000
@@ -115,44 +141,60 @@ class DesktopDownloadManager {
         // Handle redirects
         connection.instanceFollowRedirects = true
 
-        val responseCode = connection.responseCode
-        if (responseCode != HttpURLConnection.HTTP_OK) {
-            emit(DownloadState.Error("Server returned HTTP $responseCode"))
-            return@flow
-        }
+        try {
+            val responseCode = connection.responseCode
+            if (responseCode != HttpURLConnection.HTTP_OK) {
+                emit(DownloadState.Error("Server returned HTTP $responseCode"))
+                return@flow
+            }
 
-        val totalBytes = connection.contentLengthLong
-        var bytesDownloaded = 0L
-        var lastUpdateTime = System.currentTimeMillis()
-        var lastBytesDownloaded = 0L
+            val totalBytes = connection.contentLengthLong
+            var bytesDownloaded = 0L
+            var lastUpdateTime = System.currentTimeMillis()
+            var lastBytesDownloaded = 0L
 
-        connection.inputStream.use { input ->
-            FileOutputStream(targetFile).use { output ->
-                val buffer = ByteArray(8192)
-                var bytesRead: Int
+            connection.inputStream.use { input ->
+                FileOutputStream(targetFile).use { output ->
+                    val buffer = ByteArray(8192)
+                    var bytesRead: Int
 
-                while (input.read(buffer).also { bytesRead = it } != -1) {
-                    output.write(buffer, 0, bytesRead)
-                    bytesDownloaded += bytesRead
+                    while (input.read(buffer).also { bytesRead = it } != -1) {
+                        // Check for cancellation
+                        if (isCancelled.get() || !coroutineContext.isActive) {
+                            output.close()
+                            // Delete partial file
+                            if (targetFile.exists()) {
+                                targetFile.delete()
+                            }
+                            emit(DownloadState.Cancelled)
+                            return@flow
+                        }
 
-                    // Update progress every 100ms
-                    val now = System.currentTimeMillis()
-                    if (now - lastUpdateTime > 100) {
-                        val elapsed = (now - lastUpdateTime) / 1000.0
-                        val speed = if (elapsed > 0) {
-                            ((bytesDownloaded - lastBytesDownloaded) / elapsed).toLong()
-                        } else 0L
+                        output.write(buffer, 0, bytesRead)
+                        bytesDownloaded += bytesRead
 
-                        emit(DownloadState.Progress(bytesDownloaded, totalBytes, speed))
+                        // Update progress every 100ms
+                        val now = System.currentTimeMillis()
+                        if (now - lastUpdateTime > 100) {
+                            val elapsed = (now - lastUpdateTime) / 1000.0
+                            val speed = if (elapsed > 0) {
+                                ((bytesDownloaded - lastBytesDownloaded) / elapsed).toLong()
+                            } else 0L
 
-                        lastUpdateTime = now
-                        lastBytesDownloaded = bytesDownloaded
+                            emit(DownloadState.Progress(bytesDownloaded, totalBytes, speed))
+
+                            lastUpdateTime = now
+                            lastBytesDownloaded = bytesDownloaded
+                        }
                     }
                 }
             }
-        }
 
-        emit(DownloadState.Complete(targetFile))
+            emit(DownloadState.Complete(targetFile))
+        } finally {
+            connection.disconnect()
+            currentDownloadFile = null
+        }
     }
 
     private fun getExtensionFromUrl(url: String): String {

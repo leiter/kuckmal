@@ -68,6 +68,7 @@ fun SearchableTopAppBar(
     onTimePeriodClick: () -> Unit = {},
     onCheckUpdateClick: () -> Unit = {},
     onReinstallClick: () -> Unit = {},
+    onSettingsClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     var showOverflowMenu by remember { mutableStateOf(false) }
@@ -177,6 +178,15 @@ fun SearchableTopAppBar(
                             onReinstallClick()
                         }
                     )
+                    if (onSettingsClick != null) {
+                        DropdownMenuItem(
+                            text = { Text("Einstellungen") },
+                            onClick = {
+                                showOverflowMenu = false
+                                onSettingsClick()
+                            }
+                        )
+                    }
                 }
             }
         },

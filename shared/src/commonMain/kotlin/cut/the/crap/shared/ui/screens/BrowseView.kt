@@ -60,7 +60,8 @@ fun BrowseView(
     onBackClick: () -> Unit = {},
     onTimePeriodClick: () -> Unit = {},
     onCheckUpdateClick: () -> Unit = {},
-    onReinstallClick: () -> Unit = {}
+    onReinstallClick: () -> Unit = {},
+    onSettingsClick: (() -> Unit)? = null
 ) {
     Column(
         modifier = Modifier
@@ -80,6 +81,7 @@ fun BrowseView(
             onTimePeriodClick = onTimePeriodClick,
             onCheckUpdateClick = onCheckUpdateClick,
             onReinstallClick = onReinstallClick,
+            onSettingsClick = onSettingsClick,
             modifier = Modifier.fillMaxWidth()
         )
 

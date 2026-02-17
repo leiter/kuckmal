@@ -51,9 +51,9 @@ This document provides a comprehensive overview of the implementation status acr
 | Video downloads | ✅ | Quality selection, progress tracking |
 | Database | ✅ | Room KMP with SQLite |
 
-**Known Issues**:
-- No video download cancellation
-- Video player preference not configurable (hardcoded VLC → MPV → Browser)
+**Notes**:
+- Video player preference configurable via Settings menu (VLC, MPV, Browser, or Auto)
+- Download cancellation supported with partial file cleanup
 
 **Location**: `desktopApp/src/main/kotlin/cut/the/crap/desktop/`
 

@@ -20,6 +20,7 @@ import cut.the.crap.desktop.util.DesktopPreferences
 import cut.the.crap.desktop.di.downloadCallback
 import cut.the.crap.desktop.di.showMessageCallback
 import cut.the.crap.desktop.download.DesktopDownloadManager
+import cut.the.crap.desktop.player.DesktopVideoPlayer
 import cut.the.crap.desktop.util.DesktopUpdateChecker
 import cut.the.crap.shared.database.MediaEntry
 import cut.the.crap.shared.repository.MediaRepository
@@ -93,6 +94,10 @@ fun DesktopApp() {
     var showTimePeriodDialog by remember { mutableStateOf(false) }
     val currentTimePeriod by viewModel.timePeriodId.collectAsState()
 
+    // Settings dialog state
+    var showSettingsDialog by remember { mutableStateOf(false) }
+    var selectedVideoPlayer by remember { mutableStateOf(DesktopVideoPlayer.getPreferredPlayer()) }
+
     // Time period options
     val timePeriods = remember {
         listOf(
@@ -150,6 +155,13 @@ fun DesktopApp() {
                             snackbarHostState.showSnackbar(
                                 "Download failed: ${state.message}",
                                 duration = SnackbarDuration.Long
+                            )
+                        }
+                        is DesktopDownloadManager.DownloadState.Cancelled -> {
+                            isVideoDownloading = false
+                            snackbarHostState.showSnackbar(
+                                "Download cancelled",
+                                duration = SnackbarDuration.Short
                             )
                         }
                     }
@@ -296,6 +308,50 @@ fun DesktopApp() {
         )
     }
 
+    // Settings dialog
+    if (showSettingsDialog) {
+        val availablePlayers = remember { DesktopVideoPlayer.getAvailablePlayers() }
+
+        AlertDialog(
+            onDismissRequest = { showSettingsDialog = false },
+            title = { Text("Settings") },
+            text = {
+                Column {
+                    Text(
+                        text = "Video Player",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    availablePlayers.forEach { player ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    selectedVideoPlayer = player
+                                    DesktopVideoPlayer.setPreferredPlayer(player)
+                                }
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = selectedVideoPlayer == player,
+                                onClick = null
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(player.displayName)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showSettingsDialog = false }) {
+                    Text("Close")
+                }
+            }
+        )
+    }
+
     // Download progress dialog
     if (isVideoDownloading) {
         AlertDialog(
@@ -322,7 +378,13 @@ fun DesktopApp() {
                 }
             },
             confirmButton = {
-                // Could add cancel button here
+                TextButton(
+                    onClick = {
+                        downloadManager.cancelDownload()
+                    }
+                ) {
+                    Text("Cancel")
+                }
             }
         )
     }
@@ -573,6 +635,9 @@ fun DesktopApp() {
                     onReinstallClick = {
                         // Reload film list
                         downloadAndLoad()
+                    },
+                    onSettingsClick = {
+                        showSettingsDialog = true
                     }
                 )
             }
