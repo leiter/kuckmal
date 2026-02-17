@@ -246,7 +246,8 @@ class ApiMediaRepository(
                 size = obj.sizeMB as? String ?: "",
                 description = obj.description as? String ?: "",
                 url = obj.url as? String ?: "",
-                hdUrl = obj.hdUrl as? String ?: ""
+                hdUrl = obj.hdUrl as? String ?: "",
+                geo = obj.geo as? String ?: ""
             )
         } catch (e: Exception) {
             console.error("Failed to parse media entry: ${e.message}")

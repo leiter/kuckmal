@@ -223,11 +223,8 @@ Legend: ✅ Complete | ⚠️ Partial | ❌ Not working | - Not applicable
 
 ## Priority Fixes
 
-### Medium Priority
-1. webOS ORF geo-restriction handling
-
 ### Low Priority
-2. Android Compose broadcaster logo images
+1. Android Compose broadcaster logo images
 
 ---
 

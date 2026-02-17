@@ -1,6 +1,6 @@
 # TODO
 
-## webOS Issues (Medium Priority)
+## webOS Issues (Complete)
 
 - [x] ~~Fix "Abspielen" (Play) button~~ - FIXED
   - Implemented HTML5 fullscreen video player overlay
@@ -10,7 +10,10 @@
 - [x] ~~Fix "Herunterladen" (Download) button~~ - IMPROVED
   - Now uses programmatic anchor click with download attribute
   - Better cross-platform compatibility
-- [ ] Investigate ORF channel related issue (possibly geo-restricted content handling)
+- [x] ~~ORF geo-restriction handling~~ - IMPLEMENTED (all platforms)
+  - Added `geo` field to MediaItem models
+  - Geo-restriction warning banner in detail views
+  - Supports: AT, DE, CH, DE-AT, DE-CH, AT-CH, DE-AT-CH restrictions
 
 ## tvOS (Complete)
 

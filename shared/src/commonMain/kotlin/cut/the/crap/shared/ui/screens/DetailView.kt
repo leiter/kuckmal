@@ -113,6 +113,8 @@ private fun DetailViewPortrait(
             ThemeSection(theme = mediaItem.theme)
             Spacer(modifier = Modifier.height(20.dp))
             TitleSection(title = mediaItem.title)
+            Spacer(modifier = Modifier.height(12.dp))
+            GeoRestrictionBanner(mediaItem = mediaItem)
             Spacer(modifier = Modifier.height(20.dp))
             MetadataCard(mediaItem = mediaItem)
             Spacer(modifier = Modifier.height(20.dp))
@@ -170,6 +172,8 @@ private fun DetailViewLandscape(
             ThemeSection(theme = mediaItem.theme)
             Spacer(modifier = Modifier.height(16.dp))
             TitleSection(title = mediaItem.title)
+            Spacer(modifier = Modifier.height(12.dp))
+            GeoRestrictionBanner(mediaItem = mediaItem)
             Spacer(modifier = Modifier.height(16.dp))
             MetadataCard(mediaItem = mediaItem)
         }
@@ -270,6 +274,39 @@ private fun TitleSection(title: String) {
         color = Color.White,
         fontWeight = FontWeight.Bold
     )
+}
+
+@Composable
+private fun GeoRestrictionBanner(mediaItem: MediaItem) {
+    if (mediaItem.hasGeoRestriction()) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0x33FFA500)  // Orange with transparency
+            ),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "⚠",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color(0xFFFFA500)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = mediaItem.getGeoRestrictionText(),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFFFFA500),
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
 }
 
 @Composable

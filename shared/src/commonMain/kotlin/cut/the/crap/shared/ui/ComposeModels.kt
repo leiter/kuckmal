@@ -14,8 +14,31 @@ data class MediaItem(
     val time: String,
     val duration: String,
     val size: String,
-    val description: String
-)
+    val description: String,
+    val geo: String = ""  // Geographic restriction (e.g., "AT", "DE", "DE-AT-CH", "" = no restriction)
+) {
+    /**
+     * Check if content has geographic restrictions
+     */
+    fun hasGeoRestriction(): Boolean = geo.isNotEmpty()
+
+    /**
+     * Get human-readable geo restriction text
+     */
+    fun getGeoRestrictionText(): String {
+        if (geo.isEmpty()) return ""
+        return when (geo) {
+            "AT" -> "Nur in Oesterreich verfuegbar"
+            "DE" -> "Nur in Deutschland verfuegbar"
+            "CH" -> "Nur in der Schweiz verfuegbar"
+            "DE-AT" -> "Nur in Deutschland und Oesterreich verfuegbar"
+            "DE-CH" -> "Nur in Deutschland und der Schweiz verfuegbar"
+            "AT-CH" -> "Nur in Oesterreich und der Schweiz verfuegbar"
+            "DE-AT-CH" -> "Nur in Deutschland, Oesterreich und der Schweiz verfuegbar"
+            else -> "Geografisch eingeschraenkt: $geo"
+        }
+    }
+}
 
 data class Channel(
     val name: String,
@@ -140,6 +163,7 @@ fun MediaEntry.toMediaItem(): MediaItem {
         time = this.time,
         duration = this.duration,
         size = "${this.sizeMB} MB",
-        description = this.description
+        description = this.description,
+        geo = this.geo
     )
 }

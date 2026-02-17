@@ -1023,6 +1023,13 @@ fun DetailView(
             }
         }) { Text(mediaItem.title) }
 
+        // Geo-restriction warning
+        if (mediaItem.hasGeoRestriction()) {
+            Div({ classes(AppStyleSheet.geoWarning) }) {
+                Text("⚠ ${mediaItem.getGeoRestrictionText()}")
+            }
+        }
+
         // Metadata grid
         Div({ classes(AppStyleSheet.metadataGrid) }) {
             MetadataRow("Datum", mediaItem.date)
@@ -1489,6 +1496,17 @@ object AppStyleSheet : StyleSheet() {
 
     val detailContainer by style {
         property("max-width", "800px")
+    }
+
+    val geoWarning by style {
+        backgroundColor(Color("rgba(255, 165, 0, 0.2)"))
+        border(1.px, LineStyle.Solid, Color("#FFA500"))
+        borderRadius(8.px)
+        padding(12.px, 16.px)
+        marginBottom(16.px)
+        color(Color("#FFA500"))
+        fontSize(14.px)
+        fontWeight("bold")
     }
 
     val backButton by style {

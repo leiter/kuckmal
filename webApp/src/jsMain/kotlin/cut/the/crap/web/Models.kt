@@ -53,8 +53,31 @@ data class MediaItem(
     val size: String,
     val description: String,
     val url: String = "",
-    val hdUrl: String = ""
-)
+    val hdUrl: String = "",
+    val geo: String = ""  // Geographic restriction (e.g., "AT", "DE", "DE-AT-CH", "" = no restriction)
+) {
+    /**
+     * Check if content has geographic restrictions
+     */
+    fun hasGeoRestriction(): Boolean = geo.isNotEmpty()
+
+    /**
+     * Get human-readable geo restriction text
+     */
+    fun getGeoRestrictionText(): String {
+        if (geo.isEmpty()) return ""
+        return when (geo) {
+            "AT" -> "Nur in Oesterreich verfuegbar"
+            "DE" -> "Nur in Deutschland verfuegbar"
+            "CH" -> "Nur in der Schweiz verfuegbar"
+            "DE-AT" -> "Nur in Deutschland und Oesterreich verfuegbar"
+            "DE-CH" -> "Nur in Deutschland und der Schweiz verfuegbar"
+            "AT-CH" -> "Nur in Oesterreich und der Schweiz verfuegbar"
+            "DE-AT-CH" -> "Nur in Deutschland, Oesterreich und der Schweiz verfuegbar"
+            else -> "Geografisch eingeschraenkt: $geo"
+        }
+    }
+}
 
 /**
  * Sample data for development/testing
