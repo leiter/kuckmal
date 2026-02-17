@@ -42,8 +42,10 @@ val appModule = module {
         )
     }
 
-    // DAO - Singleton (provided by database)
+    // DAOs - Singleton (provided by database)
     single { get<AppDatabase>().mediaDao() }
+    single { get<AppDatabase>().favoriteDao() }
+    single { get<AppDatabase>().historyDao() }
 
     // Parser - Factory (create new instance each time)
     factory { MediaListParser() }
@@ -52,6 +54,8 @@ val appModule = module {
     single<MediaRepository> {
         MediaRepositoryImpl(
             mediaDao = get(),
+            favoriteDao = get(),
+            historyDao = get(),
             parser = get()
         )
     }

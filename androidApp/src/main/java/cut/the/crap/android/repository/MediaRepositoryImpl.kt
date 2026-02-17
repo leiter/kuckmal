@@ -2,6 +2,10 @@ package cut.the.crap.android.repository
 
 import android.util.Log
 import cut.the.crap.android.data.MediaListParser
+import cut.the.crap.shared.database.FavoriteDao
+import cut.the.crap.shared.database.FavoriteEntry
+import cut.the.crap.shared.database.HistoryDao
+import cut.the.crap.shared.database.HistoryEntry
 import cut.the.crap.shared.database.MediaDao
 import cut.the.crap.shared.database.MediaEntry
 import cut.the.crap.shared.repository.MediaRepository.LoadingResult
@@ -22,6 +26,8 @@ import java.io.File
  */
 class MediaRepositoryImpl(
     private val mediaDao: MediaDao,
+    private val favoriteDao: FavoriteDao,
+    private val historyDao: HistoryDao,
     private val parser: MediaListParser
 ) : MediaRepository {
 
@@ -737,5 +743,124 @@ class MediaRepositoryImpl(
      */
     override fun getCacheStats(): SearchCache.CacheStats {
         return searchCache.getStats()
+    }
+
+    // =========================================================================
+    // Favorites / Watch Later Implementation
+    // =========================================================================
+
+    override fun getFavoritesFlow(listType: String): Flow<List<FavoriteEntry>> {
+        return favoriteDao.getAllByType(listType)
+    }
+
+    override suspend fun addToFavorites(
+        channel: String,
+        theme: String,
+        title: String,
+        listType: String
+    ) {
+        withContext(Dispatchers.IO) {
+            val entry = FavoriteEntry(
+                channel = channel,
+                theme = theme,
+                title = title,
+                addedAt = System.currentTimeMillis(),
+                listType = listType
+            )
+            favoriteDao.insert(entry)
+            Log.d(TAG, "Added to $listType: $channel/$theme/$title")
+        }
+    }
+
+    override suspend fun removeFromFavorites(channel: String, theme: String, title: String) {
+        withContext(Dispatchers.IO) {
+            favoriteDao.delete(channel, theme, title)
+            Log.d(TAG, "Removed from favorites: $channel/$theme/$title")
+        }
+    }
+
+    override fun isFavoriteFlow(channel: String, theme: String, title: String): Flow<Boolean> {
+        return favoriteDao.isFavorite(channel, theme, title)
+    }
+
+    override fun isFavoriteByTypeFlow(
+        channel: String,
+        theme: String,
+        title: String,
+        listType: String
+    ): Flow<Boolean> {
+        return favoriteDao.isFavoriteByType(channel, theme, title, listType)
+    }
+
+    // =========================================================================
+    // Playback History Implementation
+    // =========================================================================
+
+    override fun getContinueWatchingFlow(limit: Int): Flow<List<HistoryEntry>> {
+        return historyDao.getContinueWatching(limit)
+    }
+
+    override fun getHistoryFlow(limit: Int): Flow<List<HistoryEntry>> {
+        return historyDao.getHistory(limit)
+    }
+
+    override suspend fun recordPlaybackProgress(
+        channel: String,
+        theme: String,
+        title: String,
+        positionSeconds: Long,
+        durationSeconds: Long
+    ) {
+        withContext(Dispatchers.IO) {
+            val now = System.currentTimeMillis()
+            // Consider completed if >90% watched
+            val isCompleted = durationSeconds > 0 &&
+                (positionSeconds.toFloat() / durationSeconds.toFloat()) >= 0.9f
+
+            // Check if entry exists
+            val existingEntry = historyDao.getEntry(channel, theme, title)
+            if (existingEntry != null) {
+                // Update existing entry
+                historyDao.updateProgress(
+                    channel = channel,
+                    theme = theme,
+                    title = title,
+                    positionSeconds = positionSeconds,
+                    durationSeconds = durationSeconds,
+                    watchedAt = now,
+                    isCompleted = isCompleted
+                )
+            } else {
+                // Create new entry
+                val entry = HistoryEntry(
+                    channel = channel,
+                    theme = theme,
+                    title = title,
+                    resumePositionSeconds = positionSeconds,
+                    durationSeconds = durationSeconds,
+                    watchedAt = now,
+                    isCompleted = isCompleted
+                )
+                historyDao.upsert(entry)
+            }
+            Log.d(TAG, "Recorded progress: $channel/$theme/$title at $positionSeconds/${durationSeconds}s (completed=$isCompleted)")
+        }
+    }
+
+    override suspend fun getResumePosition(channel: String, theme: String, title: String): Long? {
+        return withContext(Dispatchers.IO) {
+            historyDao.getResumePosition(channel, theme, title)
+        }
+    }
+
+    override fun getHistoryEntryFlow(channel: String, theme: String, title: String): Flow<HistoryEntry?> {
+        return historyDao.getEntryFlow(channel, theme, title)
+    }
+
+    override suspend fun clearHistory() {
+        withContext(Dispatchers.IO) {
+            historyDao.clearAll()
+            Log.d(TAG, "Cleared all playback history")
+        }
     }
 }

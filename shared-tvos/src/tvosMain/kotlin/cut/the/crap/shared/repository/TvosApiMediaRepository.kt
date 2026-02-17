@@ -1,7 +1,10 @@
 package cut.the.crap.shared.repository
 
+import cut.the.crap.shared.cache.TvosCache
+import cut.the.crap.shared.cache.createCacheKey
 import cut.the.crap.shared.data.HttpClientFactory
 import cut.the.crap.shared.database.MediaEntry
+import cut.the.crap.shared.sync.SyncStatus
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -9,14 +12,21 @@ import io.ktor.client.request.parameter
 import io.ktor.http.URLBuilder
 import io.ktor.http.encodedPath
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import platform.Foundation.NSDate
+import platform.Foundation.timeIntervalSince1970
 
 /**
  * tvOS API implementation of MediaRepository.
  * Connects to the Flask backend API for real media data.
+ * Includes caching for offline support.
  */
 class TvosApiMediaRepository(
     private val baseUrl: String = DEFAULT_API_URL
@@ -25,12 +35,34 @@ class TvosApiMediaRepository(
     companion object {
         // Production API URL
         const val DEFAULT_API_URL = "https://api.kuckmal.cutthecrap.link"
+
+        // Cache TTLs
+        private const val CHANNELS_TTL_MS = 60 * 60 * 1000L  // 1 hour
+        private const val THEMES_TTL_MS = 15 * 60 * 1000L    // 15 minutes
+        private const val ENTRIES_TTL_MS = 5 * 60 * 1000L    // 5 minutes
     }
 
     private val httpClient: HttpClient = HttpClientFactory.create()
+    private val json = Json { ignoreUnknownKeys = true }
+
+    // Response caches
+    private val channelsCache = TvosCache<List<String>>(defaultTtlMs = CHANNELS_TTL_MS, maxEntries = 10)
+    private val themesCache = TvosCache<List<String>>(defaultTtlMs = THEMES_TTL_MS, maxEntries = 50)
+    private val entriesCache = TvosCache<List<MediaEntry>>(defaultTtlMs = ENTRIES_TTL_MS, maxEntries = 100)
+    private val singleEntryCache = TvosCache<MediaEntry>(defaultTtlMs = ENTRIES_TTL_MS, maxEntries = 200)
+
+    // Sync status tracking
+    private val _syncStatus = MutableStateFlow<SyncStatus>(SyncStatus.Idle)
+    val syncStatus: StateFlow<SyncStatus> = _syncStatus.asStateFlow()
 
     // Cache for channels (they don't change often)
     private var cachedChannels: List<String>? = null
+
+    /**
+     * Get current time in milliseconds
+     */
+    private fun currentTimeMs(): Long =
+        (NSDate().timeIntervalSince1970 * 1000).toLong()
 
     // MARK: - API Response DTOs
 
@@ -111,52 +143,103 @@ class TvosApiMediaRepository(
     // MARK: - MediaRepository Implementation
 
     override fun getAllChannelsFlow(): Flow<List<String>> = flow {
+        val cacheKey = "channels"
+
+        // Try cache first
+        channelsCache.get(cacheKey)?.let { cached ->
+            emit(cached)
+            return@flow
+        }
+
         try {
+            _syncStatus.value = SyncStatus.Syncing
             val response: ChannelsResponse = httpClient.get("$baseUrl/api/channels").body()
             cachedChannels = response.data
+            channelsCache.put(cacheKey, response.data)
+            _syncStatus.value = SyncStatus.Synced(currentTimeMs())
             emit(response.data)
         } catch (e: Exception) {
             println("[TvosApiMediaRepository] getAllChannelsFlow error: ${e.message}")
-            emit(cachedChannels ?: emptyList())
+            _syncStatus.value = SyncStatus.Error(e.message ?: "Unknown error")
+            // Try stale cache as fallback
+            val stale = channelsCache.getStale(cacheKey) ?: cachedChannels ?: emptyList()
+            emit(stale)
         }
     }
 
     override suspend fun getAllChannels(): List<String> {
+        val cacheKey = "channels"
+
+        // Try cache first
+        channelsCache.get(cacheKey)?.let { return it }
+
         return try {
+            _syncStatus.value = SyncStatus.Syncing
             val response: ChannelsResponse = httpClient.get("$baseUrl/api/channels").body()
             cachedChannels = response.data
+            channelsCache.put(cacheKey, response.data)
+            _syncStatus.value = SyncStatus.Synced(currentTimeMs())
             response.data
         } catch (e: Exception) {
             println("[TvosApiMediaRepository] getAllChannels error: ${e.message}")
-            cachedChannels ?: emptyList()
+            _syncStatus.value = SyncStatus.Error(e.message ?: "Unknown error")
+            // Try stale cache as fallback
+            channelsCache.getStale(cacheKey) ?: cachedChannels ?: emptyList()
         }
     }
 
     override fun getAllThemesFlow(minTimestamp: Long, limit: Int, offset: Int): Flow<List<String>> = flow {
+        val cacheKey = createCacheKey("themes", mapOf(
+            "minTimestamp" to minTimestamp,
+            "limit" to limit,
+            "offset" to offset
+        ))
+
+        // Try cache first
+        themesCache.get(cacheKey)?.let { cached ->
+            emit(cached)
+            return@flow
+        }
+
         try {
+            _syncStatus.value = SyncStatus.Syncing
             val response: ThemesResponse = httpClient.get("$baseUrl/api/themes") {
                 parameter("limit", limit)
                 parameter("offset", offset)
                 if (minTimestamp > 0) parameter("minTimestamp", minTimestamp)
             }.body()
+            themesCache.put(cacheKey, response.data)
+            _syncStatus.value = SyncStatus.Synced(currentTimeMs())
             emit(response.data)
         } catch (e: Exception) {
             println("[TvosApiMediaRepository] getAllThemesFlow error: ${e.message}")
-            emit(emptyList())
+            _syncStatus.value = SyncStatus.Error(e.message ?: "Unknown error")
+            // Try stale cache as fallback
+            emit(themesCache.getStale(cacheKey) ?: emptyList())
         }
     }
 
     override suspend fun getAllThemes(minTimestamp: Long, limit: Int, offset: Int): List<String> {
+        val cacheKey = createCacheKey("themes", mapOf(
+            "minTimestamp" to minTimestamp,
+            "limit" to limit,
+            "offset" to offset
+        ))
+
+        // Try cache first
+        themesCache.get(cacheKey)?.let { return it }
+
         return try {
             val response: ThemesResponse = httpClient.get("$baseUrl/api/themes") {
                 parameter("limit", limit)
                 parameter("offset", offset)
                 if (minTimestamp > 0) parameter("minTimestamp", minTimestamp)
             }.body()
+            themesCache.put(cacheKey, response.data)
             response.data
         } catch (e: Exception) {
             println("[TvosApiMediaRepository] getAllThemes error: ${e.message}")
-            emptyList()
+            themesCache.getStale(cacheKey) ?: emptyList()
         }
     }
 
@@ -166,6 +249,18 @@ class TvosApiMediaRepository(
         limit: Int,
         offset: Int
     ): Flow<List<String>> = flow {
+        val cacheKey = createCacheKey("themes/$channel", mapOf(
+            "minTimestamp" to minTimestamp,
+            "limit" to limit,
+            "offset" to offset
+        ))
+
+        // Try cache first
+        themesCache.get(cacheKey)?.let { cached ->
+            emit(cached)
+            return@flow
+        }
+
         try {
             val response: ThemesResponse = httpClient.get("$baseUrl/api/themes") {
                 parameter("channel", channel)
@@ -173,10 +268,11 @@ class TvosApiMediaRepository(
                 parameter("offset", offset)
                 if (minTimestamp > 0) parameter("minTimestamp", minTimestamp)
             }.body()
+            themesCache.put(cacheKey, response.data)
             emit(response.data)
         } catch (e: Exception) {
             println("[TvosApiMediaRepository] getThemesForChannelFlow error: ${e.message}")
-            emit(emptyList())
+            emit(themesCache.getStale(cacheKey) ?: emptyList())
         }
     }
 
@@ -186,6 +282,15 @@ class TvosApiMediaRepository(
         limit: Int,
         offset: Int
     ): List<String> {
+        val cacheKey = createCacheKey("themes/$channel", mapOf(
+            "minTimestamp" to minTimestamp,
+            "limit" to limit,
+            "offset" to offset
+        ))
+
+        // Try cache first
+        themesCache.get(cacheKey)?.let { return it }
+
         return try {
             val response: ThemesResponse = httpClient.get("$baseUrl/api/themes") {
                 parameter("channel", channel)
@@ -193,10 +298,11 @@ class TvosApiMediaRepository(
                 parameter("offset", offset)
                 if (minTimestamp > 0) parameter("minTimestamp", minTimestamp)
             }.body()
+            themesCache.put(cacheKey, response.data)
             response.data
         } catch (e: Exception) {
             println("[TvosApiMediaRepository] getThemesForChannel error: ${e.message}")
-            emptyList()
+            themesCache.getStale(cacheKey) ?: emptyList()
         }
     }
 
@@ -564,15 +670,76 @@ class TvosApiMediaRepository(
     }
 
     override fun getEntriesFlow(channel: String, theme: String): Flow<List<MediaEntry>> = flow {
+        val cacheKey = createCacheKey("entries", mapOf(
+            "channel" to channel.takeIf { it.isNotEmpty() },
+            "theme" to theme.takeIf { it.isNotEmpty() }
+        ))
+
+        // Try cache first
+        entriesCache.get(cacheKey)?.let { cached ->
+            emit(cached)
+            return@flow
+        }
+
         try {
             val response: TitlesResponse = httpClient.get("$baseUrl/api/titles") {
                 if (channel.isNotEmpty()) parameter("channel", channel)
                 if (theme.isNotEmpty()) parameter("theme", theme)
             }.body()
-            emit(response.data.mapIndexed { index, entry -> entry.toMediaEntry(index.toLong()) })
+            val entries = response.data.mapIndexed { index, entry -> entry.toMediaEntry(index.toLong()) }
+            entriesCache.put(cacheKey, entries)
+            emit(entries)
         } catch (e: Exception) {
             println("[TvosApiMediaRepository] getEntriesFlow error: ${e.message}")
-            emit(emptyList())
+            emit(entriesCache.getStale(cacheKey) ?: emptyList())
         }
+    }
+
+    // =========================================================================
+    // Cache Management
+    // =========================================================================
+
+    /**
+     * Clear all caches. Call this when you want to force a refresh.
+     */
+    suspend fun clearAllCaches() {
+        channelsCache.clear()
+        themesCache.clear()
+        entriesCache.clear()
+        singleEntryCache.clear()
+        cachedChannels = null
+        _syncStatus.value = SyncStatus.Idle
+        println("[TvosApiMediaRepository] All caches cleared")
+    }
+
+    /**
+     * Evict expired entries from all caches.
+     * Call this periodically or on app resume.
+     */
+    suspend fun evictExpiredCaches() {
+        channelsCache.evictExpired()
+        themesCache.evictExpired()
+        entriesCache.evictExpired()
+        singleEntryCache.evictExpired()
+        println("[TvosApiMediaRepository] Expired cache entries evicted")
+    }
+
+    /**
+     * Get aggregated cache statistics
+     */
+    suspend fun getCacheStats(): Map<String, Any> {
+        return mapOf(
+            "channels" to channelsCache.getStats(),
+            "themes" to themesCache.getStats(),
+            "entries" to entriesCache.getStats(),
+            "singleEntry" to singleEntryCache.getStats()
+        )
+    }
+
+    /**
+     * Check if we have any cached data available (for offline mode)
+     */
+    suspend fun hasCachedData(): Boolean {
+        return channelsCache.size() > 0 || themesCache.size() > 0 || entriesCache.size() > 0
     }
 }

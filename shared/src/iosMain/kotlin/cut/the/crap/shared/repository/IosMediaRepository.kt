@@ -2,6 +2,10 @@ package cut.the.crap.shared.repository
 
 import cut.the.crap.shared.data.IosStreamingMediaListParser
 import cut.the.crap.shared.data.PlatformLogger
+import cut.the.crap.shared.database.FavoriteDao
+import cut.the.crap.shared.database.FavoriteEntry
+import cut.the.crap.shared.database.HistoryDao
+import cut.the.crap.shared.database.HistoryEntry
 import cut.the.crap.shared.database.MediaDao
 import cut.the.crap.shared.database.MediaEntry
 import kotlinx.coroutines.Dispatchers
@@ -41,7 +45,9 @@ private fun ModelMediaEntry.toDatabaseEntry() = MediaEntry(
  * Wraps the Room database DAO for media data access
  */
 class IosMediaRepository(
-    private val mediaDao: MediaDao
+    private val mediaDao: MediaDao,
+    private val favoriteDao: FavoriteDao? = null,
+    private val historyDao: HistoryDao? = null
 ) : MediaRepository {
 
     override fun getAllChannelsFlow(): Flow<List<String>> {
@@ -299,6 +305,129 @@ class IosMediaRepository(
                 mediaDao.deleteAll()
             }
             mediaDao.insertInBatches(entries, 1000)
+        }
+    }
+
+    // =========================================================================
+    // Favorites / Watch Later Implementation
+    // =========================================================================
+
+    override fun getFavoritesFlow(listType: String): Flow<List<FavoriteEntry>> {
+        return favoriteDao?.getAllByType(listType) ?: flowOf(emptyList())
+    }
+
+    override suspend fun addToFavorites(
+        channel: String,
+        theme: String,
+        title: String,
+        listType: String
+    ) {
+        withContext(Dispatchers.IO) {
+            favoriteDao?.let { dao ->
+                val entry = FavoriteEntry(
+                    channel = channel,
+                    theme = theme,
+                    title = title,
+                    addedAt = platform.Foundation.NSDate().timeIntervalSince1970.toLong() * 1000,
+                    listType = listType
+                )
+                dao.insert(entry)
+                PlatformLogger.info("IosMediaRepository", "Added to $listType: $channel/$theme/$title")
+            }
+        }
+    }
+
+    override suspend fun removeFromFavorites(channel: String, theme: String, title: String) {
+        withContext(Dispatchers.IO) {
+            favoriteDao?.delete(channel, theme, title)
+            PlatformLogger.info("IosMediaRepository", "Removed from favorites: $channel/$theme/$title")
+        }
+    }
+
+    override fun isFavoriteFlow(channel: String, theme: String, title: String): Flow<Boolean> {
+        return favoriteDao?.isFavorite(channel, theme, title) ?: flowOf(false)
+    }
+
+    override fun isFavoriteByTypeFlow(
+        channel: String,
+        theme: String,
+        title: String,
+        listType: String
+    ): Flow<Boolean> {
+        return favoriteDao?.isFavoriteByType(channel, theme, title, listType) ?: flowOf(false)
+    }
+
+    // =========================================================================
+    // Playback History Implementation
+    // =========================================================================
+
+    override fun getContinueWatchingFlow(limit: Int): Flow<List<HistoryEntry>> {
+        return historyDao?.getContinueWatching(limit) ?: flowOf(emptyList())
+    }
+
+    override fun getHistoryFlow(limit: Int): Flow<List<HistoryEntry>> {
+        return historyDao?.getHistory(limit) ?: flowOf(emptyList())
+    }
+
+    override suspend fun recordPlaybackProgress(
+        channel: String,
+        theme: String,
+        title: String,
+        positionSeconds: Long,
+        durationSeconds: Long
+    ) {
+        withContext(Dispatchers.IO) {
+            historyDao?.let { dao ->
+                val now = platform.Foundation.NSDate().timeIntervalSince1970.toLong() * 1000
+                // Consider completed if >90% watched
+                val isCompleted = durationSeconds > 0 &&
+                    (positionSeconds.toFloat() / durationSeconds.toFloat()) >= 0.9f
+
+                // Check if entry exists
+                val existingEntry = dao.getEntry(channel, theme, title)
+                if (existingEntry != null) {
+                    // Update existing entry
+                    dao.updateProgress(
+                        channel = channel,
+                        theme = theme,
+                        title = title,
+                        positionSeconds = positionSeconds,
+                        durationSeconds = durationSeconds,
+                        watchedAt = now,
+                        isCompleted = isCompleted
+                    )
+                } else {
+                    // Create new entry
+                    val entry = HistoryEntry(
+                        channel = channel,
+                        theme = theme,
+                        title = title,
+                        resumePositionSeconds = positionSeconds,
+                        durationSeconds = durationSeconds,
+                        watchedAt = now,
+                        isCompleted = isCompleted
+                    )
+                    dao.upsert(entry)
+                }
+                PlatformLogger.info("IosMediaRepository", "Recorded progress: $channel/$theme/$title at $positionSeconds/${durationSeconds}s")
+            }
+        }
+    }
+
+    override suspend fun getResumePosition(channel: String, theme: String, title: String): Long? {
+        return withContext(Dispatchers.IO) {
+            historyDao?.getResumePosition(channel, theme, title)
+        }
+    }
+
+    override fun getHistoryEntryFlow(channel: String, theme: String, title: String): Flow<HistoryEntry?> {
+        return historyDao?.getEntryFlow(channel, theme, title) ?: flowOf(null)
+    }
+
+    override suspend fun clearHistory() {
+        withContext(Dispatchers.IO) {
+            historyDao?.clearAll()
+            PlatformLogger.info("IosMediaRepository", "Cleared all playback history")
         }
     }
 }

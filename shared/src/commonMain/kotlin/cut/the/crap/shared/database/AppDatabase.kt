@@ -1,5 +1,6 @@
 package cut.the.crap.shared.database
 
+import androidx.room.AutoMigration
 import androidx.room.ConstructedBy
 import androidx.room.Database
 import androidx.room.RoomDatabase
@@ -12,13 +13,18 @@ import kotlinx.coroutines.IO
  * Room database for Kuckmal - KMP compatible
  */
 @Database(
-    entities = [MediaEntry::class],
-    version = 1,
-    exportSchema = true
+    entities = [MediaEntry::class, FavoriteEntry::class, HistoryEntry::class],
+    version = 2,
+    exportSchema = true,
+    autoMigrations = [
+        AutoMigration(from = 1, to = 2)
+    ]
 )
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun mediaDao(): MediaDao
+    abstract fun favoriteDao(): FavoriteDao
+    abstract fun historyDao(): HistoryDao
 
     companion object {
         const val DATABASE_NAME = "kuckmal.db"

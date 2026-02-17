@@ -1,5 +1,7 @@
 package cut.the.crap.shared.repository
 
+import cut.the.crap.shared.database.FavoriteEntry
+import cut.the.crap.shared.database.HistoryEntry
 import cut.the.crap.shared.database.MediaEntry
 import kotlinx.coroutines.flow.Flow
 
@@ -208,4 +210,104 @@ interface MediaRepository {
         theme: String,
         minTimestamp: Long = 0
     ): Flow<List<MediaEntry>>
+
+    // =========================================================================
+    // Favorites / Watch Later
+    // Default implementations provided to avoid breaking existing code.
+    // Platform-specific implementations should override these methods.
+    // =========================================================================
+
+    /**
+     * Get all favorites of a specific type as Flow (reactive)
+     * @param listType "favorite" or "watchLater"
+     */
+    fun getFavoritesFlow(listType: String = "favorite"): Flow<List<FavoriteEntry>> =
+        kotlinx.coroutines.flow.flowOf(emptyList())
+
+    /**
+     * Add an entry to favorites
+     * @param listType "favorite" or "watchLater"
+     */
+    suspend fun addToFavorites(
+        channel: String,
+        theme: String,
+        title: String,
+        listType: String = "favorite"
+    ) {
+        // Default no-op implementation
+    }
+
+    /**
+     * Remove an entry from favorites (any type)
+     */
+    suspend fun removeFromFavorites(channel: String, theme: String, title: String) {
+        // Default no-op implementation
+    }
+
+    /**
+     * Check if an entry is in favorites (any type) as Flow (reactive)
+     */
+    fun isFavoriteFlow(channel: String, theme: String, title: String): Flow<Boolean> =
+        kotlinx.coroutines.flow.flowOf(false)
+
+    /**
+     * Check if an entry is in a specific list type as Flow (reactive)
+     */
+    fun isFavoriteByTypeFlow(
+        channel: String,
+        theme: String,
+        title: String,
+        listType: String
+    ): Flow<Boolean> = kotlinx.coroutines.flow.flowOf(false)
+
+    // =========================================================================
+    // Playback History
+    // Default implementations provided to avoid breaking existing code.
+    // Platform-specific implementations should override these methods.
+    // =========================================================================
+
+    /**
+     * Get continue watching entries (not completed) as Flow (reactive)
+     */
+    fun getContinueWatchingFlow(limit: Int = 20): Flow<List<HistoryEntry>> =
+        kotlinx.coroutines.flow.flowOf(emptyList())
+
+    /**
+     * Get full playback history as Flow (reactive)
+     */
+    fun getHistoryFlow(limit: Int = 50): Flow<List<HistoryEntry>> =
+        kotlinx.coroutines.flow.flowOf(emptyList())
+
+    /**
+     * Record playback progress for an entry
+     * Automatically marks as completed when >90% watched
+     */
+    suspend fun recordPlaybackProgress(
+        channel: String,
+        theme: String,
+        title: String,
+        positionSeconds: Long,
+        durationSeconds: Long
+    ) {
+        // Default no-op implementation
+    }
+
+    /**
+     * Get resume position for a specific entry (in seconds)
+     * Returns null if no history exists
+     */
+    suspend fun getResumePosition(channel: String, theme: String, title: String): Long? = null
+
+    /**
+     * Get history entry for a specific media item as Flow (reactive)
+     */
+    fun getHistoryEntryFlow(channel: String, theme: String, title: String): Flow<HistoryEntry?> =
+        kotlinx.coroutines.flow.flowOf(null)
+
+    /**
+     * Clear all playback history
+     */
+    suspend fun clearHistory() {
+        // Default no-op implementation
+    }
 }

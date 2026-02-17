@@ -72,13 +72,38 @@
 
 ## Future Enhancements (All Platforms)
 
-- [ ] Favorites/Watch Later functionality
-- [ ] Playback history and resume position
-- [ ] Deep linking support (partially implemented in tvOS)
-- [ ] Enhanced offline capabilities
+- [x] Favorites/Watch Later functionality - IMPLEMENTED
+  - Database entities: `FavoriteEntry`, `FavoriteDao` in `shared/src/commonMain/kotlin/cut/the/crap/shared/database/`
+  - Repository methods: `addToFavorites()`, `removeFromFavorites()`, `getFavoritesFlow()`, `isFavoriteFlow()`
+  - Supports "favorite" and "watchLater" list types
+  - Platform implementations: Android (full), iOS (full), Desktop (full)
+- [x] Playback history and resume position - IMPLEMENTED
+  - Database entities: `HistoryEntry`, `HistoryDao` in `shared/src/commonMain/kotlin/cut/the/crap/shared/database/`
+  - Repository methods: `recordPlaybackProgress()`, `getResumePosition()`, `getContinueWatchingFlow()`, `getHistoryFlow()`, `clearHistory()`
+  - Auto-marks as completed when >90% watched
+  - Platform implementations: Android (full), iOS (full), Desktop (full)
+- [x] Deep linking support - IMPLEMENTED (Android, iOS, tvOS)
+  - URL scheme: `kuckmal://`
+  - Supported URLs:
+    - `kuckmal://play?channel=ARD&theme=Tagesschau&title=VideoTitle` - Navigate to video detail
+    - `kuckmal://browse?channel=ZDF` - Browse specific channel
+    - `kuckmal://search?q=tatort` - Search query
+  - Android: Intent filter in `AndroidManifest.xml`, handler in `ComposeActivity.kt`
+  - iOS: CFBundleURLTypes in `Info.plist`, handler in `iOSApp.swift` + `KoinHelper.kt`
+  - tvOS: Already implemented in `KuckmalTVApp.swift`
+- [x] Enhanced offline capabilities (tvOS) - IMPLEMENTED
+  - `TvosCache` class: `shared-tvos/src/tvosMain/kotlin/cut/the/crap/shared/cache/TvosCache.kt`
+  - TTL-based caching with stale fallback for offline mode
+  - Cache TTLs: channels (1hr), themes (15min), entries (5min)
+  - Methods: `clearAllCaches()`, `evictExpiredCaches()`, `hasCachedData()`
+- [x] Sync status tracking - IMPLEMENTED
+  - `SyncStatus` sealed class in `shared/src/commonMain/kotlin/cut/the/crap/shared/sync/SyncStatus.kt`
+  - States: Idle, Syncing, Synced(timestamp), Error(message), Offline
+  - tvOS implementation tracks sync status via StateFlow
 - [ ] User preferences synchronization
 - [ ] Subtitle integration in video player
 - [ ] Parental controls / content rating
+- [ ] UI components for favorites/history (heart icon, continue watching section, etc.)
 
 ## Backend API
 

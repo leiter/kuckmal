@@ -1,5 +1,7 @@
 package cut.the.crap.android.compose
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -91,6 +93,9 @@ class ComposeActivity : ComponentActivity() {
             viewModel.navigateToThemes(null)
         }
 
+        // Handle deep link from launch intent
+        handleDeepLink(intent)
+
         setContent {
             KuckmalTheme {
                 ComposeMainScreen(
@@ -114,6 +119,65 @@ class ComposeActivity : ComponentActivity() {
         } else {
             // No Compose handlers, finish activity
             super.onBackPressed()
+        }
+    }
+
+    /**
+     * Handle new intents when activity is already running (singleTask launch mode)
+     */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleDeepLink(intent)
+    }
+
+    /**
+     * Handle deep links from kuckmal:// URLs
+     *
+     * Supported URLs:
+     * - kuckmal://play?channel=ARD&theme=Tagesschau&title=VideoTitle
+     * - kuckmal://browse?channel=ZDF
+     * - kuckmal://search?q=tatort
+     */
+    private fun handleDeepLink(intent: Intent?) {
+        val uri = intent?.data ?: return
+        if (uri.scheme != "kuckmal") return
+
+        Log.d(TAG, "Handling deep link: $uri")
+
+        when (uri.host) {
+            "play" -> {
+                // Navigate to detail view for specific video
+                val channel = uri.getQueryParameter("channel") ?: return
+                val theme = uri.getQueryParameter("theme") ?: return
+                val title = uri.getQueryParameter("title") ?: return
+
+                Log.d(TAG, "Deep link play: channel=$channel, theme=$theme, title=$title")
+                viewModel.navigateToDetail(title, channel, theme)
+            }
+            "browse" -> {
+                // Navigate to browse view, optionally filtered by channel
+                val channel = uri.getQueryParameter("channel")
+                Log.d(TAG, "Deep link browse: channel=$channel")
+
+                if (channel != null) {
+                    viewModel.navigateToThemes(channel)
+                } else {
+                    viewModel.navigateToThemes(null)
+                }
+            }
+            "search" -> {
+                // Navigate to search with query
+                val query = uri.getQueryParameter("q")
+                Log.d(TAG, "Deep link search: query=$query")
+
+                if (!query.isNullOrBlank()) {
+                    viewModel.updateSearchQuery(query)
+                }
+            }
+            else -> {
+                Log.w(TAG, "Unknown deep link host: ${uri.host}")
+            }
         }
     }
 }

@@ -24,3 +24,90 @@ fun doInitKoin() {
 class KoinHelper : KoinComponent {
     fun getSharedViewModel(): SharedViewModel = get()
 }
+
+/**
+ * Deep link handler for iOS
+ * Called from Swift: DeepLinkHandlerKt.handleDeepLink(url)
+ *
+ * Supported URLs:
+ * - kuckmal://play?channel=ARD&theme=Tagesschau&title=VideoTitle
+ * - kuckmal://browse?channel=ZDF
+ * - kuckmal://search?q=tatort
+ */
+fun handleDeepLink(urlString: String): Boolean {
+    val helper = KoinHelper()
+    val viewModel = helper.getSharedViewModel()
+
+    // Parse URL components
+    val url = parseUrl(urlString) ?: return false
+    if (url.scheme != "kuckmal") return false
+
+    return when (url.host) {
+        "play" -> {
+            val channel = url.queryParams["channel"] ?: return false
+            val theme = url.queryParams["theme"] ?: return false
+            val title = url.queryParams["title"] ?: return false
+            viewModel.navigateToDetail(title, channel, theme)
+            true
+        }
+        "browse" -> {
+            val channel = url.queryParams["channel"]
+            viewModel.navigateToThemes(channel)
+            true
+        }
+        "search" -> {
+            val query = url.queryParams["q"]
+            if (!query.isNullOrBlank()) {
+                viewModel.updateSearchQuery(query)
+            }
+            true
+        }
+        else -> false
+    }
+}
+
+/**
+ * Simple URL parsing for deep links
+ */
+private data class ParsedUrl(
+    val scheme: String,
+    val host: String?,
+    val queryParams: Map<String, String>
+)
+
+private fun parseUrl(urlString: String): ParsedUrl? {
+    // Parse scheme
+    val schemeEnd = urlString.indexOf("://")
+    if (schemeEnd < 0) return null
+
+    val scheme = urlString.substring(0, schemeEnd)
+    val rest = urlString.substring(schemeEnd + 3)
+
+    // Parse host and query
+    val queryStart = rest.indexOf('?')
+    val host: String?
+    val queryString: String?
+
+    if (queryStart >= 0) {
+        host = rest.substring(0, queryStart).takeIf { it.isNotEmpty() }
+        queryString = rest.substring(queryStart + 1)
+    } else {
+        host = rest.takeIf { it.isNotEmpty() }
+        queryString = null
+    }
+
+    // Parse query parameters
+    val queryParams = mutableMapOf<String, String>()
+    queryString?.split('&')?.forEach { param ->
+        val equalsIndex = param.indexOf('=')
+        if (equalsIndex > 0) {
+            val key = param.substring(0, equalsIndex)
+            val value = param.substring(equalsIndex + 1)
+                .replace("%20", " ")
+                .replace("+", " ")
+            queryParams[key] = value
+        }
+    }
+
+    return ParsedUrl(scheme, host, queryParams)
+}

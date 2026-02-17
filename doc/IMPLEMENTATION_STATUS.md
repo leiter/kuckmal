@@ -1,6 +1,6 @@
 # Kuckmal Implementation Status
 
-**Last Updated**: February 17, 2026
+**Last Updated**: February 18, 2026
 
 This document provides a comprehensive overview of the implementation status across all platforms and features.
 
@@ -21,6 +21,9 @@ This document provides a comprehensive overview of the implementation status acr
 | Compose UI | ✅ | Modern Material Design 3 |
 | Database | ✅ | Room KMP with SQLite |
 | Koin DI | ✅ | Full dependency injection |
+| Deep linking | ✅ | `kuckmal://` scheme for play/browse/search |
+| Favorites/Watch Later | ✅ | Database layer ready |
+| Playback history | ✅ | Database layer ready |
 
 **Location**: `androidApp/src/main/java/cut/the/crap/android/`
 
@@ -50,6 +53,8 @@ This document provides a comprehensive overview of the implementation status acr
 | Video playback | ✅ | VLC → MPV → System browser fallback |
 | Video downloads | ✅ | Quality selection, progress tracking |
 | Database | ✅ | Room KMP with SQLite |
+| Favorites/Watch Later | ✅ | Database layer ready |
+| Playback history | ✅ | Database layer ready |
 
 **Notes**:
 - Video player preference configurable via Settings menu (VLC, MPV, Browser, or Auto)
@@ -70,6 +75,9 @@ This document provides a comprehensive overview of the implementation status acr
 | Film list download | ✅ | Background download |
 | Database | ✅ | Room KMP |
 | Koin DI | ✅ | Full dependency injection |
+| Deep linking | ✅ | `kuckmal://` scheme for play/browse/search |
+| Favorites/Watch Later | ✅ | Database layer ready |
+| Playback history | ✅ | Database layer ready |
 
 **Location**: `iosApp/iosApp/`
 
@@ -129,12 +137,16 @@ This document provides a comprehensive overview of the implementation status acr
 | Kotlin interop | ✅ | TvosApiMediaRepository via Koin |
 | Real API connection | ✅ | Connected to Flask backend |
 | Offline error handling | ✅ | Shows offline message when no network |
+| **API caching** | ✅ | TTL-based with stale fallback |
+| **Sync status** | ✅ | Idle/Syncing/Synced/Error/Offline states |
 | Real video playback | ⚠️ | Uses real URLs from API (needs server config) |
 
 **Notes**:
 - Configured for production API at `https://api.kuckmal.cutthecrap.link`
 - `TvosMockMediaRepository` still exists but is no longer used (replaced by `TvosApiMediaRepository`)
 - Offline state properly handled with retry functionality
+- **Enhanced caching**: `TvosCache` with TTLs (channels: 1hr, themes: 15min, entries: 5min)
+- **Stale cache fallback**: Returns cached data when offline, even if expired
 
 **Location**:
 - Swift: `tvosApp/tvosApp/`
@@ -174,11 +186,17 @@ shared/src/commonMain/kotlin/cut/the/crap/shared/
 │   ├── PlatformLogger.kt       # Platform logging (expect/actual)
 │   └── XzDecompressor.kt       # XZ decompression (expect/actual)
 ├── database/
-│   ├── AppDatabase.kt          # Room database definition
-│   ├── MediaDao.kt             # Data access object
-│   └── MediaEntry.kt           # Room entity
+│   ├── AppDatabase.kt          # Room database definition (v2)
+│   ├── MediaDao.kt             # Media data access object
+│   ├── MediaEntry.kt           # Room entity for media
+│   ├── FavoriteEntry.kt        # Room entity for favorites/watch later
+│   ├── FavoriteDao.kt          # Favorites data access object
+│   ├── HistoryEntry.kt         # Room entity for playback history
+│   └── HistoryDao.kt           # History data access object
 ├── repository/
-│   └── MediaRepository.kt      # Repository interface
+│   └── MediaRepository.kt      # Repository interface (includes favorites/history)
+├── sync/
+│   └── SyncStatus.kt           # Sync status sealed class
 ├── viewmodel/
 │   ├── SharedViewModel.kt      # Cross-platform ViewModel
 │   └── ViewState.kt            # UI state sealed classes
@@ -199,6 +217,21 @@ shared/src/commonMain/kotlin/cut/the/crap/shared/
         └── OrientationUtil.kt  # Orientation helpers
 ```
 
+### tvOS Shared Module Structure
+
+```
+shared-tvos/src/tvosMain/kotlin/cut/the/crap/shared/
+├── cache/
+│   └── TvosCache.kt            # TTL-based caching for offline support
+├── sync/
+│   └── SyncStatus.kt           # Sync status for tvOS
+├── repository/
+│   ├── TvosApiMediaRepository.kt   # API repository with caching
+│   ├── TvosMockMediaRepository.kt  # Mock data (deprecated)
+│   └── TvosFallbackMediaRepository.kt
+└── ...
+```
+
 ---
 
 ## Feature Matrix
@@ -217,13 +250,31 @@ shared/src/commonMain/kotlin/cut/the/crap/shared/
 | Film list download | ✅ | ✅ | ✅ | via API | via API | via API |
 | Time period filter | ✅ | ✅ | ✅ | ✅ | ✅ | - |
 | Real data | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Offline support | ✅ | ✅ | ✅ | ❌ | ❌ | ⚠️ |
+| Offline support | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ |
+| **Deep linking** | ✅ | - | ✅ | - | - | ✅ |
+| **Favorites DB** | ✅ | ✅ | ✅ | - | - | - |
+| **History DB** | ✅ | ✅ | ✅ | - | - | - |
+| **API caching** | - | - | - | - | - | ✅ |
+| **Sync status** | - | - | - | - | - | ✅ |
 
 Legend: ✅ Complete | ⚠️ Partial | ❌ Not working | - Not applicable
+
+### New Features (February 2026)
+
+- **Favorites/Watch Later**: Database layer for saving content (`FavoriteEntry`, `FavoriteDao`)
+- **Playback History**: Database layer for resume position (`HistoryEntry`, `HistoryDao`)
+- **Deep Linking**: `kuckmal://play`, `kuckmal://browse`, `kuckmal://search` URLs
+- **tvOS Caching**: TTL-based caching with stale fallback for offline mode
+- **Sync Status**: Tracking sync state (Idle, Syncing, Synced, Error, Offline)
 
 ---
 
 ## Priority Fixes
+
+### Medium Priority
+1. **UI for Favorites/History**: Add heart icon to detail view, favorites screen, continue watching section
+2. **Video player integration**: Hook up `recordPlaybackProgress()` to video players on each platform
+3. **tvOS favorites/history**: Extend to API-based caching or sync
 
 ### Low Priority
 1. Android Compose broadcaster logo images
@@ -259,3 +310,35 @@ Legend: ✅ Complete | ⚠️ Partial | ❌ Not working | - Not applicable
 | [WEBOS_SETUP.md](WEBOS_SETUP.md) | webOS deployment guide |
 | [flask-api-plan.md](flask-api-plan.md) | Backend API design |
 | [TODO.md](../TODO.md) | Current task list |
+
+---
+
+## Database Schema (v2)
+
+### Tables
+
+| Table | Description |
+|-------|-------------|
+| `media_entries` | Main media content (channels, themes, titles) |
+| `favorite_entries` | User favorites and watch later items |
+| `history_entries` | Playback history with resume position |
+
+### New in v2
+
+**favorite_entries**:
+- `id` (PK), `channel`, `theme`, `title`, `addedAt`, `listType`
+- Unique constraint on (channel, theme, title)
+
+**history_entries**:
+- `id` (PK), `channel`, `theme`, `title`, `resumePositionSeconds`, `durationSeconds`, `watchedAt`, `isCompleted`
+- Unique constraint on (channel, theme, title)
+
+---
+
+## Deep Link URLs
+
+| URL | Description | Platforms |
+|-----|-------------|-----------|
+| `kuckmal://play?channel=ARD&theme=Tagesschau&title=Video` | Open specific video | Android, iOS, tvOS |
+| `kuckmal://browse?channel=ZDF` | Browse channel | Android, iOS, tvOS |
+| `kuckmal://search?q=tatort` | Search query | Android, iOS |
