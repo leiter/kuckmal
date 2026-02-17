@@ -1,0 +1,116 @@
+appId: cut.the.crap.kuckmal
+---
+# App Store Screenshots: Captures key screens for App Store listing
+# Prerequisites: Run prepare_app.yaml first to ensure data is loaded
+# Screenshots are saved to the default Maestro output directory
+# Copy screenshots to appstore/screenshots/ after running
+
+- launchApp
+
+# Verify data is loaded before proceeding
+- assertVisible:
+    text: "Alle Themen"
+
+- waitForAnimationToEnd
+
+# ============================================
+# Screenshot 1: Home / Channel List
+# Shows all available broadcasters
+# ============================================
+- takeScreenshot: appstore_01_home_channels
+
+# ============================================
+# Screenshot 2: Channel Selected (ZDF)
+# Shows content from a specific channel
+# ============================================
+- tapOn:
+    text: "ZDF"
+
+- waitForAnimationToEnd
+
+- takeScreenshot: appstore_02_channel_zdf
+
+# ============================================
+# Screenshot 3: Theme Browsing
+# Navigate to themes view
+# ============================================
+- tapOn:
+    text: "Alle Themen"
+
+- waitForAnimationToEnd
+
+- takeScreenshot: appstore_03_themes
+
+# Go back to home for search
+- tapOn:
+    text: "Alle Sender"
+
+- waitForAnimationToEnd
+
+# ============================================
+# Screenshot 4: Search Results
+# Search for "Tatort" to show search functionality
+# ============================================
+- tapOn:
+    accessibilityLabel: "Search"
+
+- waitForAnimationToEnd
+
+- inputText: "Tatort"
+
+# Wait for search results
+- extendedWaitUntil:
+    visible:
+      text: ".*Tatort.*"
+    timeout: 5000
+
+- waitForAnimationToEnd
+
+- takeScreenshot: appstore_04_search_results
+
+# Close search
+- tapOn:
+    accessibilityLabel: "Close"
+
+- waitForAnimationToEnd
+
+# ============================================
+# Screenshot 5: Media Detail View
+# Tap on a specific item to show detail view
+# ============================================
+# First ensure we're showing some content
+- tapOn:
+    text: "ARD"
+
+- waitForAnimationToEnd
+
+# Tap on the first available item in the list
+# This opens the detail view
+- runFlow:
+    when:
+      visible:
+        text: ".*"
+    commands:
+      # Scroll down slightly to reveal content items
+      - scroll:
+          direction: DOWN
+
+      - waitForAnimationToEnd
+
+      # Tap on an item (try finding any clickable content)
+      - tapOn:
+          index: 0
+          optional: true
+
+      - waitForAnimationToEnd
+
+- takeScreenshot: appstore_05_media_detail
+
+# ============================================
+# Complete - Summary of screenshots taken:
+# 1. appstore_01_home_channels - Main channel list
+# 2. appstore_02_channel_zdf - ZDF channel content
+# 3. appstore_03_themes - Theme browsing view
+# 4. appstore_04_search_results - Search for "Tatort"
+# 5. appstore_05_media_detail - Media detail view
+# ============================================

@@ -1,0 +1,1 @@
+mediathek,streaming,fernsehen,ARD,ZDF,Arte,3sat,Phoenix,TV,Sendungen,Dokus,Nachrichten

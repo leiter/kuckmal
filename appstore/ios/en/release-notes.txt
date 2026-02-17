@@ -1,0 +1,11 @@
+First release of Kuckmal!
+
+With this app you can:
+• Browse all German public broadcasting media libraries
+• Explore channels and topics
+• Search for shows
+• View detailed information for all content
+
+Supported broadcasters: ARD, ZDF, Arte, 3sat, Phoenix, BR, HR, MDR, NDR, RBB, SR, SWR, WDR, KiKA, and more.
+
+Enjoy discovering!

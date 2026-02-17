@@ -50,13 +50,25 @@
 - [ ] Integrate broadcaster logo images in Compose BrowseView (logos exist in `res/drawable/`)
 - [ ] Add shared element transitions for detail view (requires Compose 1.7.0+)
 
-## iOS (App Store Preparation - WIP)
+## iOS (App Store Preparation)
 
 - [x] App is fully functional
-- [ ] App Store submission preparation (in progress)
-  - **WIP**: `appstore/` directory with privacy policies (EN/DE), review notes, screenshot guide
-  - **WIP**: Maestro automation for App Store screenshots (`iosApp/.maestro/appstore_screenshots.yaml`)
-  - **WIP**: App preparation flow (`iosApp/.maestro/prepare_app.yaml`)
+- [x] App Store submission preparation
+  - [x] Privacy policies (EN/DE): `appstore/privacy-policy-*.md`
+  - [x] App descriptions (EN/DE): `appstore/ios/*/description.txt`
+  - [x] App subtitles (EN/DE): `appstore/ios/*/subtitle.txt`
+  - [x] Keywords (EN/DE): `appstore/ios/*/keywords.txt`
+  - [x] Release notes (EN/DE): `appstore/ios/*/release-notes.txt`
+  - [x] Review notes: `appstore/review-notes.txt`
+  - [x] Support page: `appstore/support-page.md`
+  - [x] Screenshot guide: `appstore/SCREENSHOT_GUIDE.md`
+  - [x] Submission guide: `appstore/APP_STORE_SUBMISSION.md`
+  - [x] Maestro automation: `iosApp/.maestro/appstore_screenshots.yaml`
+- [ ] **User action required**:
+  - [ ] Replace `[YOUR_EMAIL]` placeholders in privacy policies, review notes, support page
+  - [ ] Host privacy policy and support page at URLs
+  - [ ] Capture screenshots using Maestro flows
+  - [ ] Create App Store Connect record and upload
 
 ## Future Enhancements (All Platforms)
 

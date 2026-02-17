@@ -1,0 +1,50 @@
+appId: cut.the.crap.kuckmal
+---
+# Prepare App: Downloads film list to populate app with data
+# Run this flow before capturing App Store screenshots
+# This ensures the app has content to display
+
+- launchApp:
+    clearState: true
+
+# Wait for app to fully load
+- assertVisible:
+    text: "Kuckmal"
+
+- waitForAnimationToEnd
+
+# Look for the Download Film List button
+# The button should be visible when no data exists
+- runFlow:
+    when:
+      visible: "Download Film List"
+    commands:
+      # Tap the download button
+      - tapOn:
+          text: "Download Film List"
+
+      - takeScreenshot: prepare_01_downloading
+
+      # Wait for download to complete (this may take a while)
+      # The film list is ~170MB compressed, so allow generous timeout
+      - extendedWaitUntil:
+          visible:
+            text: "Alle Themen"
+          timeout: 120000
+
+      - waitForAnimationToEnd
+
+      - takeScreenshot: prepare_02_data_loaded
+
+# If "Alle Themen" is already visible, data is already loaded
+- runFlow:
+    when:
+      visible: "Alle Themen"
+    commands:
+      - takeScreenshot: prepare_data_already_loaded
+
+# Final verification - confirm channels are visible
+- assertVisible:
+    text: "ARD"
+
+- takeScreenshot: prepare_complete

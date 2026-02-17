@@ -1,0 +1,36 @@
+Notes for Apple Review Team
+============================
+
+APP OVERVIEW
+Kuckmal is an aggregator app for German public broadcasting media libraries (Mediatheken). It provides a unified interface to browse and search content from ARD, ZDF, Arte, 3sat, Phoenix, and other German public broadcasters.
+
+NO LOGIN REQUIRED
+- The app does not require any user account or login
+- All features are accessible immediately upon launch
+- No demo account is needed for testing
+
+CONTENT SOURCE
+- All content comes from publicly available APIs of German public broadcasters
+- The broadcasters (ARD, ZDF, etc.) are publicly funded institutions similar to PBS/NPR in the US or BBC in the UK
+- Content is freely available to anyone in Germany and many programs worldwide
+- The app aggregates publicly accessible metadata and provides direct links to the broadcaster streaming servers
+
+HOW TO TEST
+1. Launch the app
+2. Browse channels by selecting any broadcaster (e.g., ARD, ZDF)
+3. Use the search feature to find specific shows
+4. Tap on any item to see detailed information
+5. Links open the content in the respective broadcaster's player
+
+DATA & PRIVACY
+- No user data is collected
+- No analytics or tracking
+- No advertisements
+- All data stays on device
+
+LANGUAGE
+- The app interface supports German and English
+- Content is primarily in German as it comes from German broadcasters
+
+CONTACT
+For any questions during review, please contact: [YOUR_EMAIL]
