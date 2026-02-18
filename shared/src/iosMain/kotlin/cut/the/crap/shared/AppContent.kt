@@ -300,7 +300,7 @@ fun AppContent() {
                     // Detail view with back button
                     val detail = viewState as ViewState.Detail
                     Column(modifier = Modifier.fillMaxSize()) {
-                        // Back button bar
+                        // Back button bar with safe area padding
                         Surface(
                             color = MaterialTheme.colorScheme.surface,
                             tonalElevation = 2.dp
@@ -308,11 +308,13 @@ fun AppContent() {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
+                                    .windowInsetsPadding(WindowInsets.statusBars)
                                     .padding(8.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 IconButton(onClick = {
                                     // Navigate back to themes/titles
+                                    selectedTitle = null
                                     viewModel.navigateToThemes(
                                         channel = detail.navigationChannel,
                                         theme = detail.navigationTheme
@@ -368,6 +370,7 @@ fun AppContent() {
                             else -> "Alle Themen"
                         },
                         isShowingTitles = viewState.theme != null,
+                        showBackButton = viewState.theme != null || selectedChannel != null,
                         hasMoreItems = contentList.size >= 1200,
                         searchQuery = searchQuery,
                         isSearching = isSearching,
@@ -380,6 +383,24 @@ fun AppContent() {
                             if (!visible) {
                                 searchQuery = ""
                                 searchResults = emptyList()
+                            }
+                        },
+                        onBackClick = {
+                            if (viewState.theme != null) {
+                                // Navigate back from titles to themes (keep channel selection)
+                                viewModel.navigateToThemes(
+                                    channel = selectedChannel?.name,
+                                    theme = null
+                                )
+                                selectedTitle = null
+                            } else if (selectedChannel != null) {
+                                // Unselect channel, go back to "Alle Themen"
+                                selectedChannel = null
+                                viewModel.navigateToThemes(
+                                    channel = null,
+                                    theme = null
+                                )
+                                selectedTitle = null
                             }
                         },
                         onChannelSelected = { channel ->
