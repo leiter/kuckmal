@@ -178,6 +178,38 @@ maestro test iosApp/.maestro/appstore_screenshots.yaml
 
 ---
 
+## Quick Capture Script
+
+The easiest way to capture all screenshots is using the interactive script:
+
+```bash
+./appstore/capture_all_screenshots.sh
+```
+
+This script will:
+1. Build the app if needed
+2. Boot each simulator in sequence
+3. Set up a clean status bar (9:41 AM, full battery)
+4. Guide you through capturing each screenshot
+5. Save screenshots to the correct directories
+
+### Alternative: Manual Capture
+
+For individual screenshots:
+
+```bash
+# Set up clean status bar
+xcrun simctl status_bar booted override --time "9:41" --batteryState charged --batteryLevel 100
+
+# Take screenshot
+xcrun simctl io booted screenshot appstore/screenshots/iphone67/de/01_home.png
+
+# Reset status bar when done
+xcrun simctl status_bar booted clear
+```
+
+---
+
 ## Checklist
 
 - [ ] iPhone 6.7" screenshots (1290 x 2796) - German

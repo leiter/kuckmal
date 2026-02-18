@@ -26,11 +26,11 @@ appId: cut.the.crap.kuckmal
       - takeScreenshot: prepare_01_downloading
 
       # Wait for download to complete (this may take a while)
-      # The film list is ~170MB compressed, so allow generous timeout
+      # The film list is ~170MB compressed, so allow generous timeout (5 minutes)
       - extendedWaitUntil:
           visible:
             text: "Alle Themen"
-          timeout: 120000
+          timeout: 300000
 
       - waitForAnimationToEnd
 

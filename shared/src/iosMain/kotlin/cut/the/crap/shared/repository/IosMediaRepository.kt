@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
+import cut.the.crap.shared.data.currentTimeMillis
 import cut.the.crap.shared.model.MediaEntry as ModelMediaEntry
 
 /**
@@ -328,7 +329,7 @@ class IosMediaRepository(
                     channel = channel,
                     theme = theme,
                     title = title,
-                    addedAt = platform.Foundation.NSDate().timeIntervalSince1970.toLong() * 1000,
+                    addedAt = currentTimeMillis(),
                     listType = listType
                 )
                 dao.insert(entry)
@@ -378,7 +379,7 @@ class IosMediaRepository(
     ) {
         withContext(Dispatchers.IO) {
             historyDao?.let { dao ->
-                val now = platform.Foundation.NSDate().timeIntervalSince1970.toLong() * 1000
+                val now = currentTimeMillis()
                 // Consider completed if >90% watched
                 val isCompleted = durationSeconds > 0 &&
                     (positionSeconds.toFloat() / durationSeconds.toFloat()) >= 0.9f

@@ -44,22 +44,26 @@ fun handleDeepLink(urlString: String): Boolean {
 
     return when (url.host) {
         "play" -> {
-            val channel = url.queryParams["channel"] ?: return false
-            val theme = url.queryParams["theme"] ?: return false
+            val channel = url.queryParams["channel"]
+            val theme = url.queryParams["theme"]
             val title = url.queryParams["title"] ?: return false
-            viewModel.navigateToDetail(title, channel, theme)
+            // First navigate to the correct context, then to detail
+            if (channel != null || theme != null) {
+                viewModel.navigateToThemes(channel, theme)
+            }
+            viewModel.navigateToDetail(title)
             true
         }
         "browse" -> {
             val channel = url.queryParams["channel"]
-            viewModel.navigateToThemes(channel)
+            val theme = url.queryParams["theme"]
+            viewModel.navigateToThemes(channel, theme)
             true
         }
         "search" -> {
-            val query = url.queryParams["q"]
-            if (!query.isNullOrBlank()) {
-                viewModel.updateSearchQuery(query)
-            }
+            // Search is handled via navigateToThemes with searchFilter set in UI layer
+            // Deep link can navigate to themes view where user can initiate search
+            viewModel.navigateToThemes()
             true
         }
         else -> false

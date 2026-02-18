@@ -106,6 +106,7 @@ fun AppContent() {
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             // Video download progress bar
             videoDownloadProgress?.let { (title, progress) ->
