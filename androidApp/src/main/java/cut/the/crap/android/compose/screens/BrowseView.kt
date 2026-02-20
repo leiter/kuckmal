@@ -58,7 +58,8 @@ fun BrowseView(
     onBackClick: () -> Unit = {},
     onTimePeriodClick: () -> Unit = {},
     onCheckUpdateClick: () -> Unit = {},
-    onReinstallClick: () -> Unit = {}
+    onReinstallClick: () -> Unit = {},
+    showBackButton: Boolean = isShowingTitles
 ) {
     Column(
         modifier = Modifier
@@ -73,7 +74,7 @@ fun BrowseView(
             isSearchVisible = isSearchVisible,
             onSearchQueryChanged = onSearchQueryChanged,
             onSearchVisibilityChanged = onSearchVisibilityChanged,
-            showBackButton = isShowingTitles,
+            showBackButton = showBackButton,
             onBackClick = onBackClick,
             onTimePeriodClick = onTimePeriodClick,
             onCheckUpdateClick = onCheckUpdateClick,

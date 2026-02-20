@@ -324,6 +324,7 @@ fun KuckmalNavHost(
                 selectedTitle = currentSelection, // Pass appropriate selection based on state
                 currentTheme = currentThemeLabel,
                 isShowingTitles = showingTitles,
+                showBackButton = showingTitles || selectedChannel != null,
                 hasMoreItems = hasMoreItems,
                 searchQuery = searchQuery,
                 isSearching = isSearching,
@@ -408,7 +409,7 @@ fun KuckmalNavHost(
                     }
                 },
                 onBackClick = {
-                    // Navigate back from titles to themes
+                    // Navigate back within overview states
                     when (val state = overviewState) {
                         is OverviewState.ThemeTitles -> {
                             selectedTheme = null
@@ -419,6 +420,10 @@ fun KuckmalNavHost(
                             } else {
                                 updateOverviewState(OverviewState.AllThemes)
                             }
+                        }
+                        is OverviewState.ChannelThemes -> {
+                            selectedTheme = null
+                            updateOverviewState(OverviewState.AllThemes)
                         }
                         else -> { /* Back button not shown in other states */ }
                     }
