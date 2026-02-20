@@ -39,6 +39,7 @@ import cut.the.crap.android.compose.ui.theme.KuckmalTheme
 import cut.the.crap.android.model.Broadcaster
 import cut.the.crap.android.util.MediaUrlUtils
 import cut.the.crap.android.util.UpdateChecker
+import cut.the.crap.android.util.UpdateCheckerInterface
 import cut.the.crap.android.video.VideoPlayerManager
 import cut.the.crap.shared.ui.navigation.Screen
 import cut.the.crap.android.data.MediaViewModel
@@ -72,7 +73,7 @@ class ComposeActivity : ComponentActivity() {
     private val videoPlayerManager: VideoPlayerManager by inject()
 
     // Inject UpdateChecker for update functionality
-    private val updateChecker: UpdateChecker by inject()
+    private val updateChecker: UpdateCheckerInterface by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,19 +110,6 @@ class ComposeActivity : ComponentActivity() {
         }
     }
 
-    // Let Compose handle back navigation via OnBackPressedDispatcher
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        // Check if OnBackPressedDispatcher has any enabled callbacks
-        if (onBackPressedDispatcher.hasEnabledCallbacks()) {
-            // Let Compose BackHandlers handle it
-            super.onBackPressed()
-        } else {
-            // No Compose handlers, finish activity
-            super.onBackPressed()
-        }
-    }
-
     /**
      * Handle new intents when activity is already running (singleTask launch mode)
      */
@@ -153,7 +141,7 @@ class ComposeActivity : ComponentActivity() {
                 val title = uri.getQueryParameter("title") ?: return
 
                 Log.d(TAG, "Deep link play: channel=$channel, theme=$theme, title=$title")
-                viewModel.navigateToDetail(title, channel, theme)
+                viewModel.navigateToDetail(title)
             }
             "browse" -> {
                 // Navigate to browse view, optionally filtered by channel
@@ -172,7 +160,7 @@ class ComposeActivity : ComponentActivity() {
                 Log.d(TAG, "Deep link search: query=$query")
 
                 if (!query.isNullOrBlank()) {
-                    viewModel.updateSearchQuery(query)
+                    mediaViewModel.updateSearchQuery(query)
                 }
             }
             else -> {
@@ -188,7 +176,7 @@ fun ComposeMainScreen(
     viewModel: SharedViewModel,
     mediaViewModel: MediaViewModel,
     videoPlayerManager: VideoPlayerManager,
-    updateChecker: UpdateChecker,
+    updateChecker: UpdateCheckerInterface,
     filesPath: String
 ) {
     val navController = rememberNavController()

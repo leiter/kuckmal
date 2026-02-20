@@ -8,6 +8,8 @@ import cut.the.crap.android.compose.data.ComposeDataMapper
 import cut.the.crap.android.data.MediaListParser
 import cut.the.crap.android.data.MediaViewModel
 import cut.the.crap.android.repository.DownloadRepository
+import cut.the.crap.android.repository.DownloadRepositoryInterface
+import cut.the.crap.android.util.UpdateCheckerInterface
 import cut.the.crap.android.repository.MediaRepository
 import cut.the.crap.android.repository.MediaRepositoryImpl
 import cut.the.crap.android.service.DownloadService
@@ -61,7 +63,7 @@ val appModule = module {
     }
 
     // UpdateChecker - Singleton
-    single {
+    single<UpdateCheckerInterface> {
         UpdateChecker(androidContext())
     }
 
@@ -74,7 +76,7 @@ val appModule = module {
     }
 
     // DownloadRepository - Singleton
-    single {
+    single<DownloadRepositoryInterface> {
         DownloadRepository(
             context = androidContext(),
             downloadService = get()

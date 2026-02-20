@@ -7,7 +7,7 @@ import android.os.Looper
 import android.util.Log
 import cut.the.crap.android.R
 import cut.the.crap.android.util.AppConfig
-import cut.the.crap.android.util.UpdateChecker
+import cut.the.crap.android.util.UpdateCheckerInterface
 import java.io.BufferedInputStream
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
@@ -24,7 +24,7 @@ import java.net.URL
  */
 class DownloadService(
     private val context: Context,
-    private val updateChecker: UpdateChecker
+    private val updateChecker: UpdateCheckerInterface
 ) {
 
     private val downloadQueue = mutableListOf<DownloadTask>()
