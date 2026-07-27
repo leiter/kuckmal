@@ -16,7 +16,7 @@
     <!-- Welcome Dialog -->
     <string name="welcome_title">Welcome to Kuckmal</string>
     <string name="welcome_message">To get started, we need to download the media library list.\n\nThis is a one-time setup process.</string>
-    <string name="welcome_download_size">Download size: ~30 MB</string>
+    <string name="welcome_download_size">Download size: ~75 MB</string>
 
     <!-- Progress Dialog -->
     <string name="loading">Loading…</string>

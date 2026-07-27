@@ -1,0 +1,40 @@
+Kuckmal brings the media libraries ("Mediatheken") of the German-language public broadcasters together in a single app. Instead of switching between the ARD, ZDF and Arte apps, you search the entire catalogue at once.
+
+ALL BROADCASTERS, ONE APP
+More than 400,000 items from the libraries of ARD, ZDF, Arte, 3sat, Phoenix, BR, HR, MDR, NDR, RBB, SR, SWR, WDR, KiKA, ORF, SRF and others – bundled and searchable.
+
+EASY NAVIGATION
+• Browse broadcasters: pick a channel and see what it currently offers
+• Explore topics: every series of a channel at a glance
+• Find titles: jump straight to the episode you are looking for
+
+POWERFUL SEARCH
+Full-text search covers titles, topics and descriptions of every available item – across all broadcasters or narrowed to one. A time-period filter hides older material.
+
+DETAILED INFORMATION
+Every item shows broadcast date, time, running time and file size before you start it.
+
+PLAY AND DOWNLOAD
+Play items directly in the app, or download them in your choice of quality (high/low) for later.
+
+OFFLINE CATALOGUE
+The media library index is stored on your device, so browsing and searching stay fast and work without a connection. Playback itself requires internet access.
+
+PRIVACY
+• No account, no registration
+• No advertising
+• No analytics or tracking services
+• Your favourites and history stay on the device
+
+ABOUT FIRST-TIME SETUP
+On first launch Kuckmal downloads the complete media library index (about 75 MB). Setup takes a few minutes depending on your device and temporarily needs several hundred MB of free storage. Wi-Fi is recommended.
+
+GEO NOTICES
+Some items are made available by the broadcasters in certain countries only. Kuckmal points out those restrictions before you start playback.
+
+SUPPORTED BROADCASTERS
+ARD (Das Erste), ZDF, Arte, 3sat, Phoenix, BR, HR, MDR, NDR, RBB, SR, SWR, WDR, KiKA, ZDFtivi, funk, ORF, SRF and more.
+
+Kuckmal is an independent project and is not affiliated with any of the broadcasters named above. All content is streamed directly from the official servers of the respective broadcaster; the metadata is based on the freely available film list of the MediathekView project. Kuckmal does not host, circumvent or modify any content.
+
+Note: the content itself is almost entirely in German.

@@ -102,4 +102,32 @@ object MediaUrlUtils {
         // Not pipe-delimited, just clean normally
         return cleanMediaUrl(targetUrl)
     }
+
+    /**
+     * Whether the URL points at an HLS stream rather than a single media file.
+     *
+     * HLS URLs resolve to a playlist of .ts segments, so DownloadManager can only
+     * fetch the few-KB manifest — never the video. Playback is unaffected; only
+     * downloading has to treat these differently.
+     *
+     * Broadcaster URLs may contain several extensions at once (SRF serves
+     * ".../name.mp4.csmil/index-f4-v1-a1.m3u8"), so this looks for the .m3u8
+     * marker anywhere rather than at the end.
+     */
+    @JvmStatic
+    fun isHlsStream(url: String): Boolean = url.contains(".m3u8", ignoreCase = true)
+
+    /**
+     * File extension to save [url] under.
+     *
+     * .m3u8 is checked before .mp4 because HLS URLs frequently contain both and
+     * the stream marker is the more specific signal.
+     */
+    @JvmStatic
+    fun downloadFileExtension(url: String): String = when {
+        isHlsStream(url) -> ".m3u8"
+        url.contains(".mp4", ignoreCase = true) -> ".mp4"
+        url.contains(".webm", ignoreCase = true) -> ".webm"
+        else -> ".mp4"
+    }
 }

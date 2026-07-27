@@ -1,13 +1,19 @@
 package cut.the.crap.android.compose
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -183,6 +189,42 @@ fun ComposeMainScreen(
     val context = LocalContext.current
     val coroutineScope = remember { CoroutineScope(Dispatchers.Main) }
 
+    // DownloadManager writes to the public Downloads directory, which requires the
+    // storage permission to be granted at runtime on API 23-28. From API 29 on the
+    // system owns that destination, so no permission is involved — and below API 23
+    // the permission is granted at install time, so checkSelfPermission already passes.
+    var pendingDownload by remember { mutableStateOf<(() -> Unit)?>(null) }
+    val storagePermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        val download = pendingDownload
+        pendingDownload = null
+        if (isGranted) {
+            download?.invoke()
+        } else {
+            Toast.makeText(
+                context,
+                R.string.error_storage_permission_required,
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    fun withStoragePermission(startDownload: () -> Unit) {
+        val needsPermission = Build.VERSION.SDK_INT <= Build.VERSION_CODES.P &&
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED
+
+        if (needsPermission) {
+            pendingDownload = startDownload
+            storagePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        } else {
+            startDownload()
+        }
+    }
+
     // Observe ViewModel state for synchronization with traditional UI
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
     val loadingState by viewModel.loadingState.collectAsStateWithLifecycle()
@@ -321,16 +363,18 @@ fun ComposeMainScreen(
                     }
                 },
                 onDownloadVideo = { entry, isHighQuality ->
-                    // Get the appropriate video URL based on quality selection
-                    val videoUrl = if (isHighQuality) {
-                        val hdUrl = entry.hdUrl.ifEmpty { entry.url }
-                        MediaUrlUtils.reconstructUrl(hdUrl, entry.url)
-                    } else {
-                        val smallUrl = entry.smallUrl.ifEmpty { entry.url }
-                        MediaUrlUtils.reconstructUrl(smallUrl, entry.url)
+                    withStoragePermission {
+                        // Get the appropriate video URL based on quality selection
+                        val videoUrl = if (isHighQuality) {
+                            val hdUrl = entry.hdUrl.ifEmpty { entry.url }
+                            MediaUrlUtils.reconstructUrl(hdUrl, entry.url)
+                        } else {
+                            val smallUrl = entry.smallUrl.ifEmpty { entry.url }
+                            MediaUrlUtils.reconstructUrl(smallUrl, entry.url)
+                        }
+                        val quality = if (isHighQuality) "High" else "Low"
+                        viewModel.downloadVideo(entry, videoUrl, quality)
                     }
-                    val quality = if (isHighQuality) "High" else "Low"
-                    viewModel.downloadVideo(entry, videoUrl, quality)
                 }
             )
         }

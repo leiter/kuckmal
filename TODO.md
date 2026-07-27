@@ -45,6 +45,75 @@
   - Cancel button in download progress dialog
   - Cleans up partial files on cancellation
 
+## Download Feature — Fix and Refinement
+
+### Context
+
+`DownloadManager` cannot download HLS: it fetches the `.m3u8` manifest and stops.
+Before the fix below, tapping "Herunterladen" on an HLS entry wrote a ~6 KB
+playlist file named `.mp4` that looked like a video and would not play.
+
+Measured over a 1,094-entry sample of `Filmliste-diff.xz`:
+
+- **99.4 %** of entries are progressive `.mp4` → download works
+- **0.6 %** are HLS → download impossible with `DownloadManager`
+- HLS is concentrated per broadcaster: **100 % of ORF** entries in the sample, and
+  the SRF entries that exposed the bug. ZDF/ARD/Arte were all progressive.
+- For every HLS entry, **all** quality variants (`Url`, `Url_HD`, `Url_Klein`) were
+  HLS too — 7 of 7. There is no progressive fallback to switch to.
+
+(The sample is a few hours of updates and is ZDF-heavy, so the percentage is
+directional; the per-broadcaster pattern is the reliable part. Re-measure against
+the full `Filmliste-akt.xz` before acting on the exact numbers.)
+
+### Done
+
+- [x] **Option 2 — detect HLS and refuse cleanly** (shipped)
+  - `MediaUrlUtils.isHlsStream()` and `MediaUrlUtils.downloadFileExtension()`
+  - Guard in `di/AppModule.kt` (Compose path, live) and
+    `data/MediaViewModel.kt` (legacy XML path)
+  - Shows `error_download_not_supported_stream` (EN/DE) instead of writing junk
+  - Fixed extension ordering: `.m3u8` is now tested **before** `.mp4`, because
+    SRF URLs contain both (`…/name.mp4.csmil/index-f4-v1-a1.m3u8`)
+  - Verified on device: HLS entry → toast, no file written; ARTE progressive
+    entry → real 355 MB `ftyp mp42` MP4 in `/sdcard/Download/Kuckmal/`
+
+### Options for making HLS actually downloadable
+
+Listed cheapest first. None are required for the Play release — option 2 already
+removes the broken-file behaviour.
+
+- [ ] **Option 3 — media3 `HlsDownloader` (recommended next step)**
+  - `media3-exoplayer-hls` is **already a dependency**, so the machinery is paid for
+  - Downloads all segments into an ExoPlayer `Cache`; gives genuine offline playback
+  - Needs a `DownloadService` + notification, and the player must read from the cache
+  - Trade-off: content lands in app-private cache, **not** as a file in Downloads —
+    so "download" would mean two different things depending on the entry
+- [ ] **Option 4 — fetch segments and concatenate to `.ts`**
+  - MPEG-TS concatenates cleanly, so no ffmpeg is needed
+  - Work: parse media playlist, fetch sequentially, progress/cancel/retry handling
+  - Output is `.ts` — plays in VLC, less reliably in stock gallery apps
+- [ ] **Option 5 — option 4 plus remux to MP4 via `MediaExtractor` + `MediaMuxer`**
+  - Android can remux TS→MP4 without re-encoding
+  - Yields a real `.mp4` in Downloads, consistent with every other entry
+  - Most work of the three, best end result
+- [ ] ~~Option 1 — fall back to a progressive URL for the same entry~~ — **ruled out**,
+  all quality variants of an HLS entry are HLS (verified, 7/7)
+
+Before investing in 3–5: bulk-downloading segmented streams is a different
+posture toward the broadcasters than linking to their files, and ORF in
+particular geo-restricts heavily. Worth a deliberate decision, not just a
+technical one.
+
+### Related cleanups
+
+- [ ] **De-duplicate the download logic.** It exists twice — `di/AppModule.kt`
+  (Compose, live) and `data/MediaViewModel.kt` (legacy XML via `UIManager`).
+  Both had to be patched for this fix. Deleting the legacy path is likely right:
+  `MediaActivity` is `exported=false` and `CLAUDE.md` marks the XML code legacy.
+- [ ] **`Size` shows an empty "MB"** in the detail view for entries with no size
+  field (seen on SRF Tagesschau). Hide the row when the value is missing.
+
 ## Android (Low Priority)
 
 - [ ] Integrate broadcaster logo images in Compose BrowseView (logos exist in `res/drawable/`)

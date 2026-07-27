@@ -1,0 +1,10 @@
+First release of Kuckmal.
+
+• Media libraries of ARD, ZDF, Arte, 3sat, Phoenix, BR, HR, MDR, NDR, RBB, SR, SWR, WDR, KiKA, ORF, SRF and more in one app
+• Full-text search across all broadcasters, with a time-period filter
+• Browse by broadcaster and topic
+• Play and download in your choice of quality
+• Notices for country-restricted items
+• Ad-free, no account, no tracking
+
+Enjoy exploring!

@@ -4,11 +4,13 @@ import android.app.DownloadManager
 import android.content.Context
 import android.widget.Toast
 import androidx.core.net.toUri
+import cut.the.crap.android.R
 import cut.the.crap.android.compose.data.ComposeDataMapper
 import cut.the.crap.android.data.MediaListParser
 import cut.the.crap.android.data.MediaViewModel
 import cut.the.crap.android.repository.DownloadRepository
 import cut.the.crap.android.repository.DownloadRepositoryInterface
+import cut.the.crap.android.util.MediaUrlUtils
 import cut.the.crap.android.util.UpdateCheckerInterface
 import cut.the.crap.android.repository.MediaRepository
 import cut.the.crap.android.repository.MediaRepositoryImpl
@@ -142,6 +144,17 @@ private fun downloadVideo(context: Context, entry: MediaEntry, url: String, qual
         return
     }
 
+    // DownloadManager would only fetch the .m3u8 manifest here, leaving the user with a
+    // few-KB text file that looks like a video. Refuse instead of writing junk.
+    if (MediaUrlUtils.isHlsStream(url)) {
+        Toast.makeText(
+            context,
+            R.string.error_download_not_supported_stream,
+            Toast.LENGTH_LONG
+        ).show()
+        return
+    }
+
     val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as? DownloadManager
     if (downloadManager == null) {
         Toast.makeText(context, "Download manager unavailable", Toast.LENGTH_SHORT).show()
@@ -154,13 +167,7 @@ private fun downloadVideo(context: Context, entry: MediaEntry, url: String, qual
             .replace(Regex("[^a-zA-Z0-9._-]"), "_")
             .take(100)
 
-        // Determine file extension
-        val fileExtension = when {
-            url.contains(".mp4", ignoreCase = true) -> ".mp4"
-            url.contains(".m3u8", ignoreCase = true) -> ".m3u8"
-            url.contains(".webm", ignoreCase = true) -> ".webm"
-            else -> ".mp4"
-        }
+        val fileExtension = MediaUrlUtils.downloadFileExtension(url)
 
         val request = DownloadManager.Request(url.toUri()).apply {
             setTitle(entry.title)

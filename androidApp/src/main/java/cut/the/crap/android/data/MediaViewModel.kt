@@ -1041,6 +1041,19 @@ class MediaViewModel(
             return
         }
 
+        // DownloadManager would only fetch the .m3u8 manifest here, leaving the user with a
+        // few-KB text file that looks like a video. Refuse instead of writing junk.
+        if (MediaUrlUtils.isHlsStream(videoUrl)) {
+            Log.i(TAG, "Skipping download, HLS stream: ${mediaEntry.title}")
+            Toast.makeText(
+                getApplication(),
+                getApplication<Application>()
+                    .getString(R.string.error_download_not_supported_stream),
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
+
         Log.i(TAG, "Downloading video: ${mediaEntry.title} -> $videoUrl")
 
         // Sanitize filename - remove invalid characters
@@ -1048,13 +1061,7 @@ class MediaViewModel(
             .replace(Regex("[^a-zA-Z0-9._-]"), "_")
             .take(100) // Limit filename length
 
-        // Determine file extension from URL or default to .mp4
-        val fileExtension = when {
-            videoUrl.contains(".mp4", ignoreCase = true) -> ".mp4"
-            videoUrl.contains(".m3u8", ignoreCase = true) -> ".m3u8"
-            videoUrl.contains(".webm", ignoreCase = true) -> ".webm"
-            else -> ".mp4"
-        }
+        val fileExtension = MediaUrlUtils.downloadFileExtension(videoUrl)
 
         // Use Android's DownloadManager for robust downloading
         val downloadManager = getApplication<Application>()

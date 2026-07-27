@@ -1,0 +1,10 @@
+Erste Version von Kuckmal.
+
+• Mediatheken von ARD, ZDF, Arte, 3sat, Phoenix, BR, HR, MDR, NDR, RBB, SR, SWR, WDR, KiKA, ORF, SRF und weiteren in einer App
+• Senderübergreifende Volltextsuche mit Zeitraum-Filter
+• Nach Sendern und Themen stöbern
+• Abspielen und Herunterladen in wählbarer Qualität
+• Hinweise zu länderbeschränkten Beiträgen
+• Werbefrei, ohne Konto, ohne Tracking
+
+Viel Spaß beim Entdecken!
