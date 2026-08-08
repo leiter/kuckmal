@@ -4,12 +4,12 @@
 # Captures screenshots for all required devices and languages
 #
 # Usage: ./capture_screenshots.sh [device] [language]
-#   device: iphone67, iphone65, ipad129, or all
+#   device: iphone69, iphone65, ipad129, or all
 #   language: de, en, or all
 #
 # Examples:
 #   ./capture_screenshots.sh all all       # Capture all screenshots
-#   ./capture_screenshots.sh iphone67 de   # Only iPhone 6.7" German
+#   ./capture_screenshots.sh iphone69 de   # Only iPhone 6.7" German
 #   ./capture_screenshots.sh ipad129 en    # Only iPad 12.9" English
 
 set -e
@@ -27,7 +27,7 @@ MAESTRO_OUTPUT_DIR="$HOME/.maestro/tests"
 # iPad Pro 13-inch (M4) = 12.9" (2064x2752) - matches iPad Pro 12.9" requirement
 
 declare -A DEVICES
-DEVICES["iphone67"]="iPhone 16 Pro Max:iphone67"
+DEVICES["iphone69"]="iPhone 16 Pro Max:iphone69"
 DEVICES["iphone65"]="iPhone 16 Plus:iphone65"
 DEVICES["ipad129"]="iPad Pro 13-inch (M4):ipad129"
 
@@ -207,7 +207,7 @@ LANGUAGE_ARG="${2:-all}"
 # Validate arguments
 if [ "$DEVICE_ARG" != "all" ] && [ -z "${DEVICES[$DEVICE_ARG]}" ]; then
     log_error "Unknown device: $DEVICE_ARG"
-    echo "Valid devices: iphone67, iphone65, ipad129, all"
+    echo "Valid devices: iphone69, iphone65, ipad129, all"
     exit 1
 fi
 
@@ -219,7 +219,7 @@ fi
 
 # Determine devices to process
 if [ "$DEVICE_ARG" == "all" ]; then
-    DEVICES_TO_PROCESS=("iphone67" "iphone65" "ipad129")
+    DEVICES_TO_PROCESS=("iphone69" "iphone65" "ipad129")
 else
     DEVICES_TO_PROCESS=("$DEVICE_ARG")
 fi

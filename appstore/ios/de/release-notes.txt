@@ -1,11 +1,13 @@
-Erste Veröffentlichung von Kuckmal!
+Erste Version von Kuckmal.
 
-Mit dieser App kannst du:
-• Alle deutschen öffentlich-rechtlichen Mediatheken durchsuchen
-• Sender und Themen durchstöbern
-• Nach Sendungen suchen
-• Detaillierte Informationen zu allen Inhalten abrufen
+• Mediatheken von ARD, ZDF, Arte, 3sat, Phoenix und vielen weiteren Sendern in einer App
+• Nach Sendern und Themen stöbern
+• Volltextsuche über Titel, Themen und Beschreibungen
+• Zeitraum-Filter für aktuelle Beiträge
+• Detailansicht mit Sendedatum, Laufzeit und Dateigröße
+• Wiedergabe und Download in wählbarer Qualität
+• Ohne Konto, ohne Werbung, ohne Tracking
 
-Unterstützte Sender: ARD, ZDF, Arte, 3sat, Phoenix, BR, HR, MDR, NDR, RBB, SR, SWR, WDR, KiKA und weitere.
+Hinweis: Beim ersten Start wird die Mediathek-Liste heruntergeladen (ca. 75 MB). Das dauert einige Minuten – am besten im WLAN.
 
 Viel Spaß beim Entdecken!

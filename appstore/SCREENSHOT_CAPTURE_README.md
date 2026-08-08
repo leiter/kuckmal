@@ -24,7 +24,7 @@ For each device size and language combination:
 
 | Key | Device | Resolution | App Store Size |
 |-----|--------|------------|----------------|
-| iphone67 | iPhone 16 Pro Max | 1320×2868 @3x | 6.7" (1290×2796) |
+| iphone69 | iPhone 16 Pro Max | 1320×2868 @3x | 6.9" (1320×2868) — **the required size** |
 | iphone65 | iPhone 16 Plus | 1284×2778 @3x | 6.5" (1242×2688) |
 | ipad129 | iPad Pro 13-inch (M4) | 2064×2752 | 12.9" (2048×2732) |
 
@@ -82,7 +82,7 @@ Navigate to each screen manually, then capture:
 ```bash
 # Output directory
 LANG="de"  # or "en"
-DEVICE="iphone67"  # or iphone65, ipad129
+DEVICE="iphone69"  # or iphone65, ipad129
 OUTPUT_DIR="/Users/user289697/Documents/kuckmal/appstore/screenshots/$DEVICE/$LANG"
 mkdir -p "$OUTPUT_DIR"
 
@@ -105,7 +105,7 @@ xcrun simctl status_bar booted clear
 Use the manual capture script for guided screenshot capture:
 
 ```bash
-./appstore/capture_screenshots_manual.sh iphone67 de
+./appstore/capture_screenshots_manual.sh iphone69 de
 ```
 
 ## Changing Simulator Language
@@ -128,7 +128,7 @@ Or use Xcode:
 ```bash
 # 1. Set simulator language to German
 # 2. For each device:
-for DEVICE in iphone67 iphone65 ipad129; do
+for DEVICE in iphone69 iphone65 ipad129; do
   ./appstore/capture_screenshots_manual.sh $DEVICE de
 done
 ```
@@ -138,7 +138,7 @@ done
 ```bash
 # 1. Set simulator language to English
 # 2. For each device:
-for DEVICE in iphone67 iphone65 ipad129; do
+for DEVICE in iphone69 iphone65 ipad129; do
   ./appstore/capture_screenshots_manual.sh $DEVICE en
 done
 ```
@@ -147,7 +147,7 @@ done
 
 ```
 appstore/screenshots/
-├── iphone67/
+├── iphone69/
 │   ├── de/
 │   │   ├── 01_home_channels.png
 │   │   ├── 02_channel_zdf.png

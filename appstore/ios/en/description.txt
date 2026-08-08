@@ -1,38 +1,40 @@
-Kuckmal - German Public TV Libraries in One App
-
-Discover the wealth of German public broadcasting media libraries in one place. Kuckmal brings together the best content from ARD, ZDF, Arte, 3sat, Phoenix, BR, HR, MDR, NDR, RBB, SR, SWR, WDR, KiKA, and many more broadcasters in one clear, easy-to-use app.
+Kuckmal brings the media libraries of the German-language public broadcasters together in a single app. Instead of switching between the ARD, ZDF and Arte apps, you search the entire catalogue with one search.
 
 ALL CHANNELS, ONE APP
-Instead of switching between different apps, Kuckmal bundles all content together. Search the entire catalog of German public broadcasters with a single search.
+More than 400,000 programmes from the media libraries of ARD, ZDF, Arte, 3sat, Phoenix, BR, HR, MDR, NDR, RBB, SR, SWR, WDR, KiKA, ORF, SRF and more — bundled and searchable.
 
 EASY NAVIGATION
-• Browse channels: Select your favorite broadcaster and discover their current offerings
-• Explore topics: Find shows by categories like documentaries, news, culture, or entertainment
-• Search titles: Look for your favorite show directly
+• Browse channels: pick a broadcaster and see what it currently offers
+• Explore topics: all of a channel's series at a glance
+• Find titles: jump straight to the episode you are looking for
 
 POWERFUL SEARCH
-Find exactly what you're looking for. Full-text search covers titles, descriptions, and topics across all available content.
+Full-text search covers titles, topics and descriptions of every available programme — across all channels or narrowed to one. A time-period filter hides older entries.
 
 DETAILED INFORMATION
-Every show is displayed with complete details:
-• Full description
-• Duration and broadcast date
-• Availability and expiration date
-• Direct link to watch
+For every programme you see the broadcast date, time, running time and file size before you start it.
 
-MADE FOR ON-THE-GO
-Perfect for mobile use - whether on the train, in a waiting room, or relaxing on the couch. The app is optimized for fast loading and simple operation.
+PLAY AND DOWNLOAD
+Programmes are handed to your device's player for playback, or can be downloaded in your choice of quality (high/low) for later. Downloaded files appear in the Files app under "Kuckmal".
 
-PRIVACY FIRST
-• No account required
-• No registration
-• No advertisements
-• No tracking services
-• Your data stays on your device
+OFFLINE CATALOGUE
+The media library index is stored on your device, so browsing the catalogue is fast and works without a connection — playback itself requires internet access.
+
+PRIVACY
+• No account, no registration
+• No advertising
+• No analytics or tracking services
+• Your favourites and history stay on your device
+
+BEFORE YOU START
+On first launch Kuckmal downloads the complete media library index (about 75 MB). Setup takes a few minutes depending on your device and temporarily needs several hundred MB of free space. Wi-Fi is recommended.
+
+GEO-RESTRICTIONS
+Some programmes are made available by the broadcasters only in certain countries. Kuckmal flags such restrictions before you start playback. The region used for that hint is read from your device settings and is never transmitted.
 
 SUPPORTED BROADCASTERS
-ARD (Das Erste), ZDF, Arte, 3sat, Phoenix, BR (Bavarian Broadcasting), HR (Hessian Broadcasting), MDR (Central German Broadcasting), NDR (North German Broadcasting), RBB (Berlin-Brandenburg Broadcasting), SR (Saarland Broadcasting), SWR (Southwest Broadcasting), WDR (West German Broadcasting), KiKA, funk, and more.
+ARD (Das Erste), ZDF, Arte, 3sat, Phoenix, BR, HR, MDR, NDR, RBB, SR, SWR, WDR, KiKA, ZDFtivi, funk, ORF, SRF and more.
 
-Kuckmal makes the best of German public television accessible - free, ad-free, and privacy-friendly.
+Kuckmal is an independent project and is not affiliated with any of the broadcasters named. All content comes directly from the official servers of the respective broadcaster; the metadata is based on the freely available film list of the MediathekView project. Kuckmal hosts, circumvents and modifies no content.
 
-Note: Kuckmal is an independent aggregator and is not affiliated with the public broadcasters. All content is provided directly from the official media libraries of the broadcasters.
+Note: the content itself is almost entirely in German.

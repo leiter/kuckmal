@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Privacy Policy"
+---
+
 # Privacy Policy for Kuckmal
 
 *Last updated: August 2026*

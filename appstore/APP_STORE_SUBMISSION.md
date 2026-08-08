@@ -19,7 +19,11 @@ This document provides a complete checklist and reference for submitting Kuckmal
 | **Category** | Entertainment |
 | **Secondary Category** | Utilities |
 | **Content Rights** | Does not contain third-party content requiring rights |
-| **Age Rating** | 4+ (see Age Rating section below) |
+| **Age Rating** | 12+/16+ (see Age Rating section below) |
+| **Availability** | **Germany only** |
+| **Price** | Free |
+| **Devices** | iPhone only (`TARGETED_DEVICE_FAMILY = "1"`) |
+| **Team** | K4K982LMZ9 |
 
 ### Localized Metadata
 
@@ -47,47 +51,55 @@ This document provides a complete checklist and reference for submitting Kuckmal
 
 | Field | Value |
 |-------|-------|
-| **Privacy Policy URL** | `https://kuckmal.cutthecrap.link/privacy` |
-| **Support URL** | `https://kuckmal.cutthecrap.link/support` |
-| **Marketing URL** (optional) | `https://kuckmal.cutthecrap.link` |
+Hosted on GitHub Pages from `leiter/kuckmal` (`/docs` folder, `main` branch). Set per localization:
 
-> **Note**: Host the privacy policy files (`privacy-policy-en.md`, `privacy-policy-de.md`) at the privacy URL. Create a simple support page with FAQ and contact information.
+| Field | German (de-DE) | English (en-US) |
+|-------|----------------|-----------------|
+| **Privacy Policy URL** | `https://leiter.github.io/kuckmal/privacy/` | `https://leiter.github.io/kuckmal/privacy/en/` |
+| **Support URL** | `https://leiter.github.io/kuckmal/support/` | `https://leiter.github.io/kuckmal/support/en/` |
+| **Marketing URL** (optional) | `https://leiter.github.io/kuckmal/` | `https://leiter.github.io/kuckmal/` |
+
+> **Note**: The pages under `docs/` are generated from the canonical sources in `appstore/` by `scripts/build_docs_site.sh`. Edit the `appstore/` file, re-run the script, commit both. GitHub Pages must be enabled in repository settings (Deploy from branch → `main` → `/docs`); Pages on a private repository requires a paid plan.
 
 ---
 
 ## Age Rating Questionnaire
 
-Answer these questions in App Store Connect:
+Answer against the **catalogue**, not against the app's own interface. Kuckmal surfaces an unfiltered broadcaster catalogue — crime drama (*Tatort*), news footage of war and disasters, documentaries on crime and drug use — and provides no content filtering and no parental controls. These answers match the IARC answers used for Google Play (`android/PLAY_CONSOLE_ANSWERS.md` §5).
 
 | Question | Answer |
 |----------|--------|
 | Cartoon or Fantasy Violence | None |
-| Realistic Violence | None |
+| Realistic Violence | Infrequent/Mild |
 | Prolonged Graphic or Sadistic Realistic Violence | None |
 | Profanity or Crude Humor | None |
-| Mature/Suggestive Themes | None |
-| Horror/Fear Themes | None |
-| Medical/Treatment Information | None |
-| Alcohol, Tobacco, or Drug Use or References | None |
+| Mature/Suggestive Themes | Infrequent/Mild |
+| Horror/Fear Themes | Infrequent/Mild |
+| Medical/Treatment Information | Infrequent/Mild |
+| Alcohol, Tobacco, or Drug Use or References | Infrequent/Mild |
 | Simulated Gambling | None |
 | Sexual Content or Nudity | None |
 | Graphic Sexual Content and Nudity | None |
-| Unrestricted Web Access | No |
+| Unrestricted Web Access | **Yes** — playback hands stream URLs to the system browser/player |
 | Gambling with Real Currency | No |
 
-**Result**: 4+ (suitable for all ages)
+**Expected result**: 12+ or 16+
 
-> **Note**: The app only provides access to content from German public broadcasters. The broadcasters themselves apply their own age ratings to individual content. Kuckmal does not filter or modify this content.
+> **Do not** try to optimise this down to 4+. The app has no control over the catalogue, and a rating that Apple disagrees with is a rejection or a forced re-rating. Do not declare children as a target audience despite KiKA/ZDFtivi content.
 
 ---
 
 ## Build & Version
 
-| Field | Value |
-|-------|-------|
-| Version | 1.0.0 |
-| Build | 1 |
-| Copyright | 2026 [Your Name/Company] |
+Both values live in `iosApp/iosApp/Info.plist` (there are no `MARKETING_VERSION` / `CURRENT_PROJECT_VERSION` build settings).
+
+| Field | Value | Key |
+|-------|-------|-----|
+| Version | 1.0.0 | `CFBundleShortVersionString` |
+| Build | 26 | `CFBundleVersion` |
+| Copyright | 2026 [RIGHTS_HOLDER — fill in] | App Store Connect field |
+
+> Build numbers must increase monotonically per bundle ID. Earlier local builds already reached 25, so 1.0.0 ships as build 26. Never reset to 1.
 
 ---
 
@@ -97,10 +109,10 @@ Answer these questions in App Store Connect:
 
 | Field | Value |
 |-------|-------|
-| First Name | [YOUR_FIRST_NAME] |
-| Last Name | [YOUR_LAST_NAME] |
-| Phone | [YOUR_PHONE] |
-| Email | [YOUR_EMAIL] |
+| First Name | [YOUR_FIRST_NAME — fill in] |
+| Last Name | [YOUR_LAST_NAME — fill in] |
+| Phone | [YOUR_PHONE — fill in] |
+| Email | kuckmal@cutthecrap.link |
 
 ### Notes for Review
 
@@ -120,11 +132,17 @@ See `SCREENSHOT_GUIDE.md` for detailed screenshot requirements.
 
 ### Required Screenshot Sizes
 
+The app ships iPhone-only, so no iPad set is needed.
+
 | Device | Resolution | Status |
 |--------|------------|--------|
-| iPhone 6.7" (iPhone 15 Pro Max) | 1290 x 2796 | Required |
-| iPhone 6.5" (iPhone 11 Pro Max) | 1242 x 2688 | Required |
-| iPad Pro 12.9" | 2048 x 2732 | Required |
+| iPhone 6.9" (iPhone 16 Pro Max) | 1320 x 2868 | **Required** |
+| iPhone 6.5" | 1242 x 2688 | Optional |
+| iPad | — | Not applicable (iPhone-only build) |
+
+Screenshots are required for the **primary localization (German)** only; English inherits the German set unless you upload a separate one.
+
+> The existing files in `screenshots/iphone69/de/` are the correct 1320x2868 size but were captured before the app was localized, so they show the **English** UI. They must be re-captured with the simulator set to German, and the missing search screen added.
 
 ### Screenshot Capture
 
@@ -158,15 +176,27 @@ maestro test iosApp/.maestro/appstore_screenshots.yaml
 - [ ] Support URL set and accessible
 - [ ] Category selected (Entertainment)
 - [ ] Age rating questionnaire completed
+- [ ] **Availability set to Germany only** (Pricing and Availability)
+- [ ] Price set to Free
+- [ ] Primary language set to German
 
 ### Screenshots
 
-- [ ] iPhone 6.7" screenshots (German) - 5 images
-- [ ] iPhone 6.7" screenshots (English) - 5 images
-- [ ] iPhone 6.5" screenshots (German) - 5 images
-- [ ] iPhone 6.5" screenshots (English) - 5 images
-- [ ] iPad Pro 12.9" screenshots (German) - 5 images
-- [ ] iPad Pro 12.9" screenshots (English) - 5 images
+- [ ] iPhone 6.9" screenshots (German) — 5 images, captured with a German-language simulator
+- [ ] English set (optional — inherits German if omitted)
+
+### Code / project (done in this pass)
+
+- [x] German localization of the Compose UI (`shared/src/commonMain/composeResources/values-de/strings.xml`)
+- [x] `CFBundleLocalizations` = de, en
+- [x] IP geolocation replaced with device region (`currentRegionCode()`); `GeoDetector` deleted
+- [x] `ITSAppUsesNonExemptEncryption` = false
+- [x] `UIRequiredDeviceCapabilities` armv7 → arm64
+- [x] Version 1.0.0 / build 26
+- [x] `TARGETED_DEVICE_FAMILY` = "1" (iPhone only)
+- [x] `PrivacyInfo.xcprivacy` added and bundled
+- [x] App icon alpha channel stripped (ITMS-90717)
+- [x] Dangling `KuckMal.mobileprovision` reference removed from the project file
 
 ### App Binary
 
@@ -178,10 +208,13 @@ maestro test iosApp/.maestro/appstore_screenshots.yaml
 
 ### Legal & Compliance
 
-- [ ] Privacy policy hosted and accessible
-- [ ] Export compliance answered (No encryption)
+- [ ] GitHub Pages enabled and privacy/support URLs load publicly (test in a private window)
+- [ ] App Privacy declared as **Data Not Collected**, tracking = No
+- [ ] Export compliance (pre-answered via `ITSAppUsesNonExemptEncryption`)
 - [ ] Content rights declared
 - [ ] IDFA usage declared (None)
+- [ ] Copyright rights holder filled in
+- [ ] Reviewer contact name and phone filled in
 
 ### Final Review
 
@@ -196,11 +229,7 @@ maestro test iosApp/.maestro/appstore_screenshots.yaml
 
 Kuckmal uses HTTPS for network communication, which uses standard encryption. In App Store Connect:
 
-| Question | Answer |
-|----------|--------|
-| Does your app use encryption? | Yes |
-| Does your app qualify for any exemptions? | Yes |
-| Exemption | Standard encryption exempt under EAR (uses only standard HTTPS) |
+`ITSAppUsesNonExemptEncryption` is set to `false` in `Info.plist`, so App Store Connect no longer prompts on each upload. The app uses only standard HTTPS, which is exempt under the EAR.
 
 ---
 
@@ -210,7 +239,7 @@ Kuckmal uses HTTPS for network communication, which uses standard encryption. In
 2. **Incomplete metadata**: Fill all required fields
 3. **Poor screenshots**: Use high-quality, correctly sized images
 4. **Crash on launch**: Test thoroughly on device
-5. **Placeholder content**: Replace [YOUR_EMAIL] etc. before submission
+5. **Placeholder content**: the copyright rights holder and reviewer name/phone are still marked "fill in" above
 6. **Guideline 4.2 (Minimum Functionality)**: App must provide value - Kuckmal aggregates multiple sources which adds value
 7. **Guideline 5.2.1 (Third-Party Content)**: Document that content is from public sources
 

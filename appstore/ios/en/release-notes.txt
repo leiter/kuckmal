@@ -1,11 +1,13 @@
-First release of Kuckmal!
+First release of Kuckmal.
 
-With this app you can:
-• Browse all German public broadcasting media libraries
-• Explore channels and topics
-• Search for shows
-• View detailed information for all content
+• Media libraries of ARD, ZDF, Arte, 3sat, Phoenix and many more in one app
+• Browse by channel and topic
+• Full-text search across titles, topics and descriptions
+• Time-period filter for recent programmes
+• Detail view with broadcast date, running time and file size
+• Playback and download in your choice of quality
+• No account, no ads, no tracking
 
-Supported broadcasters: ARD, ZDF, Arte, 3sat, Phoenix, BR, HR, MDR, NDR, RBB, SR, SWR, WDR, KiKA, and more.
+Note: on first launch the media library index is downloaded (about 75 MB). This takes a few minutes — Wi-Fi is recommended.
 
-Enjoy discovering!
+Enjoy exploring!

@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Help and Support"
+---
+
 # Kuckmal Support
 
 ## Frequently Asked Questions

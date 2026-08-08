@@ -4,10 +4,10 @@
 # This script helps capture screenshots using xcrun simctl io screenshot
 #
 # Usage: ./capture_screenshots_manual.sh <device> <language>
-#   device: iphone67, iphone65, ipad129
+#   device: iphone69, iphone65, ipad129
 #   language: de, en
 #
-# Example: ./capture_screenshots_manual.sh iphone67 de
+# Example: ./capture_screenshots_manual.sh iphone69 de
 
 set -e
 
@@ -17,7 +17,7 @@ SCREENSHOT_DIR="$SCRIPT_DIR/screenshots"
 
 # Device configurations
 declare -A DEVICES
-DEVICES["iphone67"]="iPhone 16 Pro Max"
+DEVICES["iphone69"]="iPhone 16 Pro Max"
 DEVICES["iphone65"]="iPhone 16 Plus"
 DEVICES["ipad129"]="iPad Pro 13-inch (M4)"
 
@@ -56,13 +56,13 @@ capture_screenshot() {
 
 # Main function
 main() {
-    local device_key="${1:-iphone67}"
+    local device_key="${1:-iphone69}"
     local language="${2:-de}"
 
     local device_name="${DEVICES[$device_key]}"
     if [ -z "$device_name" ]; then
         echo "Unknown device: $device_key"
-        echo "Valid devices: iphone67, iphone65, ipad129"
+        echo "Valid devices: iphone69, iphone65, ipad129"
         exit 1
     fi
 

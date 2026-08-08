@@ -1,0 +1,10 @@
+title: Kuckmal
+description: Die Mediatheken der öffentlich-rechtlichen Sender in einer App
+theme: jekyll-theme-minimal
+lang: de
+
+# Pages served from /docs on the main branch of leiter/kuckmal.
+# Public entry points referenced from the App Store listing:
+#   /kuckmal/privacy/  and  /kuckmal/support/
+exclude:
+  - README.md

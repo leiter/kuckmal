@@ -8,16 +8,16 @@ This guide documents the required screenshots for the iOS App Store listing.
 
 | Device Type | Display Size | Resolution | Required |
 |-------------|--------------|------------|----------|
-| iPhone 15 Pro Max | 6.7" | 1290 x 2796 | **Yes** |
-| iPhone 11 Pro Max / XS Max | 6.5" | 1242 x 2688 | **Yes** |
-| iPhone 8 Plus / 7 Plus | 5.5" | 1242 x 2208 | Optional |
+| iPhone 16 Pro Max | 6.9" | 1320 x 2868 | **Yes** |
+| iPhone 16 Plus | 6.5" | 1284 x 2778 | Optional |
+
+Only one iPhone size is mandatory; App Store Connect scales the 6.9" set down for smaller devices.
+
+Capture the German set (the primary localization). English is optional — if you upload no English screenshots, the German set is shown for both.
 
 ### iPad Screenshots
 
-| Device Type | Display Size | Resolution | Required |
-|-------------|--------------|------------|----------|
-| iPad Pro 12.9" (6th gen) | 12.9" | 2048 x 2732 | **Yes** |
-| iPad Pro 12.9" (2nd gen) | 12.9" | 2048 x 2732 | Optional |
+Not applicable. Kuckmal 1.0 ships iPhone-only (`TARGETED_DEVICE_FAMILY = "1"`), so App Store Connect does not ask for an iPad set.
 
 ## Screenshot Limits
 
@@ -92,8 +92,8 @@ Ensure the app language matches the screenshot set language.
 [device]_[number]_[screen]_[language].png
 
 Examples:
-iphone67_01_home_de.png
-iphone67_02_search_de.png
+iphone69_01_home_de.png
+iphone69_02_search_de.png
 iphone65_01_home_en.png
 ipad129_01_home_de.png
 ```
@@ -202,7 +202,7 @@ For individual screenshots:
 xcrun simctl status_bar booted override --time "9:41" --batteryState charged --batteryLevel 100
 
 # Take screenshot
-xcrun simctl io booted screenshot appstore/screenshots/iphone67/de/01_home.png
+xcrun simctl io booted screenshot appstore/screenshots/iphone69/de/01_home.png
 
 # Reset status bar when done
 xcrun simctl status_bar booted clear

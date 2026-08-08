@@ -2,35 +2,74 @@ Notes for Apple Review Team
 ============================
 
 APP OVERVIEW
-Kuckmal is an aggregator app for German public broadcasting media libraries (Mediatheken). It provides a unified interface to browse and search content from ARD, ZDF, Arte, 3sat, Phoenix, and other German public broadcasters.
+Kuckmal is an aggregator app for German public broadcasting media libraries
+("Mediatheken"). It provides a unified interface to browse and search content
+from ARD, ZDF, Arte, 3sat, Phoenix and other German public broadcasters.
 
 NO LOGIN REQUIRED
 - The app does not require any user account or login
 - All features are accessible immediately upon launch
 - No demo account is needed for testing
 
+FIRST LAUNCH — PLEASE READ BEFORE TESTING
+On first launch the app downloads the media library index (~75 MB) and unpacks
+it. This is a one-time setup that can take several minutes depending on device
+and network, and it temporarily needs a few hundred MB of free space. A progress
+dialog is shown throughout. The app is not frozen during this step. Wi-Fi is
+recommended. Until this completes, browsing lists will be empty.
+
 CONTENT SOURCE
-- All content comes from publicly available APIs of German public broadcasters
-- The broadcasters (ARD, ZDF, etc.) are publicly funded institutions similar to PBS/NPR in the US or BBC in the UK
-- Content is freely available to anyone in Germany and many programs worldwide
-- The app aggregates publicly accessible metadata and provides direct links to the broadcaster streaming servers
+- All content comes from publicly available sources. The programme metadata is
+  the freely published film list of the MediathekView project
+  (https://liste.mediathekview.de).
+- The broadcasters (ARD, ZDF, etc.) are publicly funded institutions comparable
+  to the BBC in the UK or PBS/NPR in the US.
+- Kuckmal hosts no content, modifies no content, and circumvents no access
+  restriction or DRM. It aggregates publicly accessible metadata and hands the
+  official stream URL to the system for playback.
+- Kuckmal is an independent project and is not affiliated with, endorsed by, or
+  partnered with any of the broadcasters. The app states this in its store
+  description.
 
 HOW TO TEST
-1. Launch the app
-2. Browse channels by selecting any broadcaster (e.g., ARD, ZDF)
-3. Use the search feature to find specific shows
-4. Tap on any item to see detailed information
-5. Links open the content in the respective broadcaster's player
+1. Launch the app and wait for the one-time index download to finish
+2. Browse channels by selecting any broadcaster (e.g. ARD, ZDF)
+3. Use the search feature to find specific programmes
+4. Tap any item to see detailed information
+5. Play — the stream opens in the system player / the broadcaster's player
+6. Download — where a downloadable file is offered, it is saved to the app's
+   Documents folder and is visible in the Files app under Kuckmal
+
+GEO-RESTRICTION NOTE
+Some broadcaster content is geo-restricted to Germany (or the DACH region) by
+the broadcasters themselves. If review is performed outside Germany, some items
+may not play. This is a restriction imposed by the broadcasters' servers, not by
+the app. The app shows an advisory banner for items likely to be affected; the
+country used for that hint is read from the device's own region setting and is
+never transmitted.
 
 DATA & PRIVACY
-- No user data is collected
-- No analytics or tracking
-- No advertisements
-- All data stays on device
+- No user account, no registration
+- No analytics, no crash reporting SDK, no advertising, no tracking, no IDFA
+- No personal data is collected or transmitted to us; we operate no backend
+- Settings, favourites, history, the media index and downloads are stored only
+  in app-private storage on the device
+- Outbound network connections are limited to the MediathekView film list and
+  the broadcasters' own streaming servers, which necessarily see the user's IP
+  as with any internet connection
 
 LANGUAGE
-- The app interface supports German and English
-- Content is primarily in German as it comes from German broadcasters
+- The app interface is localized in German and English and follows the device
+  language setting
+- The programme content itself is almost entirely in German, as it comes from
+  German broadcasters
+
+AGE RATING
+The rating reflects the broadcasters' unfiltered catalogue, which includes crime
+drama, news footage of war and disasters, and documentaries on crime and drug
+use. Kuckmal does not filter or modify this content and provides no parental
+controls, so the rating was answered against the catalogue as a whole rather
+than against the app's own interface.
 
 CONTACT
-For any questions during review, please contact: [YOUR_EMAIL]
+For any questions during review, please contact: kuckmal@cutthecrap.link

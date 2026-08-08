@@ -217,7 +217,7 @@ main() {
     echo ""
 
     # Create directories
-    mkdir -p "$SCREENSHOT_DIR"/{iphone67,iphone65,ipad129}/{de,en}
+    mkdir -p "$SCREENSHOT_DIR"/{iphone69,iphone65,ipad129}/{de,en}
 
     # Build app once
     build_app
@@ -237,7 +237,7 @@ main() {
     case $choice in
         1)
             # Capture all - German first, then English
-            capture_screenshots_for_device "$IPHONE67_UDID" "iphone67" "$IPHONE67_NAME" "de"
+            capture_screenshots_for_device "$IPHONE67_UDID" "iphone69" "$IPHONE67_NAME" "de"
             capture_screenshots_for_device "$IPHONE65_UDID" "iphone65" "$IPHONE65_NAME" "de"
             capture_screenshots_for_device "$IPAD129_UDID" "ipad129" "$IPAD129_NAME" "de"
 
@@ -247,12 +247,12 @@ main() {
             log_prompt "Press ENTER when ready to continue with English screenshots..."
             read
 
-            capture_screenshots_for_device "$IPHONE67_UDID" "iphone67" "$IPHONE67_NAME" "en"
+            capture_screenshots_for_device "$IPHONE67_UDID" "iphone69" "$IPHONE67_NAME" "en"
             capture_screenshots_for_device "$IPHONE65_UDID" "iphone65" "$IPHONE65_NAME" "en"
             capture_screenshots_for_device "$IPAD129_UDID" "ipad129" "$IPAD129_NAME" "en"
             ;;
-        2) capture_screenshots_for_device "$IPHONE67_UDID" "iphone67" "$IPHONE67_NAME" "de" ;;
-        3) capture_screenshots_for_device "$IPHONE67_UDID" "iphone67" "$IPHONE67_NAME" "en" ;;
+        2) capture_screenshots_for_device "$IPHONE67_UDID" "iphone69" "$IPHONE67_NAME" "de" ;;
+        3) capture_screenshots_for_device "$IPHONE67_UDID" "iphone69" "$IPHONE67_NAME" "en" ;;
         4) capture_screenshots_for_device "$IPHONE65_UDID" "iphone65" "$IPHONE65_NAME" "de" ;;
         5) capture_screenshots_for_device "$IPHONE65_UDID" "iphone65" "$IPHONE65_NAME" "en" ;;
         6) capture_screenshots_for_device "$IPAD129_UDID" "ipad129" "$IPAD129_NAME" "de" ;;

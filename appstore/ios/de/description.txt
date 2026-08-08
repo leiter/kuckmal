@@ -1,38 +1,38 @@
-Kuckmal - Deine Mediatheken in einer App
-
-Entdecke die Vielfalt der deutschen öffentlich-rechtlichen Mediatheken an einem Ort. Kuckmal vereint das Beste aus ARD, ZDF, Arte, 3sat, Phoenix, BR, HR, MDR, NDR, RBB, SR, SWR, WDR, KiKA und vielen weiteren Sendern in einer übersichtlichen App.
+Kuckmal vereint die Mediatheken der deutschsprachigen öffentlich-rechtlichen Sender in einer einzigen App. Statt zwischen ARD-, ZDF- und Arte-Apps zu wechseln, durchsuchst du das gesamte Angebot mit einer einzigen Suche.
 
 ALLE SENDER, EINE APP
-Statt zwischen verschiedenen Apps zu wechseln, findest du bei Kuckmal alle Inhalte gebündelt. Durchsuche das gesamte Angebot der öffentlich-rechtlichen Sender mit einer einzigen Suche.
+Über 400.000 Beiträge aus den Mediatheken von ARD, ZDF, Arte, 3sat, Phoenix, BR, HR, MDR, NDR, RBB, SR, SWR, WDR, KiKA, ORF, SRF und weiteren Sendern – gebündelt und durchsuchbar.
 
 EINFACHE NAVIGATION
-• Sender durchstöbern: Wähle deinen Lieblingssender und entdecke dessen aktuelles Angebot
-• Themen entdecken: Finde Sendungen nach Kategorien wie Dokumentationen, Nachrichten, Kultur oder Unterhaltung
-• Titel durchsuchen: Suche gezielt nach deiner Lieblingssendung
+• Sender durchstöbern: Wähle einen Sender und sieh dir dessen aktuelles Angebot an
+• Themen entdecken: Alle Sendungsreihen eines Senders auf einen Blick
+• Titel finden: Springe direkt zur gesuchten Folge
 
 LEISTUNGSSTARKE SUCHE
-Finde genau das, was du suchst. Die Volltextsuche durchsucht Titel, Beschreibungen und Themen aller verfügbaren Inhalte.
+Die Volltextsuche durchsucht Titel, Themen und Beschreibungen aller verfügbaren Beiträge – senderübergreifend oder auf einen Sender eingegrenzt. Über den Zeitraum-Filter blendest du ältere Beiträge aus.
 
 DETAILLIERTE INFORMATIONEN
-Jede Sendung wird mit vollständigen Details angezeigt:
-• Ausführliche Beschreibung
-• Sendedauer und Ausstrahlungsdatum
-• Verfügbarkeit und Ablaufdatum
-• Direkter Link zum Abspielen
+Zu jedem Beitrag siehst du Sendedatum, Uhrzeit, Laufzeit und Dateigröße, bevor du ihn startest.
 
-FÜR UNTERWEGS GEMACHT
-Perfekt für die mobile Nutzung - ob in der Bahn, im Wartezimmer oder gemütlich auf dem Sofa. Die App ist für schnelles Laden und einfache Bedienung optimiert.
+ABSPIELEN UND HERUNTERLADEN
+Beiträge werden zur Wiedergabe an den Player deines Geräts übergeben oder lassen sich in wählbarer Qualität (hoch/niedrig) für später herunterladen. Heruntergeladene Dateien findest du in der Dateien-App unter „Kuckmal“.
 
-DATENSCHUTZ WIRD GROSSGESCHRIEBEN
-• Kein Konto erforderlich
-• Keine Registrierung
+OFFLINE-KATALOG
+Die Mediathek-Liste wird auf dein Gerät geladen. Das Durchsuchen des Katalogs funktioniert dadurch schnell und auch ohne Verbindung – für die Wiedergabe wird eine Internetverbindung benötigt.
+
+DATENSCHUTZ
+• Kein Konto, keine Registrierung
 • Keine Werbung
-• Keine Tracking-Dienste
-• Deine Daten bleiben auf deinem Gerät
+• Keine Analyse- oder Tracking-Dienste
+• Deine Favoriten und dein Verlauf bleiben auf dem Gerät
+
+HINWEIS ZUR ERSTEN EINRICHTUNG
+Beim ersten Start lädt Kuckmal die vollständige Mediathek-Liste herunter (ca. 75 MB Download). Die Einrichtung dauert je nach Gerät einige Minuten und benötigt vorübergehend mehrere hundert MB freien Speicher. Wir empfehlen dafür WLAN.
+
+GEO-HINWEISE
+Manche Beiträge sind von den Sendern nur in bestimmten Ländern abrufbar. Kuckmal weist auf solche Einschränkungen hin, bevor du die Wiedergabe startest. Die dafür verwendete Region wird aus den Einstellungen deines Geräts gelesen und nicht übertragen.
 
 UNTERSTÜTZTE SENDER
-ARD (Das Erste), ZDF, Arte, 3sat, Phoenix, BR (Bayerischer Rundfunk), HR (Hessischer Rundfunk), MDR (Mitteldeutscher Rundfunk), NDR (Norddeutscher Rundfunk), RBB (Rundfunk Berlin-Brandenburg), SR (Saarländischer Rundfunk), SWR (Südwestrundfunk), WDR (Westdeutscher Rundfunk), KiKA, funk und weitere.
+ARD (Das Erste), ZDF, Arte, 3sat, Phoenix, BR, HR, MDR, NDR, RBB, SR, SWR, WDR, KiKA, ZDFtivi, funk, ORF, SRF und weitere.
 
-Kuckmal macht das Beste des deutschen öffentlich-rechtlichen Fernsehens zugänglich - kostenlos, werbefrei und datenschutzfreundlich.
-
-Hinweis: Kuckmal ist ein unabhängiger Aggregator und steht in keiner Verbindung zu den öffentlich-rechtlichen Sendern. Alle Inhalte werden direkt von den offiziellen Mediatheken der Sender bereitgestellt.
+Kuckmal ist ein unabhängiges Projekt und steht in keiner Verbindung zu den genannten Sendern. Alle Inhalte stammen direkt von den offiziellen Servern der jeweiligen Rundfunkanstalt; die Metadaten basieren auf der frei verfügbaren Filmliste des MediathekView-Projekts. Es werden keine Inhalte von Kuckmal gehostet, umgangen oder verändert.

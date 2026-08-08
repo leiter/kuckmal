@@ -169,7 +169,26 @@ retaining it*. Kuckmal stores nothing server-side: no account, no profile, no
 analytics, no crash reporting SDK, no advertising ID. Favourites, history and
 the media index live only in app-private storage.
 
-### 8.2 The one thing that is not "nothing" — read this
+### 8.2 RESOLVED — the ip-api.com call has been removed
+
+> **Update (iOS 1.0 release prep):** the "Best" option below was taken.
+> `GeoDetector.kt` is deleted; the country now comes from the device locale via
+> `currentRegionCode()` (`shared/src/commonMain/kotlin/cut/the/crap/shared/util/PlatformRegion.kt`
+> plus per-platform actuals). No network request, no third party, no cleartext.
+>
+> Consequences for this form:
+> - "Is all user data encrypted in transit?" → **Yes** (was No)
+> - Nothing about IP geolocation needs disclosing in the privacy policy
+>
+> One Android follow-up remains: `android:usesCleartextTraffic="true"` is still
+> in the manifest. It was added for this call, but `MediaUrlUtils.kt` also
+> accepts `http://` broadcaster URLs, and some film-list entries may genuinely be
+> plain HTTP. Verify against the real film list before removing it — dropping it
+> blindly could break playback or downloads for those entries.
+
+The original analysis follows, for the record.
+
+### 8.2a The one thing that is not "nothing" — read this
 
 `shared/src/commonMain/kotlin/cut/the/crap/shared/util/GeoDetector.kt` calls:
 
@@ -217,18 +236,22 @@ already does, under "Third-Party Content").
 
 ## 9. Privacy policy and support URLs — blocking
 
-A reachable privacy policy URL is **mandatory** to publish. The text exists at
-`appstore/privacy-policy-de.md` and `appstore/privacy-policy-en.md`, but it is
-not hosted and still contains `[YOUR_EMAIL]` placeholders.
+A reachable privacy policy URL is **mandatory** to publish.
 
-Before submitting:
+**Resolved during the iOS 1.0 release prep** — the same pages serve both stores:
 
-1. Fix the "never leaves your device" claim per §8.2, and add the third-party
-   call if you keep it.
-2. Replace every `[YOUR_EMAIL]` in the privacy policies, `review-notes.txt` and
-   `support-page.md`.
-3. Host both pages at stable public URLs (GitHub Pages is sufficient) and put the
-   German URL into the de-DE listing, the English one into en-US.
+1. ~~Fix the "never leaves your device" claim~~ — done. The ip-api.com call was
+   removed entirely (see §8.2 note below), and both policies now describe the
+   device-region lookup and the broadcaster connections accurately.
+2. ~~Replace `[YOUR_EMAIL]`~~ — done. Contact is `kuckmal@cutthecrap.link`.
+3. Pages are generated into `docs/` by `scripts/build_docs_site.sh` and served
+   from GitHub Pages:
+   - de: `https://leiter.github.io/kuckmal/privacy/` · `…/support/`
+   - en: `https://leiter.github.io/kuckmal/privacy/en/` · `…/support/en/`
+
+   **Still to do**: enable Pages in the repo settings (Deploy from branch →
+   `main` → `/docs`) and put the German URLs into the de-DE listing, the English
+   ones into en-US.
 
 ---
 

@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Datenschutzerklärung"
+---
+
 # Datenschutzerklärung für Kuckmal
 
 *Letzte Aktualisierung: August 2026*

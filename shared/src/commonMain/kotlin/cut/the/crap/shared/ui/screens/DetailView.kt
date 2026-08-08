@@ -34,7 +34,6 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,12 +49,11 @@ import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.stringResource
 import kuckmal.shared.generated.resources.*
 import kuckmal.shared.generated.resources.Res
-import cut.the.crap.shared.data.HttpClientFactory
 import cut.the.crap.shared.ui.MediaItem
 import cut.the.crap.shared.ui.SampleData
 import cut.the.crap.shared.ui.util.Orientation
 import cut.the.crap.shared.ui.util.rememberOrientation
-import cut.the.crap.shared.util.GeoDetector
+import cut.the.crap.shared.util.currentRegionCode
 
 @Composable
 fun DetailView(
@@ -65,20 +63,10 @@ fun DetailView(
 ) {
     var selectedQuality by remember { mutableStateOf(QualityOption.LOW) }
     var isDescriptionExpanded by remember { mutableStateOf(false) }
-    var userCountry by remember { mutableStateOf<String?>(null) }
     val orientation = rememberOrientation()
 
-    // Detect user's country for geo-restriction warnings
-    LaunchedEffect(Unit) {
-        try {
-            val httpClient = HttpClientFactory.create()
-            userCountry = GeoDetector.getUserCountryCode(httpClient)
-            httpClient.close()
-        } catch (e: Exception) {
-            // Silently fail - geo detection is optional
-            println("[DetailView] Geo detection failed: ${e.message}")
-        }
-    }
+    // User's country for geo-restriction warnings, read from device locale settings
+    val userCountry = remember { currentRegionCode() }
 
     when (orientation) {
         Orientation.Portrait -> DetailViewPortrait(
