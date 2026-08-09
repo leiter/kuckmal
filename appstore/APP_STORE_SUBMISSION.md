@@ -142,7 +142,7 @@ The app ships iPhone-only, so no iPad set is needed.
 
 Screenshots are required for the **primary localization (German)** only; English inherits the German set unless you upload a separate one.
 
-> The existing files in `screenshots/iphone69/de/` are the correct 1320x2868 size but were captured before the app was localized, so they show the **English** UI. They must be re-captured with the simulator set to German, and the missing search screen added.
+The German set in `screenshots/iphone69/de/` was captured against the localized build: home, ARD channel, Tatort search, Tatort episodes, media detail. See `SCREENSHOT_CAPTURE_README.md` to reproduce.
 
 ### Screenshot Capture
 
@@ -182,7 +182,7 @@ maestro test iosApp/.maestro/appstore_screenshots.yaml
 
 ### Screenshots
 
-- [ ] iPhone 6.9" screenshots (German) — 5 images, captured with a German-language simulator
+- [x] iPhone 6.9" screenshots (German) — 5 images at 1320×2868 in `screenshots/iphone69/de/`
 - [ ] English set (optional — inherits German if omitted)
 
 ### Code / project (done in this pass)

@@ -1,0 +1,28 @@
+appId: cut.the.crap.kuckmal
+---
+# Prepare the app for screenshot capture: trigger the one-time film list import.
+#
+# See appstore_screenshots_de.yaml for why this taps by coordinate rather than by
+# text, and why percentages must be integers.
+#
+# This takes roughly 10-15 minutes on a simulator:
+#   download (~75 MB) -> "Wird entpackt…" -> "Einträge werden importiert…" -> browse view
+# The app is not hung during the import; the entry counter updates in batches.
+
+- launchApp:
+    clearState: true
+- waitForAnimationToEnd
+
+# "Filmliste herunterladen" button on the empty-state screen
+- tapOn:
+    point: "50%,59%"
+
+# The flow ends here. Maestro has no sleep command and there is no text selector
+# to wait on (see the note above), so poll from the shell until the browse view
+# appears, then run appstore_screenshots_de.yaml:
+#
+#   until xcrun simctl io <udid> screenshot /tmp/p.png >/dev/null 2>&1 \
+#         && [ "$(stat -f%z /tmp/p.png)" -gt 250000 ]; do sleep 60; done
+#
+# The browse view is far denser than the progress screen (~350 KB vs ~120 KB),
+# which is a crude but reliable "import finished" signal. Confirm visually.

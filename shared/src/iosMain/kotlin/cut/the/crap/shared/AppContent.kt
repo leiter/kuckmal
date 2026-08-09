@@ -9,6 +9,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
+import kuckmal.shared.generated.resources.*
+import kuckmal.shared.generated.resources.Res
 import cut.the.crap.shared.di.KoinHelper
 import cut.the.crap.shared.di.downloadProgressCallback
 import cut.the.crap.shared.di.showMessageCallback
@@ -120,7 +123,7 @@ fun AppContent() {
                             .padding(horizontal = 16.dp, vertical = 12.dp)
                     ) {
                         Text(
-                            text = "Downloading: $title",
+                            text = stringResource(Res.string.download_progress_title, title),
                             style = MaterialTheme.typography.bodySmall,
                             maxLines = 1,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -155,7 +158,7 @@ fun AppContent() {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             CircularProgressIndicator()
                             Spacer(modifier = Modifier.height(16.dp))
-                            Text("Loading media database...")
+                            Text(stringResource(Res.string.setup_loading_database))
                         }
                     }
                 }
@@ -167,7 +170,7 @@ fun AppContent() {
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = "Error loading data",
+                                text = stringResource(Res.string.setup_error_loading),
                                 style = MaterialTheme.typography.headlineSmall,
                                 color = MaterialTheme.colorScheme.error
                             )
@@ -187,7 +190,7 @@ fun AppContent() {
                             modifier = Modifier.padding(32.dp)
                         ) {
                             Text(
-                                text = "Kuckmal",
+                                text = stringResource(Res.string.app_name),
                                 style = MaterialTheme.typography.displayMedium,
                                 color = MaterialTheme.colorScheme.primary
                             )
@@ -196,12 +199,12 @@ fun AppContent() {
                             when (val state = downloadState) {
                                 is DownloadState.Idle -> {
                                     Text(
-                                        text = "No film list found",
+                                        text = stringResource(Res.string.setup_no_filmlist),
                                         style = MaterialTheme.typography.headlineSmall
                                     )
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Text(
-                                        text = "Download the film list to browse available media.",
+                                        text = stringResource(Res.string.setup_no_filmlist_hint),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -215,7 +218,7 @@ fun AppContent() {
                                     ) {
                                         Icon(Icons.Default.Download, contentDescription = null)
                                         Spacer(modifier = Modifier.width(8.dp))
-                                        Text("Download Film List")
+                                        Text(stringResource(Res.string.setup_btn_download_filmlist))
                                     }
                                 }
 
@@ -223,7 +226,7 @@ fun AppContent() {
                                     CircularProgressIndicator()
                                     Spacer(modifier = Modifier.height(16.dp))
                                     Text(
-                                        text = "Downloading: ${state.progressPercent}%",
+                                        text = stringResource(Res.string.setup_downloading_progress, "${state.progressPercent}%"),
                                         style = MaterialTheme.typography.bodyLarge
                                     )
                                     Spacer(modifier = Modifier.height(8.dp))
@@ -237,7 +240,7 @@ fun AppContent() {
                                     CircularProgressIndicator()
                                     Spacer(modifier = Modifier.height(16.dp))
                                     Text(
-                                        text = "Decompressing...",
+                                        text = stringResource(Res.string.setup_decompressing),
                                         style = MaterialTheme.typography.bodyLarge
                                     )
                                 }
@@ -246,12 +249,12 @@ fun AppContent() {
                                     CircularProgressIndicator()
                                     Spacer(modifier = Modifier.height(16.dp))
                                     Text(
-                                        text = "Importing entries...",
+                                        text = stringResource(Res.string.setup_importing),
                                         style = MaterialTheme.typography.bodyLarge
                                     )
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Text(
-                                        text = "${state.entriesCount} entries imported",
+                                        text = stringResource(Res.string.setup_entries_imported, state.entriesCount.toString()),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -266,14 +269,14 @@ fun AppContent() {
                                     CircularProgressIndicator()
                                     Spacer(modifier = Modifier.height(16.dp))
                                     Text(
-                                        text = "Import complete!",
+                                        text = stringResource(Res.string.setup_import_complete),
                                         style = MaterialTheme.typography.bodyLarge
                                     )
                                 }
 
                                 is DownloadState.Error -> {
                                     Text(
-                                        text = "Download failed",
+                                        text = stringResource(Res.string.dialog_title_download_failed),
                                         style = MaterialTheme.typography.headlineSmall,
                                         color = MaterialTheme.colorScheme.error
                                     )
@@ -289,7 +292,7 @@ fun AppContent() {
                                             viewModel.resetDownloadState()
                                         }
                                     ) {
-                                        Text("Retry")
+                                        Text(stringResource(Res.string.btn_retry))
                                     }
                                 }
                             }
@@ -359,6 +362,9 @@ fun AppContent() {
                         titles
                     }
 
+                    // Compose draws under the status bar because the Scaffold zeroes its
+                    // content insets, so pad for it here as the detail branch does.
+                    Box(modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars)) {
                     BrowseView(
                         channels = viewModel.channels,
                         titles = displayTitles,
@@ -366,8 +372,9 @@ fun AppContent() {
                         selectedTitle = selectedTitle,
                         currentTheme = when {
                             viewState.theme != null -> viewState.theme!!
-                            viewState.channel != null -> "Themen (${viewState.channel})"
-                            else -> "Alle Themen"
+                            viewState.channel != null ->
+                                stringResource(Res.string.themes_for_channel, viewState.channel!!)
+                            else -> stringResource(Res.string.all_themes)
                         },
                         isShowingTitles = viewState.theme != null,
                         showBackButton = viewState.theme != null || selectedChannel != null,
@@ -458,6 +465,7 @@ fun AppContent() {
                             }
                         }
                     )
+                    }
                 }
             }
         }

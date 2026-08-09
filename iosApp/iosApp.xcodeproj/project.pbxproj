@@ -227,7 +227,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cd \"$SRCROOT/..\"\nexport JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home\n./gradlew :shared:embedAndSignAppleFrameworkForXcode\n";
+			shellScript = "cd \"$SRCROOT/..\"\n\n# Xcode build phases do not inherit the login shell environment, so JAVA_HOME is\n# usually unset here even when Gradle works fine in a terminal. Resolve it.\nif [ ! -x \"$JAVA_HOME/bin/java\" ]; then\n  JAVA_HOME=\"\"\n  for candidate in \\\n    \"$HOME/Applications/Android Studio.app/Contents/jbr/Contents/Home\" \\\n    \"/Applications/Android Studio.app/Contents/jbr/Contents/Home\" \\\n    \"/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home\" \\\n    \"/opt/homebrew/opt/openjdk/libexec/openjdk.jdk/Contents/Home\"; do\n    if [ -x \"$candidate/bin/java\" ]; then JAVA_HOME=\"$candidate\"; break; fi\n  done\n  if [ -z \"$JAVA_HOME\" ] && /usr/libexec/java_home >/dev/null 2>&1; then\n    JAVA_HOME=\"$(/usr/libexec/java_home)\"\n  fi\nfi\n\nif [ ! -x \"$JAVA_HOME/bin/java\" ]; then\n  echo \"error: No JDK found. Install one or set JAVA_HOME.\" >&2\n  exit 1\nfi\n\nexport JAVA_HOME\n./gradlew :shared:embedAndSignAppleFrameworkForXcode\n";
 		};
 		7555FFB6242A651A00829871 /* Embed Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;

@@ -1,0 +1,81 @@
+appId: cut.the.crap.kuckmal
+---
+# German App Store screenshots (iPhone 6.9", 1320x2868).
+#
+# IMPORTANT — why this flow uses coordinates instead of text selectors:
+# Compose Multiplatform renders the whole UI into a single UIView, so Maestro's
+# accessibility tree contains only the app container. `assertVisible`/`tapOn: text`
+# do NOT work here — `maestro hierarchy` shows no Compose elements. Everything
+# below therefore taps by percentage of the screen.
+#
+# Two consequences:
+#   1. Percentages must be INTEGERS. Maestro throws NumberFormatException on
+#      "16.5" and silently reports the step as passed, so a fractional value
+#      looks like a working tap that does nothing.
+#   2. Row coordinates depend on list scroll position and on the current film
+#      list contents, so re-verify each shot visually after running.
+#
+# Prerequisites:
+#   - Simulator: iPhone 16/17 Pro Max (both render 1320x2868)
+#   - App already installed with the film list imported (see prepare_app_de.yaml)
+#   - German locale forced:
+#       xcrun simctl spawn <udid> defaults write cut.the.crap.kuckmal AppleLanguages -array de
+#       xcrun simctl spawn <udid> defaults write cut.the.crap.kuckmal AppleLocale -string de_DE
+#   - Clean status bar:
+#       xcrun simctl status_bar <udid> override --time "09:41" \
+#         --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3
+
+- launchApp
+- waitForAnimationToEnd
+
+# 1. Home: channel rail + all themes
+- takeScreenshot: 01_home_channels
+
+# 2. Channel selected (ARD), scrolled past the leading "#"/"$" themes
+- tapOn:
+    point: "20%,24%"
+- waitForAnimationToEnd
+- repeat:
+    times: 11
+    commands:
+      - swipe:
+          start: "70%,75%"
+          end: "70%,25%"
+- waitForAnimationToEnd
+- takeScreenshot: 02_channel_ard
+
+# Back to the full theme list
+- tapOn:
+    point: "6%,10%"
+- waitForAnimationToEnd
+
+# 3. Search results for "Tatort"
+- tapOn:
+    point: "83%,10%"
+- waitForAnimationToEnd
+- inputText: "Tatort"
+- waitForAnimationToEnd
+# Tap the keyboard return key to dismiss it (hideKeyboard fails on this simulator)
+- tapOn:
+    point: "87%,89%"
+- waitForAnimationToEnd
+- takeScreenshot: 03_search_tatort
+
+# 4. Episodes of the Tatort theme
+- tapOn:
+    point: "60%,18%"
+- waitForAnimationToEnd
+# First X clears the query, second closes the search bar
+- tapOn:
+    point: "83%,10%"
+- waitForAnimationToEnd
+- tapOn:
+    point: "83%,10%"
+- waitForAnimationToEnd
+- takeScreenshot: 04_tatort_titles
+
+# 5. Media detail with date, duration, size, description and quality picker
+- tapOn:
+    point: "60%,37%"
+- waitForAnimationToEnd
+- takeScreenshot: 05_media_detail
