@@ -1,5 +1,7 @@
 package cut.the.crap.shared.model
 
+import cut.the.crap.shared.util.TextSanitizer
+
 /**
  * Represents a single media entry from the film list.
  * Platform-agnostic version for shared code.
@@ -41,15 +43,18 @@ data class MediaEntry(
 
             val isNew = arr.getOrNull(19)?.lowercase() == "true"
 
+            // Repair upstream encoding damage in the human-readable fields only.
+            // URLs are left untouched: a link containing a destroyed character is
+            // already dead, and rewriting it cannot make it resolve.
             return MediaEntry(
                 channel = getOrInherit(0, previous?.channel ?: ""),
-                theme = getOrInherit(1, previous?.theme ?: ""),
-                title = arr.getOrNull(2) ?: "",
+                theme = TextSanitizer.repair(getOrInherit(1, previous?.theme ?: "")),
+                title = TextSanitizer.repair(arr.getOrNull(2) ?: ""),
                 date = arr.getOrNull(3) ?: "",
                 time = arr.getOrNull(4) ?: "",
                 duration = arr.getOrNull(5) ?: "",
                 sizeMB = arr.getOrNull(6) ?: "",
-                description = arr.getOrNull(7) ?: "",
+                description = TextSanitizer.repair(arr.getOrNull(7) ?: ""),
                 url = arr.getOrNull(8) ?: "",
                 website = arr.getOrNull(9) ?: "",
                 subtitleUrl = arr.getOrNull(10) ?: "",

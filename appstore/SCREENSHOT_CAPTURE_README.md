@@ -104,9 +104,10 @@ each one**.
 
 - Scroll past the leading `#` and `$` themes — alphabetically first, but they look
   like junk data in a store listing.
-- Watch for mojibake in the source data (e.g. `Alfons und Gï¿½ste` instead of
-  `Gäste`). Some film-list entries carry broken encoding; keep those rows out of
-  frame.
+- Ten entries in the published film list have characters that were destroyed
+  upstream before publication. `TextSanitizer` collapses each to a single `�`
+  (e.g. `Alfons und G�ste`), which is as far as it can be repaired — the original
+  letter is not recoverable. Keep those rows out of frame.
 - Never use a video playback frame as a screenshot — it shows broadcaster content.
   Same rule as the Play listing (`android/PLAY_RELEASE_PLAN.md`).
 - Don't put broadcaster logos in store graphics.

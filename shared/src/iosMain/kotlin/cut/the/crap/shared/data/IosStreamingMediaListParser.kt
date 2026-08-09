@@ -23,10 +23,40 @@ class IosStreamingMediaListParser {
         private const val TAG = "IosStreamingParser"
         private const val BUFFER_SIZE = 64 * 1024 // 64KB read buffer
         private const val LOG_INTERVAL = 50_000
+        private const val MAX_PENDING_TEXT = 1 shl 20 // 1M chars of carry-over
     }
 
     fun setLimitDate(limitDate: Long) {
         this.limitDate = limitDate
+    }
+
+    /**
+     * Index of the first byte of the trailing incomplete UTF-8 sequence in
+     * [bytes] (considering only the first [length] bytes), or [length] when the
+     * buffer ends on a complete character.
+     *
+     * A 64 KB read lands at an arbitrary byte offset, so it regularly cuts a
+     * multi-byte character (every umlaut is two bytes) in half. Decoding such a
+     * chunk on its own corrupts that character - and NSString.create returns null
+     * for the whole chunk, which previously discarded all ~100 entries in it.
+     */
+    private fun completeUtf8Length(bytes: ByteArray, length: Int): Int {
+        if (length == 0) return 0
+        // A character is at most 4 bytes, so the split can only be in the last 3.
+        var start = length - 1
+        val floor = maxOf(0, length - 4)
+        while (start >= floor && (bytes[start].toInt() and 0xC0) == 0x80) start--
+        if (start < floor) return length // no lead byte in reach; leave it alone
+
+        val lead = bytes[start].toInt() and 0xFF
+        val expected = when {
+            lead and 0x80 == 0x00 -> 1
+            lead and 0xE0 == 0xC0 -> 2
+            lead and 0xF0 == 0xE0 -> 3
+            lead and 0xF8 == 0xF0 -> 4
+            else -> return length // not a valid lead byte; let the decoder deal with it
+        }
+        return if (start + expected <= length) length else start
     }
 
     /**
@@ -70,6 +100,10 @@ class IosStreamingMediaListParser {
 
         try {
             val buffer = ByteArray(BUFFER_SIZE)
+            // Bytes of a character cut in half by the end of the last read.
+            var pendingBytes = ByteArray(0)
+            // Text after the last fully parsed entry: an entry routinely spans reads.
+            var pendingText = ""
 
             PlatformLogger.info(TAG, "Starting to read buffer chunks...")
 
@@ -90,115 +124,121 @@ class IosStreamingMediaListParser {
                     break
                 }
 
-                PlatformLogger.info(TAG, "Buffer #$bufferReadCount: $bytesRead bytes read")
+                // Prepend the partial character carried over from the previous read,
+                // then hold back any partial character at the end of this one.
+                val combined = ByteArray(pendingBytes.size + bytesRead)
+                pendingBytes.copyInto(combined)
+                buffer.copyInto(combined, pendingBytes.size, 0, bytesRead)
 
-                // Convert to string using NSString for iOS compatibility
-                val chunk = try {
-                    val nsData = buffer.usePinned { pinned ->
-                        NSData.dataWithBytes(pinned.addressOf(0), bytesRead.toULong())
+                val decodableLength = completeUtf8Length(combined, combined.size)
+                pendingBytes = combined.copyOfRange(decodableLength, combined.size)
+
+                if (decodableLength == 0) continue
+
+                val decoded = try {
+                    val nsData = combined.usePinned { pinned ->
+                        NSData.dataWithBytes(pinned.addressOf(0), decodableLength.toULong())
                     }
-                    val nsString = NSString.create(nsData, NSUTF8StringEncoding)
-                    if (nsString == null) {
-                        PlatformLogger.error(TAG, "Failed to decode buffer #$bufferReadCount as UTF-8")
-                        continue
-                    }
-                    nsString.toString()
+                    NSString.create(nsData, NSUTF8StringEncoding)?.toString()
                 } catch (decodeError: Exception) {
                     PlatformLogger.error(TAG, "FAILED to decode buffer #$bufferReadCount", decodeError)
+                    null
+                }
+
+                if (decoded == null) {
+                    // Genuinely malformed input rather than a split character. Drop
+                    // this window but keep the carried entry so the stream resyncs.
+                    PlatformLogger.error(TAG, "Buffer #$bufferReadCount not valid UTF-8, skipping $decodableLength bytes")
                     continue
                 }
 
-                PlatformLogger.info(TAG, "Buffer #$bufferReadCount decoded: ${chunk.length} chars")
-
-                // Verify string is accessible before scanning
-                val firstChar = try {
-                    chunk[0]
-                } catch (e: Exception) {
-                    PlatformLogger.error(TAG, "Buffer #$bufferReadCount: FAILED to access first char!", e)
-                    continue
-                }
-                val lastChar = try {
-                    chunk[chunk.length - 1]
-                } catch (e: Exception) {
-                    PlatformLogger.error(TAG, "Buffer #$bufferReadCount: FAILED to access last char!", e)
-                    continue
-                }
-                PlatformLogger.info(TAG, "Buffer #$bufferReadCount: first='$firstChar' last='$lastChar', starting scan...")
-
-                // Process characters using indexOf instead of char-by-char
-                var i = 0
-                var xFoundInBuffer = 0
-
-                // Try using indexOf to find "X": patterns - more iOS friendly
+                val chunk = pendingText + decoded
                 var searchStart = 0
+                var consumed = 0
+
                 while (true) {
                     val xPos = chunk.indexOf("\"X\":", searchStart)
-                    if (xPos == -1) break
-
-                    xFoundInBuffer++
-                    if (xFoundInBuffer <= 3 || xFoundInBuffer % 500 == 0) {
-                        PlatformLogger.info(TAG, "Buffer #$bufferReadCount: found X #$xFoundInBuffer at pos $xPos")
+                    if (xPos == -1) {
+                        // Keep the last few chars in case "X": itself straddles the read.
+                        consumed = maxOf(consumed, chunk.length - 3)
+                        break
                     }
 
-                    // Find the [ after "X":
                     var bracketPos = xPos + 4
                     while (bracketPos < chunk.length && chunk[bracketPos].isWhitespace()) bracketPos++
 
-                    if (bracketPos < chunk.length && chunk[bracketPos] == '[') {
-                        // Find matching ]
-                        var depth = 1
-                        var entryEnd = bracketPos + 1
-                        var inString = false
-
-                        while (entryEnd < chunk.length && depth > 0) {
-                            val ec = chunk[entryEnd]
-                            when {
-                                inString -> {
-                                    if (ec == '"' && chunk.getOrNull(entryEnd - 1) != '\\') {
-                                        inString = false
-                                    }
-                                }
-                                ec == '"' -> inString = true
-                                ec == '[' -> depth++
-                                ec == ']' -> depth--
-                            }
-                            entryEnd++
-                        }
-
-                        if (depth == 0) {
-                            val entryJson = chunk.substring(bracketPos, entryEnd)
-                            val entry = try {
-                                parseEntryArray(entryJson)
-                            } catch (e: Exception) {
-                                PlatformLogger.error(TAG, "Failed to parse entry at pos $xPos")
-                                null
-                            }
-
-                            if (entry != null) {
-                                entry.inTimePeriod = entry.dateL > limitDate
-                                previousEntry = entry
-                                totalCount++
-                                onEntry(entry)
-
-                                if (totalCount % LOG_INTERVAL == 0) {
-                                    PlatformLogger.info(TAG, "Parsed $totalCount entries")
-                                    onProgress(totalCount)
-                                }
-
-                                if (maxEntries > 0 && totalCount >= maxEntries) {
-                                    inputStream.close()
-                                    return totalCount
-                                }
-                            }
-                        }
-
-                        searchStart = entryEnd
-                    } else {
-                        searchStart = xPos + 4
+                    if (bracketPos >= chunk.length) {
+                        consumed = xPos // need more input to see the bracket
+                        break
                     }
+
+                    if (chunk[bracketPos] != '[') {
+                        searchStart = xPos + 4
+                        continue
+                    }
+
+                    var depth = 1
+                    var entryEnd = bracketPos + 1
+                    var inString = false
+
+                    while (entryEnd < chunk.length && depth > 0) {
+                        val ec = chunk[entryEnd]
+                        when {
+                            inString -> {
+                                if (ec == '"' && chunk.getOrNull(entryEnd - 1) != '\\') {
+                                    inString = false
+                                }
+                            }
+                            ec == '"' -> inString = true
+                            ec == '[' -> depth++
+                            ec == ']' -> depth--
+                        }
+                        entryEnd++
+                    }
+
+                    if (depth != 0) {
+                        // Entry continues past this read; carry it whole to the next.
+                        consumed = xPos
+                        break
+                    }
+
+                    val entryJson = chunk.substring(bracketPos, entryEnd)
+                    val entry = try {
+                        parseEntryArray(entryJson)
+                    } catch (e: Exception) {
+                        PlatformLogger.error(TAG, "Failed to parse entry at pos $xPos")
+                        null
+                    }
+
+                    if (entry != null) {
+                        entry.inTimePeriod = entry.dateL > limitDate
+                        previousEntry = entry
+                        totalCount++
+                        onEntry(entry)
+
+                        if (totalCount % LOG_INTERVAL == 0) {
+                            PlatformLogger.info(TAG, "Parsed $totalCount entries")
+                            onProgress(totalCount)
+                        }
+
+                        if (maxEntries > 0 && totalCount >= maxEntries) {
+                            inputStream.close()
+                            return totalCount
+                        }
+                    }
+
+                    searchStart = entryEnd
+                    consumed = entryEnd
                 }
 
-                PlatformLogger.info(TAG, "Buffer #$bufferReadCount: scan complete, found $xFoundInBuffer X entries, total parsed: $totalCount")
+                pendingText = chunk.substring(consumed.coerceIn(0, chunk.length))
+
+                // A single entry is far smaller than this; anything larger means the
+                // input is malformed and we would otherwise grow without bound.
+                if (pendingText.length > MAX_PENDING_TEXT) {
+                    PlatformLogger.error(TAG, "Carry-over exceeded $MAX_PENDING_TEXT chars, resetting at entry #$totalCount")
+                    pendingText = ""
+                }
             }
 
             PlatformLogger.info(TAG, "=== PARSE COMPLETE: $totalCount entries ===")
@@ -215,217 +255,6 @@ class IosStreamingMediaListParser {
             }
         }
     }
-
-    /**
-     * Parse JSON file using true streaming.
-     * Returns a sequence of parsed entries for memory efficiency.
-     *
-     * @param filePath Path to the JSON file
-     * @param onProgress Called periodically with progress (entry count)
-     * @param maxEntries Maximum entries to parse (-1 for unlimited)
-     * @return Sequence of MediaEntry
-     */
-    fun parseFileStreaming(
-        filePath: String,
-        onProgress: (Int) -> Unit = {},
-        maxEntries: Int = -1
-    ): Sequence<MediaEntry> = sequence {
-        PlatformLogger.info(TAG, "=== STARTING parseFileStreaming (sequence) ===")
-        PlatformLogger.info(TAG, "Opening file: $filePath")
-
-        previousEntry = null
-        var totalCount = 0
-        var bufferReadCount = 0
-
-        val inputStream = NSInputStream.inputStreamWithFileAtPath(filePath)
-        if (inputStream == null) {
-            PlatformLogger.error(TAG, "FAILED: Cannot open file: $filePath")
-            return@sequence
-        }
-
-        PlatformLogger.info(TAG, "File stream created, opening...")
-
-        try {
-            inputStream.open()
-            PlatformLogger.info(TAG, "File stream opened successfully")
-        } catch (openError: Exception) {
-            PlatformLogger.error(TAG, "FAILED to open file stream", openError)
-            return@sequence
-        }
-
-        try {
-            val buffer = ByteArray(BUFFER_SIZE)
-            var insideEntry = false
-            var bracketDepth = 0
-            var currentEntryBuilder = StringBuilder()
-
-            PlatformLogger.info(TAG, "Starting to read buffer chunks (${BUFFER_SIZE} bytes each)...")
-
-            while (inputStream.hasBytesAvailable) {
-                bufferReadCount++
-
-                val bytesRead = try {
-                    buffer.usePinned { pinned ->
-                        inputStream.read(pinned.addressOf(0).reinterpret<uint8_tVar>(), BUFFER_SIZE.toULong()).toInt()
-                    }
-                } catch (readError: Exception) {
-                    PlatformLogger.error(TAG, "FAILED to read buffer at read #$bufferReadCount", readError)
-                    throw readError
-                }
-
-                if (bytesRead <= 0) {
-                    PlatformLogger.info(TAG, "End of stream reached after $bufferReadCount reads")
-                    break
-                }
-
-                PlatformLogger.info(TAG, "Buffer read #$bufferReadCount: $bytesRead bytes, entries parsed so far: $totalCount")
-
-                PlatformLogger.info(TAG, "Decoding buffer #$bufferReadCount to string...")
-                val chunk = try {
-                    val decoded = buffer.decodeToString(0, bytesRead)
-                    PlatformLogger.info(TAG, "Buffer #$bufferReadCount decoded OK, length: ${decoded.length} chars")
-                    decoded
-                } catch (decodeError: Exception) {
-                    PlatformLogger.error(TAG, "FAILED to decode buffer at read #$bufferReadCount", decodeError)
-                    throw decodeError
-                }
-
-                PlatformLogger.info(TAG, "Starting to scan buffer #$bufferReadCount (${chunk.length} chars)...")
-                var i = 0
-                var loopCount = 0
-
-                while (i < chunk.length) {
-                    loopCount++
-
-                    // Log first 10 iterations to catch the crash
-                    if (loopCount <= 10 || loopCount % 5000 == 0) {
-                        PlatformLogger.info(TAG, "Loop #$loopCount: getting char at $i")
-                    }
-
-                    val c = try {
-                        chunk[i]
-                    } catch (e: Exception) {
-                        PlatformLogger.error(TAG, "CRASH getting char at index $i", e)
-                        throw e
-                    }
-
-                    if (loopCount <= 10) {
-                        PlatformLogger.info(TAG, "Loop #$loopCount: char='$c' (${c.code})")
-                    }
-
-                    // Check for "X": pattern
-                    val isXPattern = !insideEntry && i + 4 < chunk.length && run {
-                        if (loopCount <= 10) {
-                            PlatformLogger.info(TAG, "Loop #$loopCount: checking substring at $i")
-                        }
-                        try {
-                            chunk.substring(i, i + 4) == "\"X\":"
-                        } catch (e: Exception) {
-                            PlatformLogger.error(TAG, "CRASH in substring at $i", e)
-                            throw e
-                        }
-                    }
-
-                    when {
-                        isXPattern -> {
-                            PlatformLogger.info(TAG, "Found \"X\": pattern at position $i")
-                            i += 4
-                            // Skip whitespace
-                            while (i < chunk.length && chunk[i].isWhitespace()) i++
-                            if (i < chunk.length && chunk[i] == '[') {
-                                insideEntry = true
-                                bracketDepth = 1
-                                currentEntryBuilder.clear()
-                                currentEntryBuilder.append('[')
-                            }
-                            i++
-                            continue
-                        }
-
-                        insideEntry -> {
-                            currentEntryBuilder.append(c)
-
-                            when (c) {
-                                '[' -> bracketDepth++
-                                ']' -> {
-                                    bracketDepth--
-                                    if (bracketDepth == 0) {
-                                        // Complete entry found
-                                        insideEntry = false
-                                        val entryJson = currentEntryBuilder.toString()
-
-                                        val entry = try {
-                                            parseEntryArray(entryJson)
-                                        } catch (parseError: Exception) {
-                                            PlatformLogger.error(TAG, "FAILED to parse entry #${totalCount + 1}: ${parseError.message}")
-                                            PlatformLogger.error(TAG, "Entry JSON (first 200 chars): ${entryJson.take(200)}")
-                                            null
-                                        }
-
-                                        if (entry != null) {
-                                            entry.inTimePeriod = entry.dateL > limitDate
-                                            previousEntry = entry
-                                            totalCount++
-
-                                            yield(entry)
-
-                                            if (totalCount % LOG_INTERVAL == 0) {
-                                                PlatformLogger.info(TAG, "Parsed $totalCount entries, last: ${entry.channel}/${entry.title?.take(30)}")
-                                                onProgress(totalCount)
-                                            }
-
-                                            if (maxEntries > 0 && totalCount >= maxEntries) {
-                                                PlatformLogger.info(TAG, "Reached max entries limit: $maxEntries")
-                                                inputStream.close()
-                                                return@sequence
-                                            }
-                                        }
-                                        currentEntryBuilder.clear()
-                                    }
-                                }
-                                '"' -> {
-                                    // Handle string - skip to end of string
-                                    i++
-                                    while (i < chunk.length) {
-                                        val sc = chunk[i]
-                                        currentEntryBuilder.append(sc)
-                                        if (sc == '"' && chunk.getOrNull(i - 1) != '\\') {
-                                            break
-                                        }
-                                        i++
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    i++
-                }
-
-                // Safety check for overly large entries
-                if (insideEntry && currentEntryBuilder.length > 10000) {
-                    PlatformLogger.error(TAG, "Entry too large (${currentEntryBuilder.length} chars), resetting parser state at entry #$totalCount")
-                    insideEntry = false
-                    currentEntryBuilder.clear()
-                }
-            }
-
-            PlatformLogger.info(TAG, "=== STREAMING PARSE COMPLETE ===")
-            PlatformLogger.info(TAG, "Total entries parsed: $totalCount")
-            PlatformLogger.info(TAG, "Total buffer reads: $bufferReadCount")
-
-        } catch (e: Exception) {
-            PlatformLogger.error(TAG, "=== STREAMING PARSE FAILED ===", e)
-            PlatformLogger.error(TAG, "Failed at entry #$totalCount after $bufferReadCount buffer reads")
-        } finally {
-            try {
-                inputStream.close()
-                PlatformLogger.info(TAG, "File stream closed")
-            } catch (closeError: Exception) {
-                PlatformLogger.error(TAG, "Error closing file stream", closeError)
-            }
-        }
-    }
-
     /**
      * Parse a JSON array string into a MediaEntry
      */
