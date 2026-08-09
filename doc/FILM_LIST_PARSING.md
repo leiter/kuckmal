@@ -1,11 +1,14 @@
-# Film list parsing — findings
+# Film list parsing and search — findings
 
 *Investigated 2026-08-09, against the MediathekView list of that date
 (`Filmliste-akt.json`, 465,370,723 bytes decompressed, 707,323 entries).*
 
-Written up after an iOS report of "no entries for 3sat". The 3sat symptom could
-not be reproduced on current `main`, but the investigation turned up two real
-defects that were fixed, and one structural gap that is still open.
+Written up after an iOS report of "no entries for 3sat".
+
+**The 3sat symptom turned out to be a search-scoping bug, not a parsing bug**
+(§4) — it needed the follow-up detail that search had been used first. Chasing
+it also turned up two genuine parsing defects, both fixed, and one structural
+gap that is still open (§5).
 
 ---
 
@@ -162,8 +165,41 @@ Note the channel is stored as **`3Sat`** (capital S) and displayed as `3sat`.
 That mapping is correct — `Broadcaster("3Sat", …, "3sat")` and the UI passes
 `Channel.name`, not `displayName`, into the query — so it is not the cause.
 
-**Most likely explanation for the original report: a database imported by the
-pre-fix parser.** See §5.
+### Resolved: it was search scoping, not parsing
+
+A follow-up report ("after I used search, 3sat theme selection is empty") gave
+the missing reproduction step. The data was never the problem.
+
+`SharedViewModel.searchContentFlow` always called the **unscoped**
+`repository.searchEntries`, ignoring the active channel/theme filter. A theme
+matches if the query appears in any of its entries' descriptions, so searching
+`3sat` with the 3sat channel selected offered themes from other broadcasters —
+e.g. `MDR THÜRINGEN JOURNAL`, which has **0 rows under 3Sat and 1,578 under MDR**.
+
+Selecting such a result calls
+`navigateToThemes(channel = selectedChannel?.name, theme = title)`, keeping the
+rail's channel, which resolves to
+`getTitlesForChannelAndThemeAsEntriesFlow("3Sat", "MDR THÜRINGEN JOURNAL")` —
+a combination with no rows. The pane went blank with no message.
+
+Two things hid it:
+
+- the stale search hits kept rendering under the new `Titel: …` header until the
+  search was closed by hand, so the emptiness only appeared after two taps on X;
+- the channel-scoped repository methods (`searchEntriesByChannel`,
+  `searchEntriesByChannelAndTheme`) already existed and were simply never called
+  from the shared path.
+
+Notably the **legacy Android `UIManager` already did this correctly** —
+it calls `searchEntriesByChannel` / `searchEntriesByChannelAndTheme` based on the
+current state. The shared Compose path regressed behaviour the older code had.
+
+Fixed: search is now scoped to the active channel/theme, and choosing a result
+clears the query so the pane shows what was actually navigated to. Covered by
+`SharedViewModelSearchScopeTest` (4 tests; 3 of them fail if the scoping is
+reverted). This fix is shared, so it applies to any UI using `SharedViewModel`.
+
+**The pre-fix parser database (§5) remains a separate, still-open concern.**
 
 ---
 

@@ -430,6 +430,15 @@ fun AppContent() {
                                     theme = title
                                 )
                             }
+                            // Drop the query once a result has been chosen. Without this
+                            // the pane keeps rendering the old search hits underneath the
+                            // new "Titel: ..." header until the search is closed by hand,
+                            // which hides what was actually navigated to.
+                            if (searchQuery.isNotEmpty()) {
+                                searchQuery = ""
+                                searchResults = emptyList()
+                                isSearchVisible = false
+                            }
                         },
                         onLoadMore = {
                             viewModel.nextPart()

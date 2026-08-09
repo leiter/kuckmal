@@ -265,13 +265,36 @@ class SharedViewModel(
         }
     }
 
+    /**
+     * Search within whatever the user is currently looking at.
+     *
+     * The search must honour the active channel/theme filter. It previously always
+     * called the unscoped [MediaRepository.searchEntries], so with a channel
+     * selected it still returned themes from every other broadcaster - a theme
+     * matches if the query appears in its description, so searching "3sat" with
+     * 3Sat selected offered e.g. "MDR THÜRINGEN JOURNAL". Selecting one of those
+     * navigated to (selected channel, foreign theme), a combination with no rows,
+     * and the content pane went blank with no explanation.
+     */
     fun searchContentFlow(query: String, searchInTitles: Boolean): Flow<List<String>> {
         if (query.isBlank()) {
             return flowOf(emptyList())
         }
 
         return flow {
-            val results = repository.searchEntries(query, 5000)
+            // Read at collection time so the scope matches the list being filtered.
+            val state = _viewState.value
+            val channel = state.channel
+            val theme = state.theme
+
+            val results = when {
+                channel != null && theme != null ->
+                    repository.searchEntriesByChannelAndTheme(channel, theme, query, 5000)
+                channel != null -> repository.searchEntriesByChannel(channel, query, 5000)
+                theme != null -> repository.searchEntriesByTheme(theme, query, 5000)
+                else -> repository.searchEntries(query, 5000)
+            }
+
             val items = if (searchInTitles) {
                 results.map { it.title }.distinct()
             } else {
