@@ -8,6 +8,7 @@ import cut.the.crap.shared.repository.MediaRepository
 import cut.the.crap.shared.ui.Channel
 import cut.the.crap.shared.ui.MediaItem
 import cut.the.crap.shared.ui.toMediaItem
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -33,7 +34,15 @@ class SharedViewModel(
     private val onDownloadVideo: DownloadVideoCallback = { _, _, _ -> },
     private val onShowToast: ShowToastCallback = { },
     private val getFilesPath: GetFilesPathCallback = { "" },
-    private val getAllChannels: GetAllChannelsCallback = { emptyList() }
+    private val getAllChannels: GetAllChannelsCallback = { emptyList() },
+    /**
+     * Dispatcher for the off-main work this ViewModel does (database reads,
+     * list building). Injected so tests can supply their own scheduler:
+     * `Dispatchers.setMain` only replaces Main, so hardcoding `Dispatchers.Default`
+     * here would leave that work on a real thread pool that `advanceUntilIdle()`
+     * cannot wait for, making every assertion after it a race.
+     */
+    private val backgroundDispatcher: CoroutineDispatcher = Dispatchers.Default
 ) : ViewModel() {
 
     companion object {
@@ -148,7 +157,7 @@ class SharedViewModel(
             emit(count)
             kotlinx.coroutines.delay(1000)
         }
-    }.flowOn(Dispatchers.Default)
+    }.flowOn(backgroundDispatcher)
 
     /**
      * Single unified content list for the right pane
@@ -269,7 +278,7 @@ class SharedViewModel(
                 results.map { it.theme }.distinct()
             }
             emit(items)
-        }.flowOn(Dispatchers.Default)
+        }.flowOn(backgroundDispatcher)
     }
 
     // ===========================================================================================
@@ -278,7 +287,7 @@ class SharedViewModel(
 
     init {
         // Check if database already has data
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(backgroundDispatcher) {
             try {
                 val count = repository.getCount()
                 val hasData = count > 0
@@ -316,7 +325,7 @@ class SharedViewModel(
 
     fun navigateToDetail(title: String) {
         val currentState = _viewState.value
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(backgroundDispatcher) {
             val entry = when {
                 currentState.theme != null && currentState.channel != null -> {
                     repository.getMediaEntryFlow(currentState.channel!!, currentState.theme!!, title)
@@ -402,7 +411,7 @@ class SharedViewModel(
 
     fun checkAndLoadMediaListToDatabase(privatePath: String): Boolean {
         var hasData = false
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(backgroundDispatcher) {
             try {
                 hasData = repository.checkAndLoadMediaList(privatePath)
                 if (hasData) {
@@ -434,7 +443,7 @@ class SharedViewModel(
     }
 
     fun clearData() {
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(backgroundDispatcher) {
             repository.deleteAll()
             _hasDataInDatabase.value = false
             _loadingState.value = LoadingState.NOT_LOADED

@@ -77,7 +77,11 @@ abstract class SharedViewModelTestBase {
                 lastToastMessage = message
             },
             getFilesPath = { "/test/files/path" },
-            getAllChannels = { emptyList() }
+            getAllChannels = { emptyList() },
+            // Without this the ViewModel's background work runs on the real
+            // Dispatchers.Default thread pool, which advanceUntilIdle() cannot
+            // wait for - the source of the intermittent failures in these tests.
+            backgroundDispatcher = testDispatcher
         )
     }
 

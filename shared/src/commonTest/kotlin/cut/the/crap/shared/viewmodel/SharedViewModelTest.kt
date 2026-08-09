@@ -3,8 +3,6 @@ package cut.the.crap.shared.viewmodel
 import app.cash.turbine.test
 import cut.the.crap.shared.database.MediaEntry
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -172,27 +170,25 @@ class SharedViewModelTest : SharedViewModelTestBase() {
     // =================================================================================
 
     @Test
-    fun `clearData resets loading state to NOT_LOADED`() = runBlocking {
-        // Use runBlocking because clearData uses Dispatchers.Default internally
+    fun `clearData resets loading state to NOT_LOADED`() = runTest {
         fakeRepository.addEntries(listOf(createTestEntry()))
         val viewModel = createViewModel()
-        delay(100) // Wait for init to complete
+        advanceUntilIdle()
 
         viewModel.clearData()
-        delay(100) // Wait for clearData coroutine on Dispatchers.Default
+        advanceUntilIdle()
 
         assertEquals(LoadingState.NOT_LOADED, viewModel.loadingState.value)
     }
 
     @Test
-    fun `clearData calls repository deleteAll`() = runBlocking {
-        // Use runBlocking because clearData uses Dispatchers.Default internally
+    fun `clearData calls repository deleteAll`() = runTest {
         fakeRepository.addEntries(listOf(createTestEntry()))
         val viewModel = createViewModel()
-        delay(100) // Wait for init to complete
+        advanceUntilIdle()
 
         viewModel.clearData()
-        delay(100) // Wait for clearData coroutine on Dispatchers.Default
+        advanceUntilIdle()
 
         assertTrue(fakeRepository.deleteAllCalled)
     }
