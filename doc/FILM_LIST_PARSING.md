@@ -222,8 +222,11 @@ rebuild when it changes. The Room schema version does not serve this purpose —
 the schema did not change here, only the code that fills it. Without this, the
 parser fix effectively only applies to new installs.
 
-This matters for the App Store release: anyone who installed a TestFlight or
-development build before `07b03b5` is carrying a corrupted catalogue.
+Designed in [`IMPORT_FORMAT_VERSIONING.md`](IMPORT_FORMAT_VERSIONING.md).
+**Not implemented, and deliberately deferred:** only test releases exist so far,
+so no install in the wild is carrying a bad catalogue. Worth having in place
+before the first public release, after which a bad import becomes expensive to
+correct.
 
 ---
 
